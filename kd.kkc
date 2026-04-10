@@ -1,1 +1,183 @@
-println('cock')
+use Tui
+	Color
+	Color8
+	Tui
+	Screen
+use Mem
+	u32-i32
+	size-u32
+	i32-u32
+	i32-size
+	size-i32
+	cast
+
+
+tab-size = 2
+fn char-len (c Char)
+	if c == '\t'
+		return tab-size
+	else
+		return 1
+
+Cursor
+	x I32
+	y I32
+
+# cute! so that I don't get confused
+Visual
+	Visual I32
+
+fn from-visual(Visual(x)): x
+
+Editor al
+	cursor Cursor
+	goal-x Visual  # when moving up-down, try to move it to this. it'll get reset with any horizontal movement.
+	current-file List al (List al Cnile.Char)
+
+
+fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
+	(&ed&.current-file) List.get-ptr(y i32-size())
+
+fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al Cnile.Char):
+	(&ed&.current-file) List.get-ptr(ed&.cursor.y i32-size())
+
+
+
+fn x-to-visual-x (ed Ptr (Editor al), x I32, y I32) -> Visual:
+	ed get-row(y) take(x i32-size()) map(char-len) sum() Visual()
+
+fn visual-x-to-x (ed Ptr (Editor al), Visual(vx), y I32) -> I32
+	sum-x = 0
+	chars = ed get-row(y)
+	for x in 0 to (chars&.count size-i32() - 1) # we first convert size to i32 to handle the case when count = 0.
+		sum-x <= sum-x + chars[x i32-size()] char-len()
+		if vx < sum-x
+			return x
+
+	return chars&.count size-i32()
+
+fn move-to-row (ed Ptr (Editor al), y I32)
+	cur = ed&.cursor
+	vx = ed&.goal-x
+	# vx = ed x-to-visual-x(ed&.goal-x, cur.y)
+	y = y Math.clamp(0, ed&.current-file.count size-i32())
+	nu-x = ed visual-x-to-x(vx, y)
+	ed <&.cursor= { x: nu-x, y: y }
+
+
+al = Alloc.idc()
+fn load-file (filename): filename
+	File.read-contents(al)
+	lines()
+	map(fn line: line to-list(al))
+	to-list(al)
+
+
+fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
+	# first, render screen
+	w = screen&.tui&.width u32-i32()
+	h = screen&.tui&.height u32-i32()
+	x = 0
+	y = 0
+	for (row, cy) in ed&.current-file zip (from(0))
+		for (char, cx) in row zip (from(0))
+			if char == '\t'
+				screen Tui.put-char(' ', x, y)
+				x <= x + 1
+				screen Tui.put-char(' ', x, y)
+			else
+				screen Tui.put-char(char, x, y)
+
+			x <= x + 1
+			if x >= w
+				break
+
+		y <= y + 1
+		x <= 0
+		if y >= h
+			break
+
+	# render cursor
+	cur = ed&.cursor
+	vx = ed x-to-visual-x(cur.x, cur.y) from-visual()
+	len = ed
+		get-row(cur.y)
+		List.try-get(cur.x i32-size()) 
+		Misc.maybe(char-len, 1)
+
+	for x in 0 to (len - 1)
+		cursor-cell = screen Tui.get-cell-ptr(vx + x, ed&.cursor.y) or-fail('cursor out of screen')
+		cursor-cell <&.fg= Term.Color8(Term.Black8)
+		cursor-cell <&.bg= Term.Color8(Term.White8)
+
+
+ed =& Editor
+	{ cursor: { x: 0, y: 0 }
+	, goal-x: 0 Visual()
+	, current-file: load-file('kd.kkc')
+	}
+
+
+tui =& Tui.mk()
+al = Alloc.idc()
+screen =& tui Tui.mk-screen(al)
+running = True
+
+
+counter = 0 as U32
+changes = 0
+while running
+	for ev in Iter.from-function(Tui.read-key)
+		case ev
+			Tui.Key(k)
+				case k
+					Tui.Char(c)
+						code = c cast() Mem.u8-i32()
+						if c == 'q'
+							running <= False
+
+						if c == 'k'
+							ed move-to-row(ed&.cursor.y - 1)
+						if c == 'j'
+							ed move-to-row(ed&.cursor.y + 1)
+						if c == 'h'
+							cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
+							ed <&.cursor.x= cx
+							ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+						if c == 'l'
+							cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
+							ed <&.cursor.x= cx
+							ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+					Tui.Escape
+						running <= False
+					_
+						pass
+			_
+				pass
+
+	screen Tui.resize-screen-if-needed()
+
+	screen Tui.clear-screen()
+	# screen Tui.draw-str('changes: \(changes)', 0, 0)
+	screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
+	charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
+		and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
+		fmap-maybe(fn(c): (c, c Str.char-i32()))
+	screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
+	screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
+
+	rowcount = ed get-row(ed&.cursor.y)&.count
+	screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
+	gx = ed&.goal-x from-visual()
+	screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
+
+
+	screen render-editor(ed)
+
+	changes <= screen Tui.render-screen()
+	Tui.sync(tui)
+	counter <= counter + 1
+
+
+screen Tui.free-screen()
+tui Tui.deinit()
