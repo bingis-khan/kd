@@ -29,10 +29,31 @@ Visual
 
 fn from-visual(Visual(x)): x
 
+Mode
+	Normal
+	Insert
+
+inst Str Mode
+	print-str (self)
+		case self
+			Normal
+				Str.print-str('Normal')
+			Insert
+				Str.print-str('Insert')
+
+	chars (self)
+		case self
+			Normal
+				return 'Normal' chars()
+			Insert
+				return 'Insert' chars()
+
 Editor al
 	cursor Cursor
 	goal-x Visual  # when moving up-down, try to move it to this. it'll get reset with any horizontal movement.
 	current-file List al (List al Cnile.Char)
+	mode Mode
+	screen-top I32
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -56,11 +77,26 @@ fn visual-x-to-x (ed Ptr (Editor al), Visual(vx), y I32) -> I32
 
 	return chars&.count size-i32()
 
-fn move-to-row (ed Ptr (Editor al), y I32)
+fn move-to-row (ed Ptr (Editor al), y I32, rows I32)
 	cur = ed&.cursor
 	vx = ed&.goal-x
 	# vx = ed x-to-visual-x(ed&.goal-x, cur.y)
-	y = y Math.clamp(0, ed&.current-file.count size-i32())
+	y = y Math.clamp(0, ed&.current-file.count size-i32() - 1)
+
+	# if out of view, center screen, otherwise move it normally. (helix behavior)
+	if ed&.screen-top <= y and y < ed&.screen-top + rows
+		funny-space = 5 # I DONT KNOW THE PROPER NAME
+		if y < ed&.screen-top + funny-space
+			ed <&.screen-top= Math.max(0, y - funny-space)
+		elif y > ed&.screen-top + rows - funny-space - 1
+			onscreen-y = Math.min(ed&.current-file.count size-i32() - rows, y + funny-space - rows + 1)
+			ed <&.screen-top= onscreen-y
+		else
+			pass  # todo or actually nothing?
+	else
+		todo'('out of view move')
+
+
 	nu-x = ed visual-x-to-x(vx, y)
 	ed <&.cursor= { x: nu-x, y: y }
 
@@ -77,9 +113,10 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	# first, render screen
 	w = screen&.tui&.width u32-i32()
 	h = screen&.tui&.height u32-i32()
+	from-y = ed&.screen-top
 	x = 0
 	y = 0
-	for (row, cy) in ed&.current-file zip (from(0))
+	for (row, cy) in ed&.current-file drop(from-y i32-size()) zip (from(0))
 		for (char, cx) in row zip (from(0))
 			if char == '\t'
 				screen Tui.put-char(' ', x, y)
@@ -106,15 +143,25 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		Misc.maybe(char-len, 1)
 
 	for x in 0 to (len - 1)
-		cursor-cell = screen Tui.get-cell-ptr(vx + x, ed&.cursor.y) or-fail('cursor out of screen')
+		cursor-cell = screen Tui.get-cell-ptr(vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
 		cursor-cell <&.fg= Term.Color8(Term.Black8)
 		cursor-cell <&.bg= Term.Color8(Term.White8)
 
 
+args = Args.get()
+file = @undefined
+if args.count == 0
+	file <= List.mk(al)
+	(&file) List.add(List.mk(al))
+else
+	file <= args[0] load-file()
+
 ed =& Editor
 	{ cursor: { x: 0, y: 0 }
 	, goal-x: 0 Visual()
-	, current-file: load-file('kd.kkc')
+	, screen-top: 0
+	, current-file: file
+	, mode: Normal
 	}
 
 
@@ -128,28 +175,61 @@ counter = 0 as U32
 changes = 0
 while running
 	for ev in Iter.from-function(Tui.read-key)
+		tui Tui.update-dimensions()
 		case ev
 			Tui.Key(k)
 				case k
 					Tui.Char(c)
-						code = c cast() Mem.u8-i32()
-						if c == 'q'
-							running <= False
+						case ed&.mode
+							Normal
+								code = c cast() Mem.u8-i32()
+								if c == 'q'
+									running <= False
 
-						if c == 'k'
-							ed move-to-row(ed&.cursor.y - 1)
-						if c == 'j'
-							ed move-to-row(ed&.cursor.y + 1)
-						if c == 'h'
-							cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
-							ed <&.cursor.x= cx
-							ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
-						if c == 'l'
-							cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
-							ed <&.cursor.x= cx
-							ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+								if c == 'k'
+									ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
+								if c == 'j'
+									ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
+								if c == 'h'
+									cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
+									ed <&.cursor.x= cx
+									ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+								if c == 'l'
+									cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
+									ed <&.cursor.x= cx
+									ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+
+								if c == 'i'
+									ed <&.mode= Insert
+
+								if c == 'd'
+									row = ed cursor-row()
+									if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
+										ed cursor-row() List.remove(ed&.cursor.x i32-size())
+										# ed <&.cursor.x= ed&.cursor.x - 1
+										# ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+
+							Insert
+								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
+								ed <&.cursor.x= ed&.cursor.x + 1
+								ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+
 					Tui.Escape
-						running <= False
+						case ed&.mode
+							Normal
+								running <= False
+							Insert
+								ed <&.mode= Normal
+
+					Tui.Backspace
+						case ed&.mode
+							Normal
+								pass
+							Insert
+								if ed&.cursor.x > 0
+									ed cursor-row() List.remove(ed&.cursor.x i32-size() - 1)
+									ed <&.cursor.x= ed&.cursor.x - 1
+									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
 					_
 						pass
 			_
@@ -159,6 +239,7 @@ while running
 
 	screen Tui.clear-screen()
 	# screen Tui.draw-str('changes: \(changes)', 0, 0)
+	screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
 	screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
 	charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
 		and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
