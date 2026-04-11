@@ -103,18 +103,18 @@ fn move-to-row (ed Ptr (Editor al), y I32, rows I32)
 	y = y Math.clamp(0, ed&.current-file.count size-i32() - 1)
 
 	# if out of view, center screen, otherwise move it normally. (helix behavior)
-	if ed&.screen-top <= y and y < ed&.screen-top + rows
-		funny-space = 5 # I DONT KNOW THE PROPER NAME
-		if y < ed&.screen-top + funny-space
-			ed <&.screen-top= Math.max(0, y - funny-space)
-		elif y > ed&.screen-top + rows - funny-space - 1
-			# onscreen-y = Math.min(ed&.current-file.count size-i32() - rows, y + funny-space - rows + 1)
-			onscreen-y = y + funny-space - rows + 1
-			ed <&.screen-top= onscreen-y
-		else
-			pass  # todo or actually nothing?
+	# if ed&.screen-top <= y and y < ed&.screen-top + rows
+	funny-space = 5 # I DONT KNOW THE PROPER NAME
+	if y < ed&.screen-top + funny-space
+		ed <&.screen-top= Math.max(0, y - funny-space)
+	elif y > ed&.screen-top + rows - funny-space - 1
+		# onscreen-y = Math.min(ed&.current-file.count size-i32() - rows, y + funny-space - rows + 1)
+		onscreen-y = y + funny-space - rows + 1
+		ed <&.screen-top= onscreen-y
 	else
-		todo'('out of view move')
+		pass  # todo or actually nothing?
+	# else
+	# 	todo'('out of view move')
 
 
 	nu-x = ed visual-x-to-x(vx, y)
@@ -239,7 +239,7 @@ fn update-animation (Ptr(anim) Ptr (Maybe Cnile.Timespec), screen Ptr (Screen Al
 						screen Tui.put-char(' ', screen-x, screen-y)
 
 
-fn run-cmd(ed Ptr (Editor al), s Str, al al) <= Allocator al
+fn run-cmd(ed Ptr (Editor al), s Str, screen-height I32, al al) <= Allocator al
 	if s head() == Just('w')
 		filename = s drop(1) drop-while(is-whitespace) take-while(fn c: not is-whitespace(c))
 		alfname = @undefined
@@ -277,7 +277,15 @@ fn run-cmd(ed Ptr (Editor al), s Str, al al) <= Allocator al
 
 		og free-file()
 		al Alloc.free({ ptr: alfname cast(), count: 0 })
-
+	
+	else
+		mint = s take-while(fn c: not is-whitespace(c)) parse-int()
+		case mint
+			Just(unline)
+				newline = (unline - 1) i64-i32() Math.clamp(0, ed&.current-file.count size-i32() - 1)
+				ed move-to-row(newline, screen-height)
+			None
+				return
 
 args = Args.get()
 file = @undefined
@@ -437,7 +445,7 @@ while ed&.running
 
 							Cmd(sb)
 								s = StrBuilder.as-str(&sb)
-								ed run-cmd(s, al)
+								ed run-cmd(s, tui&.height u32-i32(), al)
 
 								StrBuilder.free(&sb)
 								ed <&.mode= Normal
