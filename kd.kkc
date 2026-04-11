@@ -272,9 +272,29 @@ while running
 									cur-row List.free()
 									(&ed&.current-file) List.remove(ed&.cursor.y i32-size())
 
-									ed <&.cursor.y= ed&.cursor.y - 1
+									ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
 									ed <&.cursor.x= og-row-len
 									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+
+					Tui.Enter
+						case ed&.mode
+							Normal
+								pass
+							Insert
+								# TODO: indent
+								cx = ed&.cursor.x
+
+								# insert empty line below
+								nurow =& List.mk(al)
+								cur-row = ed cursor-row()
+								nurow List.add-all(cur-row& List.to-slice() Slice.subslice(cx i32-size(), cur-row&.count))
+								cur-row List.trim(cx i32-size())
+								(&ed&.current-file) List.insert(ed&.cursor.y i32-size() + 1, nurow&)
+
+								ed <&.cursor.x= 0
+								ed <&.goal-x= 0 Visual()
+								ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
+						
 					_
 						pass
 			_
