@@ -105,6 +105,7 @@ al = Alloc.idc()
 fn load-file (filename): filename
 	File.read-contents(al)
 	lines()
+	# append('' DynStr.from-const-str())  # add a single empty line just like all the other editors...?
 	map(fn line: line to-list(al))
 	to-list(al)
 
@@ -116,14 +117,26 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	from-y = ed&.screen-top
 	x = 0
 	y = 0
+	assert(ed&.current-file.count > 0, 'number of lines in file is somehow 0 ???')
+	max-digits = ed&.current-file.count Str.count-digits()
+	pad = 2
+	from-x = pad + max-digits + pad
+
 	for (row, cy) in ed&.current-file drop(from-y i32-size()) zip (from(0))
+		row-num = cy + ed&.screen-top + 1
+		for xx in 0 to (pad - 1)
+			screen Tui.put-char(' ', xx, y)
+		screen Tui.draw-str-right(row-num, screen&.tui&.width u32-i32() - max-digits - pad, cy)
+		for xx in 0 to (pad - 1)
+			screen Tui.put-char(' ', xx + pad + max-digits, y)
+
 		for (char, cx) in row zip (from(0))
 			if char == '\t'
-				screen Tui.put-char(' ', x, y)
+				screen Tui.put-char(' ', from-x + x, y)
 				x <= x + 1
-				screen Tui.put-char(' ', x, y)
+				screen Tui.put-char(' ', from-x + x, y)
 			else
-				screen Tui.put-char(char, x, y)
+				screen Tui.put-char(char, from-x + x, y)
 
 			x <= x + 1
 			if x >= w
@@ -143,7 +156,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		Misc.maybe(char-len, 1)
 
 	for x in 0 to (len - 1)
-		cursor-cell = screen Tui.get-cell-ptr(vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
+		cursor-cell = screen Tui.get-cell-ptr(from-x + vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
 		cursor-cell <&.fg= Term.Color8(Term.Black8)
 		cursor-cell <&.bg= Term.Color8(Term.White8)
 
@@ -191,13 +204,25 @@ while running
 								if c == 'j'
 									ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
 								if c == 'h'
-									cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
-									ed <&.cursor.x= cx
-									ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+									if ed&.cursor.x == 0 # jump to previous line then.
+										ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
+										ed <&.cursor.x= ed cursor-row()&.count size-i32()
+									else
+										row-len = ed cursor-row()&.count size-i32()
+										cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), row-len))
+										ed <&.cursor.x= cx
+									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+
 								if c == 'l'
-									cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
-									ed <&.cursor.x= cx
-									ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
+									row-len = ed cursor-row()&.count size-i32()
+									if ed&.cursor.x == row-len # jump to next line then.
+										ed <&.cursor.x= 0
+										ed <&.goal-x= 0 Visual()
+										ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
+									else
+										cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
+										ed <&.cursor.x= cx
+										ed <&.goal-x= ed x-to-visual-x(cx, ed&.cursor.y)
 
 								if c == 'i'
 									ed <&.mode= Insert
@@ -208,6 +233,14 @@ while running
 										ed cursor-row() List.remove(ed&.cursor.x i32-size())
 										# ed <&.cursor.x= ed&.cursor.x - 1
 										# ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+									elif ed&.cursor.y + 1 < ed&.current-file.count size-i32()
+										# note: marge next to this one.
+										cur-row = ed cursor-row()
+										next-row-id = ed&.cursor.y + 1
+										next-row = ed get-row(next-row-id)
+										cur-row List.add-all(next-row)
+										next-row List.free()
+										(&ed&.current-file) List.remove(next-row-id i32-size())
 
 							Insert
 								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
@@ -229,6 +262,18 @@ while running
 								if ed&.cursor.x > 0
 									ed cursor-row() List.remove(ed&.cursor.x i32-size() - 1)
 									ed <&.cursor.x= ed&.cursor.x - 1
+									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+								elif ed&.cursor.y > 0 # cant backspace more if we're at (0, 0)
+									# join current row to previous row and move cursor to previous row
+									cur-row = ed cursor-row() # List.remove(ed&.cursor.x i32-size() - 1)
+									prev-row = ed get-row(ed&.cursor.y - 1)
+									og-row-len = prev-row&.count size-i32()
+									prev-row List.add-all(cur-row)
+									cur-row List.free()
+									(&ed&.current-file) List.remove(ed&.cursor.y i32-size())
+
+									ed <&.cursor.y= ed&.cursor.y - 1
+									ed <&.cursor.x= og-row-len
 									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
 					_
 						pass
