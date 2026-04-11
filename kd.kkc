@@ -93,7 +93,8 @@ fn move-to-row (ed Ptr (Editor al), y I32, rows I32)
 		if y < ed&.screen-top + funny-space
 			ed <&.screen-top= Math.max(0, y - funny-space)
 		elif y > ed&.screen-top + rows - funny-space - 1
-			onscreen-y = Math.min(ed&.current-file.count size-i32() - rows, y + funny-space - rows + 1)
+			# onscreen-y = Math.min(ed&.current-file.count size-i32() - rows, y + funny-space - rows + 1)
+			onscreen-y = y + funny-space - rows + 1
 			ed <&.screen-top= onscreen-y
 		else
 			pass  # todo or actually nothing?
@@ -260,9 +261,10 @@ while running
 								if c == 'l'
 									row-len = ed cursor-row()&.count size-i32()
 									if ed&.cursor.x == row-len # jump to next line then.
-										ed <&.cursor.x= 0
-										ed <&.goal-x= 0 Visual()
-										ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
+										if ed&.cursor.y < ed&.current-file.count size-i32() - 1
+											ed <&.cursor.x= 0
+											ed <&.goal-x= 0 Visual()
+											ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
 									else
 										cx = (ed&.cursor.x + 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), ed cursor-row()&.count size-i32()))
 										ed <&.cursor.x= cx
