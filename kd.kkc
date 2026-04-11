@@ -1,3 +1,4 @@
+use Time
 use Tui
 	Color
 	Color8
@@ -8,6 +9,8 @@ use Mem
 	size-u32
 	i32-u32
 	i32-size
+	i64-i32
+	u32-i64
 	size-i32
 	cast
 
@@ -54,6 +57,7 @@ Editor al
 	current-file List al (List al Cnile.Char)
 	mode Mode
 	screen-top I32
+	anim Maybe Cnile.Timespec
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -110,6 +114,12 @@ fn load-file (filename): filename
 	to-list(al)
 
 
+# offset of the left line number bar from the text file.
+pad = 2
+fn left-offset (ed Ptr (Editor al)) -> { max-digits: I32, total-offset: I32 }
+	max-digits = ed&.current-file.count Str.count-digits()
+	return { max-digits, total-offset: pad + max-digits + pad }
+
 fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	# first, render screen
 	w = screen&.tui&.width u32-i32()
@@ -118,9 +128,9 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	x = 0
 	y = 0
 	assert(ed&.current-file.count > 0, 'number of lines in file is somehow 0 ???')
-	max-digits = ed&.current-file.count Str.count-digits()
-	pad = 2
-	from-x = pad + max-digits + pad
+	offstuff = ed left-offset()
+	max-digits = offstuff.max-digits
+	from-x = offstuff.total-offset
 
 	for (row, cy) in ed&.current-file drop(from-y i32-size()) zip (from(0))
 		row-num = cy + ed&.screen-top + 1
@@ -152,7 +162,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	vx = ed x-to-visual-x(cur.x, cur.y) from-visual()
 	len = ed
 		get-row(cur.y)
-		List.try-get(cur.x i32-size()) 
+		List.try-get(cur.x i32-size())
 		Misc.maybe(char-len, 1)
 
 	for x in 0 to (len - 1)
@@ -160,6 +170,36 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		cursor-cell <&.fg= Term.Color8(Term.Black8)
 		cursor-cell <&.bg= Term.Color8(Term.White8)
 
+
+# example anim.
+fn update-animation (Ptr(anim) Ptr (Maybe Cnile.Timespec), screen Ptr (Screen Allocator))
+	case anim
+		None
+			return
+		Just(start-time)
+			diff = Time.now() Time.diff(start-time)
+			limit = Time.duration-from-ns(50000000)
+			# limit = Time.duration-from-s(2)
+			if diff > limit
+				anim <= None
+				return
+
+			x-fill = screen&.tui&.width u32-i64() / 2
+			y-fill = screen&.tui&.height u32-i64() / 2
+			x-progress = ((Time.duration-to-ns(diff) * x-fill) / Time.duration-to-ns(limit)) i64-i32()
+			y-progress = ((Time.duration-to-ns(diff) * y-fill) / Time.duration-to-ns(limit)) i64-i32()
+
+			center-x = screen&.tui&.width / 2 + 1
+			center-y = screen&.tui&.height / 2 + 1
+			screen Tui.set-screen-bg(Term.ColorDefault)
+			x-off = x-fill i64-i32() - x-progress
+			y-off = y-fill i64-i32() - y-progress
+			h = (screen&.tui&.height u32-i32() - 1)
+			w = (screen&.tui&.width u32-i32() - 1)
+			for screen-y in 0 to (h)
+				for screen-x in 0 to (w)
+					if screen-x <= x-off or screen-x >= w - x-off or screen-y <= y-off or screen-y >= h - y-off
+						screen Tui.put-char(' ', screen-x, screen-y)
 
 args = Args.get()
 file = @undefined
@@ -175,6 +215,7 @@ ed =& Editor
 	, screen-top: 0
 	, current-file: file
 	, mode: Normal
+	, anim: Just(Time.now())
 	}
 
 
@@ -185,9 +226,11 @@ running = True
 
 
 counter = 0 as U32
-changes = 0
+first-draw = True
 while running
+	events = 0
 	for ev in Iter.from-function(Tui.read-key)
+		events <= events + 1
 		tui Tui.update-dimensions()
 		case ev
 			Tui.Key(k)
@@ -205,8 +248,9 @@ while running
 									ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
 								if c == 'h'
 									if ed&.cursor.x == 0 # jump to previous line then.
-										ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
-										ed <&.cursor.x= ed cursor-row()&.count size-i32()
+										if ed&.cursor.y > 0
+											ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
+											ed <&.cursor.x= ed cursor-row()&.count size-i32()
 									else
 										row-len = ed cursor-row()&.count size-i32()
 										cx = (ed&.cursor.x - 1) Math.clamp(0, Math.min((tui&.width - 1) u32-i32(), row-len))
@@ -297,13 +341,42 @@ while running
 						
 					_
 						pass
-			_
-				pass
 
-	screen Tui.resize-screen-if-needed()
+			Tui.Mouse(mouse)
+				case mouse.button
+					Tui.MouseLeft
+						if mouse.pressed
+							linecnt = ed&.current-file.count size-i32()
+							cy = (ed&.screen-top + mouse.y) Math.clamp(0, linecnt - 1)
+								
+							vx = (mouse.x - ed left-offset().total-offset) Visual()
+							cx = ed visual-x-to-x(vx, cy)
+
+							ed <&.cursor.x= cx
+							ed <&.goal-x= vx
+							ed move-to-row(cy, tui&.height u32-i32())
+
+					_
+						pass
+
+			_
+				unreachable()
+
+	resized = screen Tui.resize-screen-if-needed()
+
+	# fyi: when just sleeping and not rendering without events, we reduce CPU usage to 1% compared to 5-8% on idle with continuous rendering.
+	# add it in the future.
+	# if resized or events > 0 or first-draw
+	# 	first-draw <= False
 
 	screen Tui.clear-screen()
-	# screen Tui.draw-str('changes: \(changes)', 0, 0)
+	screen Tui.set-screen-fg(Term.Color16(Term.White16))
+	screen Tui.set-screen-bg(Term.Color16(Term.Black16))
+	# screen Tui.set-screen-fg(Term.Color16(Term.Black16))
+	# screen Tui.set-screen-bg(Term.Color16(Term.White16))
+	screen Tui.fill-default()
+	screen render-editor(ed)
+
 	screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
 	screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
 	charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
@@ -316,13 +389,13 @@ while running
 	screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
 	gx = ed&.goal-x from-visual()
 	screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
+	# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
 
+	update-animation(&ed&.anim, screen)
 
-	screen render-editor(ed)
+	screen Tui.render-screen()
 
-	changes <= screen Tui.render-screen()
 	Tui.sync(tui)
-	counter <= counter + 1
 
 
 screen Tui.free-screen()
