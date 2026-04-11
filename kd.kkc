@@ -1,4 +1,6 @@
 use Time
+use StrBuilder
+	StrBuilder
 use Tui
 	Color
 	Color8
@@ -32,9 +34,10 @@ Visual
 
 fn from-visual(Visual(x)): x
 
-Mode
+Mode al
 	Normal
 	Insert
+	Cmd (StrBuilder al)
 
 inst Str Mode
 	print-str (self)
@@ -43,19 +46,31 @@ inst Str Mode
 				Str.print-str('Normal')
 			Insert
 				Str.print-str('Insert')
+			Cmd(s)
+				ss = StrBuilder.as-str(&s)
+				Str.print-str('Cmd \(ss)')
 
 	chars (self)
+		c = @undefined
 		case self
 			Normal
-				return 'Normal' chars()
+				c <= 'Normal' Str.StrCase1()
 			Insert
-				return 'Insert' chars()
+				c <= 'Insert' Str.StrCase1()
+			Cmd(s)
+				ss = StrBuilder.as-str(&s)
+				c <= 'Cmd(\(ss))' Str.StrCase2()
+
+		return c chars()
+
 
 Editor al
+	running Bool
 	cursor Cursor
 	goal-x Visual  # when moving up-down, try to move it to this. it'll get reset with any horizontal movement.
 	current-file List al (List al Cnile.Char)
-	mode Mode
+	filename Maybe ConstStr
+	mode (Mode al)
 	screen-top I32
 	anim Maybe Cnile.Timespec
 
@@ -107,18 +122,31 @@ fn move-to-row (ed Ptr (Editor al), y I32, rows I32)
 
 
 al = Alloc.idc()
-fn load-file (filename): filename
+fn load-file (filename, al): filename
 	File.read-contents(al)
 	lines()
 	# append('' DynStr.from-const-str())  # add a single empty line just like all the other editors...?
 	map(fn line: line to-list(al))
 	to-list(al)
 
+fn save-file (cf, filename)
+	sb =& StrBuilder.mk(al)
+	for row in cf
+		row for-each(fn c: sb StrBuilder.write-char(c))
+		sb StrBuilder.write-char('\n')
+
+	File.write-contents(filename, sb StrBuilder.as-str())
+	sb StrBuilder.free()
+
+fn free-file (cf)
+	cf List.addresses() for-each(List.free)
+	List.free(&cf)
+
 
 # offset of the left line number bar from the text file.
 pad = 2
 fn left-offset (ed Ptr (Editor al)) -> { max-digits: I32, total-offset: I32 }
-	max-digits = ed&.current-file.count Str.count-digits()
+	max-digits = ed&.current-file.count Str.count-digits() Math.max(3)
 	return { max-digits, total-offset: pad + max-digits + pad }
 
 fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
@@ -140,6 +168,14 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		screen Tui.draw-str-right(row-num, screen&.tui&.width u32-i32() - max-digits - pad, cy)
 		for xx in 0 to (pad - 1)
 			screen Tui.put-char(' ', xx + pad + max-digits, y)
+
+		if ed&.cursor.y == row-num - 1
+			fg = screen&.default-fg
+			bg = screen&.default-bg
+			for xxx in 0 to (max-digits - 1)
+				cp = screen Tui.get-cell-ptr(xxx + pad, y) or-fail('screen index somehow landed outside of screen')
+				cp <&.fg= bg
+				cp <&.bg= fg
 
 		for (char, cx) in row zip (from(0))
 			if char == '\t'
@@ -202,19 +238,64 @@ fn update-animation (Ptr(anim) Ptr (Maybe Cnile.Timespec), screen Ptr (Screen Al
 					if screen-x <= x-off or screen-x >= w - x-off or screen-y <= y-off or screen-y >= h - y-off
 						screen Tui.put-char(' ', screen-x, screen-y)
 
+
+fn run-cmd(ed Ptr (Editor al), s Str, al al) <= Allocator al
+	if s head() == Just('w')
+		filename = s drop(1) drop-while(is-whitespace) take-while(fn c: not is-whitespace(c))
+		alfname = @undefined
+		if filename null()
+			case ed&.filename
+				None
+					return
+				Just(fname)
+					alfname <= fname
+		else
+			case ed&.filename
+				None
+					pass
+				Just(oldfname)
+					al Alloc.free({ ptr: oldfname cast(), count: 0 })
+
+			alfname <= filename StrBuilder.mk-const-str(al)
+
+		ed&.current-file save-file(alfname)
+		ed <&.filename= Just(alfname)
+
+	elif s Str.eq('q')
+		ed <&.running= False
+
+	elif s head() == Just('o')
+		filename = s drop(1) drop-while(is-whitespace) take-while(fn c: not is-whitespace(c))
+		alfname = filename StrBuilder.mk-const-str(al)
+		og = ed&.current-file
+		ed <&.current-file= load-file(alfname, al)
+
+		# reset mouse pointer
+		ed <&.cursor= { x: 0, y: 0 }
+		ed <&.goal-x= 0 Visual()
+		ed <&.screen-top= 0
+
+		og free-file()
+		al Alloc.free({ ptr: alfname cast(), count: 0 })
+
+
 args = Args.get()
 file = @undefined
+mfilename = None
 if args.count == 0
 	file <= List.mk(al)
 	(&file) List.add(List.mk(al))
 else
-	file <= args[0] load-file()
+	file <= args[0] load-file(al)
+	mfilename <= Just(args[0])
 
 ed =& Editor
 	{ cursor: { x: 0, y: 0 }
+	, running: True
 	, goal-x: 0 Visual()
 	, screen-top: 0
 	, current-file: file
+	, filename: mfilename
 	, mode: Normal
 	, anim: Just(Time.now())
 	}
@@ -223,12 +304,11 @@ ed =& Editor
 tui =& Tui.mk()
 al = Alloc.idc()
 screen =& tui Tui.mk-screen(al)
-running = True
 
 
 counter = 0 as U32
 first-draw = True
-while running
+while ed&.running
 	events = 0
 	for ev in Iter.from-function(Tui.read-key)
 		events <= events + 1
@@ -237,11 +317,11 @@ while running
 			Tui.Key(k)
 				case k
 					Tui.Char(c)
-						case ed&.mode
-							Normal
+						case &ed&.mode
+							Ptr(Normal)
 								code = c cast() Mem.u8-i32()
 								if c == 'q'
-									running <= False
+									ed <&.running= False
 
 								if c == 'k'
 									ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
@@ -288,23 +368,33 @@ while running
 										next-row List.free()
 										(&ed&.current-file) List.remove(next-row-id i32-size())
 
-							Insert
+								if c == ':'
+									ed <&.mode= StrBuilder.mk(al) Cmd()
+
+							Ptr(Insert)
 								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
 								ed <&.cursor.x= ed&.cursor.x + 1
 								ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
 
+							Ptr(Cmd(sb))
+								StrBuilder.write-char(&sb, c)
+
 					Tui.Escape
 						case ed&.mode
 							Normal
-								running <= False
+								# ed <&.running= False
+								pass
 							Insert
+								ed <&.mode= Normal
+							Cmd(sb)
+								StrBuilder.free(&sb)
 								ed <&.mode= Normal
 
 					Tui.Backspace
-						case ed&.mode
-							Normal
+						case &ed&.mode
+							Ptr(Normal)
 								pass
-							Insert
+							Ptr(Insert)
 								if ed&.cursor.x > 0
 									ed cursor-row() List.remove(ed&.cursor.x i32-size() - 1)
 									ed <&.cursor.x= ed&.cursor.x - 1
@@ -321,6 +411,10 @@ while running
 									ed move-to-row(ed&.cursor.y - 1, tui&.height u32-i32())
 									ed <&.cursor.x= og-row-len
 									ed <&.goal-x= ed x-to-visual-x(ed&.cursor.x, ed&.cursor.y)
+
+							Ptr(Cmd(cmd))
+								if StrBuilder.count(&cmd) > 0
+									StrBuilder.pop(&cmd)
 
 					Tui.Enter
 						case ed&.mode
@@ -340,6 +434,13 @@ while running
 								ed <&.cursor.x= 0
 								ed <&.goal-x= 0 Visual()
 								ed move-to-row(ed&.cursor.y + 1, tui&.height u32-i32())
+
+							Cmd(sb)
+								s = StrBuilder.as-str(&sb)
+								ed run-cmd(s, al)
+
+								StrBuilder.free(&sb)
+								ed <&.mode= Normal
 						
 					_
 						pass
@@ -368,34 +469,34 @@ while running
 
 	# fyi: when just sleeping and not rendering without events, we reduce CPU usage to 1% compared to 5-8% on idle with continuous rendering.
 	# add it in the future.
-	# if resized or events > 0 or first-draw
-	# 	first-draw <= False
+	if resized or events > 0 or first-draw or ed&.anim is-just()
+		first-draw <= False
 
-	screen Tui.clear-screen()
-	screen Tui.set-screen-fg(Term.Color16(Term.White16))
-	screen Tui.set-screen-bg(Term.Color16(Term.Black16))
-	# screen Tui.set-screen-fg(Term.Color16(Term.Black16))
-	# screen Tui.set-screen-bg(Term.Color16(Term.White16))
-	screen Tui.fill-default()
-	screen render-editor(ed)
+		screen Tui.clear-screen()
+		screen Tui.set-screen-fg(Term.Color16(Term.White16))
+		screen Tui.set-screen-bg(Term.Color16(Term.Black16))
+		# screen Tui.set-screen-fg(Term.Color16(Term.Black16))
+		# screen Tui.set-screen-bg(Term.Color16(Term.White16))
+		screen Tui.fill-default()
+		screen render-editor(ed)
 
-	screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
-	screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
-	charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
-		and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
-		fmap-maybe(fn(c): (c, c Str.char-i32()))
-	screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
-	screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
+		screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
+		screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
+		charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
+			and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
+			fmap-maybe(fn(c): (c, c Str.char-i32()))
+		screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
+		screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
 
-	rowcount = ed get-row(ed&.cursor.y)&.count
-	screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
-	gx = ed&.goal-x from-visual()
-	screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
-	# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
+		rowcount = ed get-row(ed&.cursor.y)&.count
+		screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
+		gx = ed&.goal-x from-visual()
+		screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
+		# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
 
-	update-animation(&ed&.anim, screen)
+		update-animation(&ed&.anim, screen)
 
-	screen Tui.render-screen()
+		screen Tui.render-screen()
 
 	Tui.sync(tui)
 
