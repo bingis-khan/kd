@@ -1,4 +1,3 @@
-# LOOK AT LINE 86 for the bug
 use Time
 use StrBuilder
 	StrBuilder
@@ -28,6 +27,9 @@ fn char-len (c Char)
 Cursor
 	x I32
 	y I32
+
+inst Eq Cursor
+	eq (l, r): l.x == r.x and l.y == r.y
 
 # cute! so that I don't get confused
 Visual
@@ -86,6 +88,8 @@ fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al Cnile.Char):
 fn indent-on-row (ed Ptr (Editor al), y I32):
 	ed get-row(y) take-while(is-whitespace)
 
+fn char-at-cursor (ed Ptr (Editor al)) -> Maybe Char:
+	ed cursor-row() List.try-get(ed&.cursor.x i32-size())
 
 fn x-to-visual-x (ed Ptr (Editor al), x I32, y I32) -> Visual:
 	ed get-row(y) take(x i32-size()) map(char-len) sum() Visual()
@@ -145,6 +149,68 @@ fn move-to-col (ed Ptr (Editor al), x I32, dim Dims)
 
 fn move-to-row (ed Ptr (Editor al), y I32, dim Dims)
 	ed move-to(ed&.cursor.x, y, dim)
+
+fn move-left (ed Ptr (Editor al), dim Dims) -> Bool
+	cur = ed&.cursor
+	if ed&.cursor.x == 0 # jump to previous line then.
+		if ed&.cursor.y > 0
+			ed move-to-row(ed&.cursor.y - 1, dim)
+			ed move-to-col(ed cursor-row()&.count size-i32(), dim)
+	else
+			ed move-to-col(ed&.cursor.x - 1, dim)
+	
+	return ed&.cursor /= cur
+
+fn move-right (ed Ptr (Editor al), dims Dims) -> Bool
+	cur = ed&.cursor
+	row-len = ed cursor-row()&.count size-i32()
+	if ed&.cursor.x == row-len # jump to next line then.
+		if ed&.cursor.y < ed&.current-file.count size-i32() - 1
+			ed move-to(0, ed&.cursor.y + 1, dims)
+	else
+		ed move-to-col(ed&.cursor.x + 1, dims)
+
+	return ed&.cursor /= cur
+
+fn move-to-start-of-line-indented(ed Ptr (Editor al), dims Dims)
+	off = ed indent-on-row(ed&.cursor.y) count() size-i32()
+	ed move-to-col(off, dims)
+
+fn move-to-end-of-line (ed Ptr (Editor al), dims Dims)
+	currow = ed cursor-row()
+	ed move-to-col(currow List.size() size-i32(), dims)
+
+fn cursor-is-at-line-start (ed Ptr (Editor al)):
+	ed&.cursor.x == 0
+
+fn cursor-is-at-line-end (ed Ptr (Editor al)):
+	ed&.cursor.x == ed cursor-row() List.size() size-i32()
+
+
+fn delete-at-current (ed Ptr (Editor al)) <= Allocator al
+	row = ed cursor-row()
+	if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
+		ed cursor-row() List.remove(ed&.cursor.x i32-size())
+	elif ed&.cursor.y + 1 < ed&.current-file.count size-i32()
+		# note: marge next to this one.
+		cur-row = ed cursor-row()
+		next-row-id = ed&.cursor.y + 1
+		next-row = ed get-row(next-row-id)
+		cur-row List.add-all(next-row)
+		next-row List.free()
+		(&ed&.current-file) List.remove(next-row-id i32-size())
+
+# NOTE: also indents from current row!
+fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
+	nurow =& List.mk(al)
+	rowws = ed indent-on-row(ed&.cursor.y)
+	offchars = rowws count() size-i32()
+	nurow List.add-all(rowws)
+	(&ed&.current-file) List.insert(y i32-size(), nurow&)
+
+fn is-word-char (c Char): is-not-whitespace(c)
+fn is-word-char' (c Maybe Char): c Misc.maybe(is-word-char, False)
+
 
 
 al = Alloc.idc()
@@ -369,39 +435,103 @@ while ed&.running
 								if c == 'j'
 									ed move-to-row(ed&.cursor.y + 1, ed screen-dims(tui))
 								if c == 'h'
-									if ed&.cursor.x == 0 # jump to previous line then.
-										if ed&.cursor.y > 0
-											ed move-to-row(ed&.cursor.y - 1, ed screen-dims(tui))
-											ed move-to-col(ed cursor-row()&.count size-i32(), ed screen-dims(tui))
-									else
-											ed move-to-col(ed&.cursor.x - 1, ed screen-dims(tui))
+									ed move-left(ed screen-dims(tui))
 
 								if c == 'l'
-									row-len = ed cursor-row()&.count size-i32()
-									if ed&.cursor.x == row-len # jump to next line then.
-										if ed&.cursor.y < ed&.current-file.count size-i32() - 1
-											ed move-to(0, ed&.cursor.y + 1, ed screen-dims(tui))
-									else
-										ed move-to-col(ed&.cursor.x + 1, ed screen-dims(tui))
+									ed move-right(ed screen-dims(tui))
 
 								if c == 'i'
 									ed <&.mode= Insert
 
 								if c == 'd'
-									row = ed cursor-row()
-									if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
-										ed cursor-row() List.remove(ed&.cursor.x i32-size())
-									elif ed&.cursor.y + 1 < ed&.current-file.count size-i32()
-										# note: marge next to this one.
-										cur-row = ed cursor-row()
-										next-row-id = ed&.cursor.y + 1
-										next-row = ed get-row(next-row-id)
-										cur-row List.add-all(next-row)
-										next-row List.free()
-										(&ed&.current-file) List.remove(next-row-id i32-size())
+									ed delete-at-current()
+
+								if c == 'c'
+									ed delete-at-current()
+									ed <&.mode= Insert
+
+								if c == 'I'
+									ed move-to-start-of-line-indented(ed screen-dims(tui))
+									ed <&.mode= Insert
+								if c == 'A'
+									ed move-to-end-of-line(ed screen-dims(tui))
+									ed <&.mode= Insert
+
+								if c == 'o'
+									ed insert-empty-row-at(ed&.cursor.y + 1, al)
+									currow = ed get-row(ed&.cursor.y + 1)
+									ed move-to(currow List.size() size-i32(), ed&.cursor.y + 1, ed screen-dims(tui))
+									ed <&.mode= Insert
+								if c == 'O'
+									ed insert-empty-row-at(ed&.cursor.y, al)
+									ed move-to-end-of-line(ed screen-dims(tui))
+									ed <&.mode= Insert
 
 								if c == ':'
 									ed <&.mode= StrBuilder.mk(al) Cmd()
+
+								# word jumping!~
+								if c == 'w'  # fwd to word start
+									dims = ed screen-dims(tui)
+									ed move-right(dims)
+									changed = True
+									while ed cursor-is-at-line-end()
+										if not ed move-right(dims)
+											changed <= False
+											break
+
+									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										if not ed move-right(dims) 
+											changed <= False
+											break
+									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										if not ed move-right(dims)
+											changed <= False
+											break
+
+									if changed
+										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+
+								if c == 'e'  # fwd to word end
+									dims = ed screen-dims(tui)
+									ed move-right(dims)
+									changed = True
+									while ed cursor-is-at-line-end()
+										if not ed move-right(dims)
+											changed <= False
+											break
+
+									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										if not ed move-right(dims)
+											changed <= False
+											break
+									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										if not ed move-right(dims) 
+											changed <= False
+											break
+
+									if changed
+										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+
+								if c == 'b'  # bwd to word start
+									dims = ed screen-dims(tui)
+									ed move-left(dims)
+									changed = True
+									while ed cursor-is-at-line-end()
+										if not ed move-left(dims)
+											changed <= False
+											break
+
+									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										if not ed move-left(dims)
+											changed <= False
+											break
+									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										if not ed move-left(dims) 
+											changed <= False
+											break
+									if changed
+										ed move-right(dims) 
 
 							Ptr(Insert)
 								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
@@ -426,19 +556,9 @@ while ed&.running
 							Ptr(Normal)
 								pass
 							Ptr(Insert)
-								if ed&.cursor.x > 0
-									ed cursor-row() List.remove(ed&.cursor.x i32-size() - 1)
-									ed move-to-col(ed&.cursor.x - 1, ed screen-dims(tui))
-								elif ed&.cursor.y > 0 # cant backspace more if we're at (0, 0)
-									# join current row to previous row and move cursor to previous row
-									cur-row = ed cursor-row() # List.remove(ed&.cursor.x i32-size() - 1)
-									prev-row = ed get-row(ed&.cursor.y - 1)
-									og-row-len = prev-row&.count size-i32()
-									prev-row List.add-all(cur-row)
-									cur-row List.free()
-									(&ed&.current-file) List.remove(ed&.cursor.y i32-size())
-
-									ed move-to(og-row-len, ed&.cursor.y - 1, ed screen-dims(tui))
+								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
+									ed move-left(ed screen-dims(tui))
+									ed delete-at-current()
 									
 							Ptr(Cmd(cmd))
 								if StrBuilder.count(&cmd) > 0
@@ -509,21 +629,23 @@ while ed&.running
 		screen Tui.fill-default()
 		screen render-editor(ed)
 
-		screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
-		screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
-		charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
-			and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
-			fmap-maybe(fn(c): (c, c Str.char-i32()))
-		screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
-		screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
+		debug = True
+		if debug
+			screen Tui.draw-str-right('mode: \(ed&.mode)', 0, 0)
+			screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
+			charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
+				and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
+				fmap-maybe(fn(c): (c, c Str.char-i32()))
+			screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
+			screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
 
-		rowcount = ed get-row(ed&.cursor.y)&.count
-		screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
-		gx = ed&.goal-x from-visual()
-		screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
-		dim = ed screen-dims(tui)
-		screen Tui.draw-str-right('sl: \(ed&.screen-left) | \(dim.cols)', 0, 6)
-		# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
+			rowcount = ed get-row(ed&.cursor.y)&.count
+			screen Tui.draw-str-right('row char count: \(rowcount)', 0, 4)
+			gx = ed&.goal-x from-visual()
+			screen Tui.draw-str-right('goal x: \(gx)', 0, 5)
+			dim = ed screen-dims(tui)
+			screen Tui.draw-str-right('sl: \(ed&.screen-left) | \(dim.cols)', 0, 6)
+			# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
 
 		update-animation(&ed&.anim, screen)
 
