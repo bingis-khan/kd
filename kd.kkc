@@ -267,8 +267,11 @@ fn update-animation (Ptr(anim) Ptr (Maybe Cnile.Timespec), screen Ptr (Screen Al
 
 
 fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
-	if s take-while(is-not-whitespace) Str.eq ('w')
-		filename = s drop(1) drop-while(is-whitespace) take-while(fn c: not is-whitespace(c))
+	s = s drop-while(is-whitespace)
+	cmd = s take-while(is-not-whitespace)
+	rest = s drop-while(is-not-whitespace) drop-while(is-whitespace)
+	if cmd Str.eq ('w')
+		filename = rest take-while(fn c: not is-whitespace(c))
 		alfname = @undefined
 		if filename null()
 			case ed&.filename
@@ -288,11 +291,11 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 		ed&.current-file save-file(alfname)
 		ed <&.filename= Just(alfname)
 
-	elif s Str.eq('q')
+	elif cmd Str.eq ('q')
 		ed <&.running= False
 
-	elif s head() == Just('o')
-		filename = s drop(1) drop-while(is-whitespace) take-while(fn c: not is-whitespace(c))
+	elif cmd Str.eq ('o')
+		filename = rest take-while(fn c: not is-whitespace(c))
 		alfname = filename StrBuilder.mk-const-str(al)
 		og = ed&.current-file
 		ed <&.current-file= load-file(alfname, al)
@@ -306,7 +309,7 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 		al Alloc.free({ ptr: alfname cast(), count: 0 })
 	
 	else
-		mint = s take-while(fn c: not is-whitespace(c)) parse-int()
+		mint = rest take-while(fn c: not is-whitespace(c)) parse-int()
 		case mint
 			Just(unline)
 				newline = (unline - 1) i64-i32() Math.clamp(0, ed&.current-file.count size-i32() - 1)
