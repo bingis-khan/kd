@@ -1,3 +1,4 @@
+# LOOK AT LINE 86 for the bug
 use Time
 use StrBuilder
 	StrBuilder
@@ -82,6 +83,8 @@ fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
 fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al Cnile.Char):
 	(&ed&.current-file) List.get-ptr(ed&.cursor.y i32-size())
 
+fn indent-on-row (ed Ptr (Editor al), y I32):
+	ed get-row(y) take-while(is-whitespace)
 
 
 fn x-to-visual-x (ed Ptr (Editor al), x I32, y I32) -> Visual:
@@ -309,8 +312,7 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 		al Alloc.free({ ptr: alfname cast(), count: 0 })
 	
 	else
-		mint = rest take-while(fn c: not is-whitespace(c)) parse-int()
-		case mint
+		case cmd parse-int()
 			Just(unline)
 				newline = (unline - 1) i64-i32() Math.clamp(0, ed&.current-file.count size-i32() - 1)
 				ed move-to-row(newline, dim)
@@ -452,12 +454,15 @@ while ed&.running
 
 								# insert empty line below
 								nurow =& List.mk(al)
+								rowws = ed indent-on-row(ed&.cursor.y)
+								offchars = rowws count() size-i32()
+								nurow List.add-all(rowws)
 								cur-row = ed cursor-row()
 								nurow List.add-all(cur-row& List.to-slice() Slice.subslice(cx i32-size(), cur-row&.count))
 								cur-row List.trim(cx i32-size())
 								(&ed&.current-file) List.insert(ed&.cursor.y i32-size() + 1, nurow&)
 
-								ed move-to(0, ed&.cursor.y + 1, ed screen-dims(tui))
+								ed move-to(offchars, ed&.cursor.y + 1, ed screen-dims(tui))
 								
 							Cmd(sb)
 								s = StrBuilder.as-str(&sb)
