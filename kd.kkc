@@ -540,6 +540,17 @@ while ed&.running
 							Ptr(Cmd(sb))
 								StrBuilder.write-char(&sb, c)
 
+					Tui.Ctrl(c)
+						# the helix version keeps the cursor in place, but still offsets screen at top/bottom borders.
+						# I emulate it by setting screen-top to the desired value first then moving.
+						if c == 'u'
+							ed <&.screen-top= Math.max(0, ed&.screen-top - 15)
+							ed move-to-row(ed&.cursor.y - 15, ed screen-dims(tui))
+						if c == 'd'
+							ed <&.screen-top= Math.max(0, ed&.screen-top + 15)
+							ed move-to-row(ed&.cursor.y + 15, ed screen-dims(tui))
+
+
 					Tui.Escape
 						case ed&.mode
 							Normal
