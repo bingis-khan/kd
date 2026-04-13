@@ -31,6 +31,15 @@ Cursor
 inst Eq Cursor
 	eq (l, r): l.x == r.x and l.y == r.y
 
+inst Ord Cursor
+	cmp (l, r)
+		case l.y cmp (r.y)
+			EQ
+				return l.x cmp (r.x)
+
+			els
+				return els
+
 # cute! so that I don't get confused
 Visual
 	Visual I32
@@ -70,12 +79,12 @@ inst Str Mode
 Editor al
 	running Bool
 	cursor Cursor
+	screen-top I32
+	screen-left I32  # change it to Vec2 (or just Cursor)?
 	goal-x Visual  # when moving up-down, try to move it to this. it'll get reset with any horizontal movement.
 	current-file List al (List al Cnile.Char)
 	filename Maybe ConstStr
 	mode (Mode al)
-	screen-top I32
-	screen-left I32
 	anim Maybe Cnile.Timespec
 	selected Maybe Cursor
 
@@ -89,6 +98,16 @@ fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al Cnile.Char):
 fn indent-on-row (ed Ptr (Editor al), y I32):
 	ed get-row(y) take-while(is-whitespace)
 
+fn num-rows (ed Ptr (Editor al)): List.size(&ed&.current-file)
+
+fn remove-row(ed Ptr (Editor Allocator), y I32)
+	next-row = ed get-row(y)
+	next-row List.free()
+	(&ed&.current-file) List.remove(y i32-size())
+
+fn char-at (ed Ptr (Editor al), cur Cursor) -> Maybe Char:
+	ed get-row(cur.y) List.try-get(cur.x i32-size())
+	
 fn char-at-cursor (ed Ptr (Editor al)) -> Maybe Char:
 	ed cursor-row() List.try-get(ed&.cursor.x i32-size())
 
@@ -143,6 +162,7 @@ fn move-to (ed Ptr (Editor al), x I32, y I32, dim Dims)
 		pass  # todo or actually nothing?
 
 	ed <&.cursor= { x, y }
+	ed <&.selected= None  # on select mode you would not reset it.
 
 
 fn move-to-col (ed Ptr (Editor al), x I32, dim Dims)
@@ -184,22 +204,69 @@ fn move-to-end-of-line (ed Ptr (Editor al), dims Dims)
 fn cursor-is-at-line-start (ed Ptr (Editor al)):
 	ed&.cursor.x == 0
 
+fn is-at-line-end (ed Ptr (Editor al), col I32, row I32):
+	col == ed get-row(row) List.size() size-i32()
+
 fn cursor-is-at-line-end (ed Ptr (Editor al)):
 	ed&.cursor.x == ed cursor-row() List.size() size-i32()
 
 
-fn delete-at-current (ed Ptr (Editor al)) <= Allocator al
-	row = ed cursor-row()
-	if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
-		ed cursor-row() List.remove(ed&.cursor.x i32-size())
-	elif ed&.cursor.y + 1 < ed&.current-file.count size-i32()
-		# note: marge next to this one.
-		cur-row = ed cursor-row()
-		next-row-id = ed&.cursor.y + 1
-		next-row = ed get-row(next-row-id)
-		cur-row List.add-all(next-row)
-		next-row List.free()
-		(&ed&.current-file) List.remove(next-row-id i32-size())
+fn delete-selected (ed Ptr (Editor al)) <= Allocator al
+	case ed&.selected
+		None
+			row = ed cursor-row()
+			if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
+				ed cursor-row() List.remove(ed&.cursor.x i32-size())
+			elif ed cursor-is-at-line-end()
+				# note: marge next to this one.
+				if ed&.cursor.y - 1 < ed num-rows() size-i32()
+					cur-row = ed cursor-row()
+					next-row-id = ed&.cursor.y + 1
+					next-row = ed get-row(next-row-id)
+					cur-row List.add-all(next-row)
+					ed remove-row(next-row-id)
+
+		Just(sel)
+			# first, remove all rows in between cursors (exclusive)
+			cfrom = Math.min(sel, ed&.cursor)
+			cto = Math.max(sel, ed&.cursor)
+
+			for row-id in (cfrom.y + 1) to (cto.y - 1)
+				assert(row-id > 0, 'rows in between must be ACTUAL ROWS (greater than 0, otherwise sel and cursor have weird values?)')
+				ed remove-row(row-id)
+
+			nu-to-y = cto.y - Math.max((cto.y - 1) - (cfrom.y + 1) + 1, 0)
+			assert(nu-to-y == cfrom.y or nu-to-y == cfrom.y + 1, 'when removing rows in between, afterwards the new nu-to-y must be either the same row or the next one')
+
+			cto = { x: cto.x, y: nu-to-y }
+
+			# is-cursor-at-end = ed is-at-line-end(cto.x) # and next-row-id < List.size(&ed&.current-file) size-i32()
+			should-merge-next-line = ed is-at-line-end(cto.x, cto.y)
+			if should-merge-next-line
+				first-row = ed get-row(cfrom.y)
+				first-row List.trim(cfrom.x i32-size())
+				first-row List.add-all(ed get-row(cto.y + 1))
+
+				if cto.y == cfrom.y
+					ed remove-row(cto.y + 1)
+				else
+					# NOTE: UNTESTED
+					ed remove-row(cto.y + 1)
+					ed remove-row(cto.y)
+			else
+				first-row = ed get-row(cfrom.y)
+				if cto.y == cfrom.y
+					for xx in cfrom.x to (Math.min(cto.x, first-row List.size() size-i32() - 1))
+						 first-row List.remove(cfrom.x i32-size())
+				else
+					# NOTE: UNTESTED
+					# different lines. trim + add
+					first-row List.trim(cfrom.x i32-size())
+					first-row List.add-all(ed get-row(cto.y)& List.to-slice() Slice.subslice(0, (cto.x - 1) clamp-uint()))
+					ed remove-row(cto.y)
+
+			ed <&.selected= None
+			ed <&.cursor = cfrom
 
 # NOTE: also indents from current row!
 fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
@@ -209,18 +276,29 @@ fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
 	nurow List.add-all(rowws)
 	(&ed&.current-file) List.insert(y i32-size(), nurow&)
 
+
+fn is-in-selection (ed Ptr (Editor al), c Cursor):
+	(case ed&.selected)
+		Just(sel): c Math.between(ed&.cursor, sel)
+		_: False
+
 fn is-word-char (c Char): is-not-whitespace(c)
 fn is-word-char' (c Maybe Char): c Misc.maybe(is-word-char, False)
 
 
 
 al = Alloc.idc()
-fn load-file (filename, al): filename
-	File.read-contents(al)
-	lines()
-	# append('' DynStr.from-const-str())  # add a single empty line just like all the other editors...?
-	map(fn line: line to-list(al))
-	to-list(al)
+fn load-file (filename, al)
+	file =& filename File.read-contents(al)
+		lines()
+		# append('' DynStr.from-const-str())  # add a single empty line just like all the other editors...?
+		map(fn line: line to-list(al))
+		to-list(al)
+
+	if file null()
+		file List.add(List.mk(al))
+
+	return file&
 
 fn save-file (cf, filename)
 	sb =& StrBuilder.mk(al)
@@ -258,11 +336,11 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	max-digits = offstuff.max-digits
 	left-off = offstuff.total-offset
 
-	for (row, cy) in ed&.current-file drop(from-y i32-size()) zip (from(0))
-		row-num = cy + ed&.screen-top + 1
+	for (row, cy) in ed&.current-file zip(from(0)) drop(from-y i32-size())
+		row-num = cy + 1
 		for xx in 0 to (pad - 1)
 			screen Tui.put-char(' ', xx, y)
-		screen Tui.draw-str-right(row-num, screen&.tui&.width u32-i32() - max-digits - pad, cy)
+		screen Tui.draw-str-right(row-num, screen&.tui&.width u32-i32() - max-digits - pad, y)
 		for xx in 0 to (pad - 1)
 			screen Tui.put-char(' ', xx + pad + max-digits, y)
 
@@ -274,13 +352,22 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 				cp <&.fg= bg
 				cp <&.bg= fg
 
-		for (char, cx) in row drop(from-x i32-size()) zip (from(0))
+		for (char, cx) in row zip(from(0)) drop(from-x i32-size())
+			in-selection = ed is-in-selection({ x: cx, y: cy })
+			og-fg = screen&.default-fg
+			og-bg = screen&.default-bg
+			if in-selection
+				screen Tui.set-screen-colors(Term.Color16(Term.BrightBlack16), Term.Color16(Term.BrightWhite16))
+
 			if char == '\t'
 				screen Tui.put-char(' ', left-off + x, y)
 				x <= x + 1
 				screen Tui.put-char(' ', left-off + x, y)
 			else
 				screen Tui.put-char(char, left-off + x, y)
+
+			if in-selection
+				screen Tui.set-screen-colors(og-fg, og-bg)
 
 			x <= x + 1
 			if x >= w
@@ -452,10 +539,10 @@ while ed&.running
 									ed <&.mode= Insert
 
 								if c == 'd'
-									ed delete-at-current()
+									ed delete-selected()
 
 								if c == 'c'
-									ed delete-at-current()
+									ed delete-selected()
 									ed <&.mode= Insert
 
 								if c == 'I'
@@ -477,69 +564,101 @@ while ed&.running
 
 								if c == ':'
 									ed <&.mode= StrBuilder.mk(al) Cmd()
+								
+								# big selector!
+								if c == 'x'
+									# we should also support helix's multiselection.
+									# the way helix does it is it checks if the selection is at the beginning and cursor at the end.
+									# if so, we move to next row.
+									# select start of line and move to front.
+									if ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.x) == 0 and ed cursor-is-at-line-end()
+										dims = ed screen-dims(tui)
+										sel = ed&.selected or-else(ed&.cursor)  # it's gonna get unselected, so make sure to back up that selection.
+										ed move-to-row(ed&.cursor.y + 1, dims)
+										ed move-to-end-of-line(dims)
+										ed <&.selected= Just(sel)
+									else
+										# expand selection and move cursor to end.
+										ed move-to-end-of-line(ed screen-dims(tui))
+										ed <&.selected= Just({ x: 0, y: ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.y) })
 
 								# word jumping!~
+								# TODO: lots of duplication, but how would we generalize this behavior?
 								if c == 'w'  # fwd to word start
 									dims = ed screen-dims(tui)
+
+									first-pos = ed&.cursor
 									ed move-right(dims)
-									changed = True
+									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										first-pos <= ed&.cursor
+
 									while ed cursor-is-at-line-end()
 										if not ed move-right(dims)
-											changed <= False
 											break
+										first-pos <= ed&.cursor
 
 									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
 										if not ed move-right(dims) 
-											changed <= False
-											break
-									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
-										if not ed move-right(dims)
-											changed <= False
 											break
 
-									if changed
+									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										if not ed move-right(dims)
+											break
+									
+									if first-pos /= ed&.cursor
 										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+										ed <&.selected= Just(first-pos)
 
 								if c == 'e'  # fwd to word end
 									dims = ed screen-dims(tui)
+
+									first-pos = ed&.cursor
 									ed move-right(dims)
-									changed = True
+									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										first-pos <= ed&.cursor
+
 									while ed cursor-is-at-line-end()
 										if not ed move-right(dims)
-											changed <= False
 											break
+										first-pos <= ed&.cursor
+
 
 									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
 										if not ed move-right(dims)
-											changed <= False
-											break
-									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
-										if not ed move-right(dims) 
-											changed <= False
 											break
 
-									if changed
+									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										if not ed move-right(dims) 
+											break
+
+									if first-pos /= ed&.cursor
 										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+										ed <&.selected= Just(first-pos)
 
 								if c == 'b'  # bwd to word start
 									dims = ed screen-dims(tui)
+
+									first-pos = ed&.cursor
 									ed move-left(dims)
-									changed = True
+									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										first-pos <= ed&.cursor
+
 									while ed cursor-is-at-line-end()
 										if not ed move-left(dims)
-											changed <= False
 											break
+										first-pos <= ed&.cursor
 
 									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
 										if not ed move-left(dims)
-											changed <= False
 											break
 									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
 										if not ed move-left(dims) 
-											changed <= False
 											break
-									if changed
-										ed move-right(dims) 
+
+									if first-pos /= ed&.cursor
+										if ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), True)
+											ed move-right(dims)
+										ed <&.selected= Just(first-pos)
 
 							Ptr(Insert)
 								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
@@ -577,7 +696,7 @@ while ed&.running
 							Ptr(Insert)
 								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
 									ed move-left(ed screen-dims(tui))
-									ed delete-at-current()
+									ed delete-selected()
 									
 							Ptr(Cmd(cmd))
 								if StrBuilder.count(&cmd) > 0
