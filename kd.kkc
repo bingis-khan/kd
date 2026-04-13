@@ -254,8 +254,8 @@ fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 			if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
 				ed cursor-row() List.remove(ed&.cursor.x i32-size())
 			elif ed cursor-is-at-line-end()
-				# note: marge next to this one.
-				if ed&.cursor.y - 1 < ed num-rows() size-i32()
+				# marge next to this one.
+				if ed&.cursor.y + 1 < ed num-rows() size-i32()
 					cur-row = ed cursor-row()
 					next-row-id = ed&.cursor.y + 1
 					next-row = ed get-row(next-row-id)
@@ -281,12 +281,17 @@ fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 			if should-merge-next-line
 				first-row = ed get-row(cfrom.y)
 				first-row List.trim(cfrom.x i32-size())
-				first-row List.add-all(ed get-row(cto.y + 1))
+
+				on-last-row = cto.y + 1 >= ed num-rows() size-i32()
+				if not on-last-row
+					first-row List.add-all(ed get-row(cto.y + 1))
 
 				if cto.y == cfrom.y
-					ed remove-row(cto.y + 1)
+					if not on-last-row
+						ed remove-row(cto.y + 1)
 				else
-					ed remove-row(cto.y + 1)
+					if not on-last-row
+						ed remove-row(cto.y + 1)
 					ed remove-row(cto.y)
 			else
 				first-row = ed get-row(cfrom.y)
