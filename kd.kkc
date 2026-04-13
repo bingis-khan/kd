@@ -211,7 +211,8 @@ fn cursor-is-at-line-end (ed Ptr (Editor al)):
 	ed&.cursor.x == ed cursor-row() List.size() size-i32()
 
 
-fn delete-selected (ed Ptr (Editor al)) <= Allocator al
+# dims are unfortunately needed to reposition the cursor properly.
+fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 	case ed&.selected
 		None
 			row = ed cursor-row()
@@ -233,7 +234,7 @@ fn delete-selected (ed Ptr (Editor al)) <= Allocator al
 
 			for row-id in (cfrom.y + 1) to (cto.y - 1)
 				assert(row-id > 0, 'rows in between must be ACTUAL ROWS (greater than 0, otherwise sel and cursor have weird values?)')
-				ed remove-row(row-id)
+				ed remove-row(cfrom.y + 1)  # rows move afterwards, so we can't keep deleting the same row.
 
 			nu-to-y = cto.y - Math.max((cto.y - 1) - (cfrom.y + 1) + 1, 0)
 			assert(nu-to-y == cfrom.y or nu-to-y == cfrom.y + 1, 'when removing rows in between, afterwards the new nu-to-y must be either the same row or the next one')
@@ -250,7 +251,6 @@ fn delete-selected (ed Ptr (Editor al)) <= Allocator al
 				if cto.y == cfrom.y
 					ed remove-row(cto.y + 1)
 				else
-					# NOTE: UNTESTED
 					ed remove-row(cto.y + 1)
 					ed remove-row(cto.y)
 			else
@@ -266,7 +266,7 @@ fn delete-selected (ed Ptr (Editor al)) <= Allocator al
 					ed remove-row(cto.y)
 
 			ed <&.selected= None
-			ed <&.cursor = cfrom
+			ed move-to(cfrom.x, cfrom.y, dims)
 
 # NOTE: also indents from current row!
 fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
@@ -372,6 +372,12 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 			x <= x + 1
 			if x >= w
 				break
+
+		if x < w and ed is-in-selection({ x: row.count size-i32(), y: cy })
+			cell = screen Tui.get-cell-ptr(left-off + x, y) or-fail('x < w condition should assert that the cell exists.')
+			cell <&.fg= Term.Color16(Term.BrightBlack16)
+			cell <&.bg= Term.Color16(Term.BrightWhite16)
+
 
 		y <= y + 1
 		x <= 0
@@ -539,10 +545,10 @@ while ed&.running
 									ed <&.mode= Insert
 
 								if c == 'd'
-									ed delete-selected()
+									ed delete-selected(ed screen-dims(tui))
 
 								if c == 'c'
-									ed delete-selected()
+									ed delete-selected(ed screen-dims(tui))
 									ed <&.mode= Insert
 
 								if c == 'I'
@@ -696,7 +702,7 @@ while ed&.running
 							Ptr(Insert)
 								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
 									ed move-left(ed screen-dims(tui))
-									ed delete-selected()
+									ed delete-selected(ed screen-dims(tui))
 									
 							Ptr(Cmd(cmd))
 								if StrBuilder.count(&cmd) > 0
