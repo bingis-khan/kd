@@ -466,14 +466,14 @@ static  bool   eq58 (    struct Color_53  l1835 ,    struct Color_53  r1837 ) {
     return ( {  struct Tuple2_59  dref1838 = ( ( Tuple2_59_Tuple2 ) ( (  l1835 ) ,  (  r1837 ) ) ) ; dref1838 .field0.tag == Color_53_ColorDefault_t && dref1838 .field1.tag == Color_53_ColorDefault_t ? ( true ) : dref1838 .field0.tag == Color_53_Color8_t && dref1838 .field1.tag == Color_53_Color8_t ? (  eq60 ( ( dref1838 .field0 .stuff .Color_53_Color8_s .field0 ) , ( dref1838 .field1 .stuff .Color_53_Color8_s .field0 ) ) ) : dref1838 .field0.tag == Color_53_Color16_t && dref1838 .field1.tag == Color_53_Color16_t ? (  eq68 ( ( dref1838 .field0 .stuff .Color_53_Color16_s .field0 ) , ( dref1838 .field1 .stuff .Color_53_Color16_s .field0 ) ) ) : dref1838 .field0.tag == Color_53_Color256_t && dref1838 .field1.tag == Color_53_Color256_t ? (  eq43 ( ( dref1838 .field0 .stuff .Color_53_Color256_s .field0 ) , ( dref1838 .field1 .stuff .Color_53_Color256_s .field0 ) ) ) : dref1838 .field0.tag == Color_53_ColorRGB_t && dref1838 .field1.tag == Color_53_ColorRGB_t ? (  eq72 ( ( dref1838 .field0 .stuff .Color_53_ColorRGB_s .field0 ) , ( dref1838 .field1 .stuff .Color_53_ColorRGB_s .field0 ) ) ) : ( false ) ; } );
 }
 
-static  bool   eq57 (    struct Cell_52  l2283 ,    struct Cell_52  r2285 ) {
-    if ( ( !  eq47 ( ( (  l2283 ) .f_c ) , ( (  r2285 ) .f_c ) ) ) ) {
+static  bool   eq57 (    struct Cell_52  l2280 ,    struct Cell_52  r2282 ) {
+    if ( ( !  eq47 ( ( (  l2280 ) .f_c ) , ( (  r2282 ) .f_c ) ) ) ) {
         return ( false );
     }
-    if ( ( !  eq58 ( ( (  l2283 ) .f_fg ) , ( (  r2285 ) .f_fg ) ) ) ) {
+    if ( ( !  eq58 ( ( (  l2280 ) .f_fg ) , ( (  r2282 ) .f_fg ) ) ) ) {
         return ( false );
     }
-    if ( ( !  eq58 ( ( (  l2283 ) .f_bg ) , ( (  r2285 ) .f_bg ) ) ) ) {
+    if ( ( !  eq58 ( ( (  l2280 ) .f_bg ) , ( (  r2282 ) .f_bg ) ) ) ) {
         return ( false );
     }
     return ( true );
@@ -756,21 +756,21 @@ static  struct Cell_52   undefined138 (  ) {
     return (  temp139 );
 }
 
-enum MouseButton_141 {
-    MouseButton_141_MouseLeft,
-    MouseButton_141_MouseMiddle,
-    MouseButton_141_MouseRight,
-    MouseButton_141_ScrollUp,
-    MouseButton_141_ScrollDown,
-};
-
-static  enum MouseButton_141   undefined140 (  ) {
-    enum MouseButton_141  temp142;
-    return (  temp142 );
+static  uint8_t   undefined140 (  ) {
+    uint8_t  temp141;
+    return (  temp141 );
 }
 
-static  uint8_t   undefined143 (  ) {
-    uint8_t  temp144;
+enum MouseButton_143 {
+    MouseButton_143_MouseLeft,
+    MouseButton_143_MouseMiddle,
+    MouseButton_143_MouseRight,
+    MouseButton_143_ScrollUp,
+    MouseButton_143_ScrollDown,
+};
+
+static  enum MouseButton_143   undefined142 (  ) {
+    enum MouseButton_143  temp144;
     return (  temp144 );
 }
 
@@ -932,11 +932,11 @@ static  uint32_t *   cast191 (    size_t *  x463 ) {
     return ( (uint32_t * ) (  x463 ) );
 }
 
-static  char *   cast192 (    int32_t *  x463 ) {
+static  char *   cast192 (    struct Array_180 *  x463 ) {
     return ( (char * ) (  x463 ) );
 }
 
-static  char *   cast193 (    struct Array_180 *  x463 ) {
+static  char *   cast193 (    int32_t *  x463 ) {
     return ( (char * ) (  x463 ) );
 }
 
@@ -1150,7 +1150,7 @@ static  size_t   cast_dash_on_dash_zeroed246 (    uint32_t  x476 ) {
 static  int32_t   cast_dash_on_dash_zeroed248 (    char  x476 ) {
     int32_t  temp249 = ( (  zeroed63 ) ( ) );
     int32_t *  y477 = ( &temp249 );
-    char *  yp478 = ( (  cast192 ) ( (  y477 ) ) );
+    char *  yp478 = ( (  cast193 ) ( (  y477 ) ) );
     (*  yp478 ) = (  x476 );
     return ( * (  y477 ) );
 }
@@ -1533,8 +1533,8 @@ struct funenv307 {
 };
 
 struct env306 {
+    enum CAllocator_4  al2570;
     struct env307 envinst307;
-    enum CAllocator_4  al2573;
 };
 
 struct funenv306 {
@@ -1583,8 +1583,8 @@ static struct Take_316 Take_316_Take (  struct SliceIter_278  field0 ,  size_t  
 };
 
 struct env317 {
-    int32_t  tab_dash_size2416;
     ;
+    int32_t  tab_dash_size2413;
     ;
     ;
 };
@@ -1860,11 +1860,11 @@ static  struct Drop_348   into_dash_iter347 (    struct Drop_348  self607 ) {
 }
 
 struct Drop_353 {
-    struct SliceIter_278  field0;
+    struct SliceIter_350  field0;
     size_t  field1;
 };
 
-static struct Drop_353 Drop_353_Drop (  struct SliceIter_278  field0 ,  size_t  field1 ) {
+static struct Drop_353 Drop_353_Drop (  struct SliceIter_350  field0 ,  size_t  field1 ) {
     return ( struct Drop_353 ) { .field0 = field0 ,  .field1 = field1 };
 };
 
@@ -1873,11 +1873,11 @@ static  struct Drop_353   into_dash_iter352 (    struct Drop_353  self607 ) {
 }
 
 struct Drop_355 {
-    struct SliceIter_350  field0;
+    struct SliceIter_278  field0;
     size_t  field1;
 };
 
-static struct Drop_355 Drop_355_Drop (  struct SliceIter_350  field0 ,  size_t  field1 ) {
+static struct Drop_355 Drop_355_Drop (  struct SliceIter_278  field0 ,  size_t  field1 ) {
     return ( struct Drop_355 ) { .field0 = field0 ,  .field1 = field1 };
 };
 
@@ -2009,7 +2009,7 @@ static  struct Maybe_362   next361 (    struct Drop_348 *  dref609 ) {
     return ( (  next364 ) ( ( & ( (* dref609 ) .field0 ) ) ) );
 }
 
-static  struct Maybe_319   next366 (    struct Drop_355 *  dref609 ) {
+static  struct Maybe_319   next366 (    struct Drop_353 *  dref609 ) {
     while ( (  cmp9 ( ( (* dref609 ) .field1 ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ) {
         ( (  next365 ) ( ( & ( (* dref609 ) .field0 ) ) ) );
         (* dref609 ) .field1 = (  op_dash_sub93 ( ( (* dref609 ) .field1 ) , (  from_dash_integral11 ( 1 ) ) ) );
@@ -2017,7 +2017,7 @@ static  struct Maybe_319   next366 (    struct Drop_355 *  dref609 ) {
     return ( (  next365 ) ( ( & ( (* dref609 ) .field0 ) ) ) );
 }
 
-static  struct Maybe_49   next367 (    struct Drop_353 *  dref609 ) {
+static  struct Maybe_49   next367 (    struct Drop_355 *  dref609 ) {
     while ( (  cmp9 ( ( (* dref609 ) .field1 ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ) {
         ( (  next335 ) ( ( & ( (* dref609 ) .field0 ) ) ) );
         (* dref609 ) .field1 = (  op_dash_sub93 ( ( (* dref609 ) .field1 ) , (  from_dash_integral11 ( 1 ) ) ) );
@@ -2069,14 +2069,14 @@ static  struct SliceIter_350   into_dash_iter374 (    struct List_373  self1610 
     return ( (  into_dash_iter375 ) ( ( (  subslice376 ) ( ( (  self1610 ) .f_elements ) ,  (  from_dash_integral11 ( 0 ) ) ,  ( (  self1610 ) .f_count ) ) ) ) );
 }
 
-static  struct Drop_355   drop372 (    struct List_373  iterable614 ,    size_t  i616 ) {
+static  struct Drop_353   drop372 (    struct List_373  iterable614 ,    size_t  i616 ) {
     struct SliceIter_350  it617 = ( (  into_dash_iter374 ) ( (  iterable614 ) ) );
-    return ( ( Drop_355_Drop ) ( (  it617 ) ,  (  i616 ) ) );
+    return ( ( Drop_353_Drop ) ( (  it617 ) ,  (  i616 ) ) );
 }
 
-static  struct Drop_353   drop377 (    struct List_3  iterable614 ,    size_t  i616 ) {
+static  struct Drop_355   drop377 (    struct List_3  iterable614 ,    size_t  i616 ) {
     struct SliceIter_278  it617 = ( (  into_dash_iter281 ) ( (  iterable614 ) ) );
-    return ( ( Drop_353_Drop ) ( (  it617 ) ,  (  i616 ) ) );
+    return ( ( Drop_355_Drop ) ( (  it617 ) ,  (  i616 ) ) );
 }
 
 static  struct Take_316   take378 (    struct List_3 *  it629 ,    size_t  i631 ) {
@@ -2130,7 +2130,7 @@ static  struct FromIter_346   into_dash_iter385 (    struct FromIter_346  it665 
 }
 
 struct Zip_387 {
-    struct Drop_355  f_left_dash_it;
+    struct Drop_353  f_left_dash_it;
     struct FromIter_346  f_right_dash_it;
 };
 
@@ -2139,7 +2139,7 @@ static  struct Zip_387   into_dash_iter386 (    struct Zip_387  self673 ) {
 }
 
 struct Zip_389 {
-    struct Drop_353  f_left_dash_it;
+    struct Drop_355  f_left_dash_it;
     struct FromIter_346  f_right_dash_it;
 };
 
@@ -2371,7 +2371,79 @@ static  struct Zip_426   into_dash_iter425 (    struct Zip_426  self673 ) {
     return (  self673 );
 }
 
-static  struct Maybe_362   next429 (    struct Zip_387 *  self676 ) {
+struct env433 {
+    ;
+    int32_t  base922;
+};
+
+struct funenv433 {
+    int32_t  (*fun) (  struct env433  ,    int32_t  ,    int32_t  );
+    struct env433 env;
+};
+
+static  int32_t   reduce432 (    struct Range_380  iterable812 ,    int32_t  base814 ,   struct funenv433  fun816 ) {
+    int32_t  x817 = (  base814 );
+    struct RangeIter_382  it818 = ( (  into_dash_iter381 ) ( (  iterable812 ) ) );
+    while ( ( true ) ) {
+        struct Maybe_333  dref819 = ( (  next383 ) ( ( & (  it818 ) ) ) );
+        if ( dref819.tag == Maybe_333_None_t ) {
+            return (  x817 );
+        }
+        else if ( dref819.tag == Maybe_333_Just_t ) {
+            struct funenv433  temp434 = (  fun816 );
+            x817 = ( temp434.fun ( temp434.env ,  ( dref819 .stuff .Maybe_333_Just_s .field0 ) ,  (  x817 ) ) );
+        }
+    }
+    int32_t  temp435;
+    return (  temp435 );
+}
+
+static  int32_t   lam433 (   struct env433 env ,    int32_t  item926 ,    int32_t  x928 ) {
+    return (  op_dash_mul83 ( (  x928 ) , ( env.base922 ) ) );
+}
+
+static  int32_t   pow431 (    int32_t  base922 ,    int32_t  p924 ) {
+    struct env433 envinst433 = {
+        .base922 =  base922 ,
+    };
+    return ( (  reduce432 ) ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  p924 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) ,  (  from_dash_integral29 ( 1 ) ) ,  ( (struct funenv433){ .fun = lam433, .env = envinst433 } ) ) );
+}
+
+static  struct Maybe_49   next430 (    struct IntStrIter_392 *  self1017 ) {
+    if ( (  cmp74 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 0 ) ) ) != 2 ) ) {
+        return ( (struct Maybe_49) { .tag = Maybe_49_None_t } );
+    }
+    int32_t  trim_dash_down1018 = ( (  pow431 ) ( (  from_dash_integral29 ( 10 ) ) ,  (  op_dash_sub82 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
+    int32_t  upper1019 = (  op_dash_div84 ( ( ( * (  self1017 ) ) .f_int ) , (  trim_dash_down1018 ) ) );
+    int32_t  upper_dash_mask1020 = (  op_dash_mul83 ( (  op_dash_div84 ( (  upper1019 ) , (  from_dash_integral29 ( 10 ) ) ) ) , (  from_dash_integral29 ( 10 ) ) ) );
+    int32_t  digit1021 = (  op_dash_sub82 ( (  upper1019 ) , (  upper_dash_mask1020 ) ) );
+    (*  self1017 ) .f_len = (  op_dash_sub82 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 1 ) ) ) );
+    char  digit_dash_char1022 = ( (  cast196 ) ( (  op_dash_add81 ( (  digit1021 ) , (  from_dash_integral29 ( 48 ) ) ) ) ) );
+    return ( ( Maybe_49_Just ) ( (  digit_dash_char1022 ) ) );
+}
+
+static  struct Maybe_357   next429 (    struct Zip_391 *  self676 ) {
+    struct Zip_391  copy677 = ( * (  self676 ) );
+    while ( ( true ) ) {
+        struct Maybe_49  dref678 = ( (  next430 ) ( ( & ( (  copy677 ) .f_left_dash_it ) ) ) );
+        if ( dref678.tag == Maybe_49_None_t ) {
+            return ( (struct Maybe_357) { .tag = Maybe_357_None_t } );
+        }
+        else if ( dref678.tag == Maybe_49_Just_t ) {
+            struct Maybe_333  dref680 = ( (  next360 ) ( ( & ( (  copy677 ) .f_right_dash_it ) ) ) );
+            if ( dref680.tag == Maybe_333_None_t ) {
+                return ( (struct Maybe_357) { .tag = Maybe_357_None_t } );
+            }
+            else if ( dref680.tag == Maybe_333_Just_t ) {
+                ( (  next430 ) ( ( & ( ( * (  self676 ) ) .f_left_dash_it ) ) ) );
+                ( (  next360 ) ( ( & ( ( * (  self676 ) ) .f_right_dash_it ) ) ) );
+                return ( ( Maybe_357_Just ) ( ( ( Tuple2_358_Tuple2 ) ( ( dref678 .stuff .Maybe_49_Just_s .field0 ) ,  ( dref680 .stuff .Maybe_333_Just_s .field0 ) ) ) ) );
+            }
+        }
+    }
+}
+
+static  struct Maybe_362   next436 (    struct Zip_387 *  self676 ) {
     struct Zip_387  copy677 = ( * (  self676 ) );
     while ( ( true ) ) {
         struct Maybe_319  dref678 = ( (  next366 ) ( ( & ( (  copy677 ) .f_left_dash_it ) ) ) );
@@ -2392,7 +2464,7 @@ static  struct Maybe_362   next429 (    struct Zip_387 *  self676 ) {
     }
 }
 
-static  struct Maybe_357   next430 (    struct Zip_389 *  self676 ) {
+static  struct Maybe_357   next437 (    struct Zip_389 *  self676 ) {
     struct Zip_389  copy677 = ( * (  self676 ) );
     while ( ( true ) ) {
         struct Maybe_49  dref678 = ( (  next367 ) ( ( & ( (  copy677 ) .f_left_dash_it ) ) ) );
@@ -2406,78 +2478,6 @@ static  struct Maybe_357   next430 (    struct Zip_389 *  self676 ) {
             }
             else if ( dref680.tag == Maybe_333_Just_t ) {
                 ( (  next367 ) ( ( & ( ( * (  self676 ) ) .f_left_dash_it ) ) ) );
-                ( (  next360 ) ( ( & ( ( * (  self676 ) ) .f_right_dash_it ) ) ) );
-                return ( ( Maybe_357_Just ) ( ( ( Tuple2_358_Tuple2 ) ( ( dref678 .stuff .Maybe_49_Just_s .field0 ) ,  ( dref680 .stuff .Maybe_333_Just_s .field0 ) ) ) ) );
-            }
-        }
-    }
-}
-
-struct env435 {
-    ;
-    int32_t  base922;
-};
-
-struct funenv435 {
-    int32_t  (*fun) (  struct env435  ,    int32_t  ,    int32_t  );
-    struct env435 env;
-};
-
-static  int32_t   reduce434 (    struct Range_380  iterable812 ,    int32_t  base814 ,   struct funenv435  fun816 ) {
-    int32_t  x817 = (  base814 );
-    struct RangeIter_382  it818 = ( (  into_dash_iter381 ) ( (  iterable812 ) ) );
-    while ( ( true ) ) {
-        struct Maybe_333  dref819 = ( (  next383 ) ( ( & (  it818 ) ) ) );
-        if ( dref819.tag == Maybe_333_None_t ) {
-            return (  x817 );
-        }
-        else if ( dref819.tag == Maybe_333_Just_t ) {
-            struct funenv435  temp436 = (  fun816 );
-            x817 = ( temp436.fun ( temp436.env ,  ( dref819 .stuff .Maybe_333_Just_s .field0 ) ,  (  x817 ) ) );
-        }
-    }
-    int32_t  temp437;
-    return (  temp437 );
-}
-
-static  int32_t   lam435 (   struct env435 env ,    int32_t  item926 ,    int32_t  x928 ) {
-    return (  op_dash_mul83 ( (  x928 ) , ( env.base922 ) ) );
-}
-
-static  int32_t   pow433 (    int32_t  base922 ,    int32_t  p924 ) {
-    struct env435 envinst435 = {
-        .base922 =  base922 ,
-    };
-    return ( (  reduce434 ) ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  p924 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) ,  (  from_dash_integral29 ( 1 ) ) ,  ( (struct funenv435){ .fun = lam435, .env = envinst435 } ) ) );
-}
-
-static  struct Maybe_49   next432 (    struct IntStrIter_392 *  self1017 ) {
-    if ( (  cmp74 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 0 ) ) ) != 2 ) ) {
-        return ( (struct Maybe_49) { .tag = Maybe_49_None_t } );
-    }
-    int32_t  trim_dash_down1018 = ( (  pow433 ) ( (  from_dash_integral29 ( 10 ) ) ,  (  op_dash_sub82 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
-    int32_t  upper1019 = (  op_dash_div84 ( ( ( * (  self1017 ) ) .f_int ) , (  trim_dash_down1018 ) ) );
-    int32_t  upper_dash_mask1020 = (  op_dash_mul83 ( (  op_dash_div84 ( (  upper1019 ) , (  from_dash_integral29 ( 10 ) ) ) ) , (  from_dash_integral29 ( 10 ) ) ) );
-    int32_t  digit1021 = (  op_dash_sub82 ( (  upper1019 ) , (  upper_dash_mask1020 ) ) );
-    (*  self1017 ) .f_len = (  op_dash_sub82 ( ( ( * (  self1017 ) ) .f_len ) , (  from_dash_integral29 ( 1 ) ) ) );
-    char  digit_dash_char1022 = ( (  cast196 ) ( (  op_dash_add81 ( (  digit1021 ) , (  from_dash_integral29 ( 48 ) ) ) ) ) );
-    return ( ( Maybe_49_Just ) ( (  digit_dash_char1022 ) ) );
-}
-
-static  struct Maybe_357   next431 (    struct Zip_391 *  self676 ) {
-    struct Zip_391  copy677 = ( * (  self676 ) );
-    while ( ( true ) ) {
-        struct Maybe_49  dref678 = ( (  next432 ) ( ( & ( (  copy677 ) .f_left_dash_it ) ) ) );
-        if ( dref678.tag == Maybe_49_None_t ) {
-            return ( (struct Maybe_357) { .tag = Maybe_357_None_t } );
-        }
-        else if ( dref678.tag == Maybe_49_Just_t ) {
-            struct Maybe_333  dref680 = ( (  next360 ) ( ( & ( (  copy677 ) .f_right_dash_it ) ) ) );
-            if ( dref680.tag == Maybe_333_None_t ) {
-                return ( (struct Maybe_357) { .tag = Maybe_357_None_t } );
-            }
-            else if ( dref680.tag == Maybe_333_Just_t ) {
-                ( (  next432 ) ( ( & ( ( * (  self676 ) ) .f_left_dash_it ) ) ) );
                 ( (  next360 ) ( ( & ( ( * (  self676 ) ) .f_right_dash_it ) ) ) );
                 return ( ( Maybe_357_Just ) ( ( ( Tuple2_358_Tuple2 ) ( ( dref678 .stuff .Maybe_49_Just_s .field0 ) ,  ( dref680 .stuff .Maybe_333_Just_s .field0 ) ) ) ) );
             }
@@ -2668,7 +2668,7 @@ static  struct Maybe_49   next458 (    struct StrConcatIter_411 *  self1083 ) {
         return ( ( Maybe_49_Just ) ( ( dref1084 .stuff .Maybe_49_Just_s .field0 ) ) );
     }
     else if ( dref1084.tag == Maybe_49_None_t ) {
-        return ( (  next432 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
+        return ( (  next430 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
     }
 }
 
@@ -2749,7 +2749,7 @@ static  struct Maybe_49   next464 (    struct StrConcatIter_418 *  self1083 ) {
         return ( ( Maybe_49_Just ) ( ( dref1084 .stuff .Maybe_49_Just_s .field0 ) ) );
     }
     else if ( dref1084.tag == Maybe_49_None_t ) {
-        return ( (  next432 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
+        return ( (  next430 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
     }
 }
 
@@ -2769,7 +2769,7 @@ static  struct Maybe_49   next462 (    struct StrConcatIter_416 *  self1083 ) {
         return ( ( Maybe_49_Just ) ( ( dref1084 .stuff .Maybe_49_Just_s .field0 ) ) );
     }
     else if ( dref1084.tag == Maybe_49_None_t ) {
-        return ( (  next432 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
+        return ( (  next430 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
     }
 }
 
@@ -2913,7 +2913,7 @@ static  struct Maybe_49   next475 (    struct StrConcatIter_427 *  self1083 ) {
         return ( ( Maybe_49_Just ) ( ( dref1084 .stuff .Maybe_49_Just_s .field0 ) ) );
     }
     else if ( dref1084.tag == Maybe_49_None_t ) {
-        return ( (  next432 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
+        return ( (  next430 ) ( ( & ( ( * (  self1083 ) ) .f_right ) ) ) );
     }
 }
 
@@ -2962,26 +2962,26 @@ static  struct Zip_349   zip480 (    struct List_373  left684 ,    struct FromIt
     return ( (struct Zip_349) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
 }
 
-static  struct IntStrIter_392   into_dash_iter482 (    struct IntStrIter_392  self1014 ) {
+static  struct Zip_387   zip481 (    struct Drop_353  left684 ,    struct FromIter_346  right686 ) {
+    struct Drop_353  left_dash_it687 = ( (  into_dash_iter352 ) ( (  left684 ) ) );
+    struct FromIter_346  right_dash_it688 = ( (  into_dash_iter385 ) ( (  right686 ) ) );
+    return ( (struct Zip_387) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
+}
+
+static  struct IntStrIter_392   into_dash_iter483 (    struct IntStrIter_392  self1014 ) {
     return (  self1014 );
 }
 
-static  struct Zip_391   zip481 (    struct IntStrIter_392  left684 ,    struct FromIter_346  right686 ) {
-    struct IntStrIter_392  left_dash_it687 = ( (  into_dash_iter482 ) ( (  left684 ) ) );
+static  struct Zip_391   zip482 (    struct IntStrIter_392  left684 ,    struct FromIter_346  right686 ) {
+    struct IntStrIter_392  left_dash_it687 = ( (  into_dash_iter483 ) ( (  left684 ) ) );
     struct FromIter_346  right_dash_it688 = ( (  into_dash_iter385 ) ( (  right686 ) ) );
     return ( (struct Zip_391) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
 }
 
-static  struct Zip_389   zip483 (    struct Drop_353  left684 ,    struct FromIter_346  right686 ) {
-    struct Drop_353  left_dash_it687 = ( (  into_dash_iter352 ) ( (  left684 ) ) );
-    struct FromIter_346  right_dash_it688 = ( (  into_dash_iter385 ) ( (  right686 ) ) );
-    return ( (struct Zip_389) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
-}
-
-static  struct Zip_387   zip484 (    struct Drop_355  left684 ,    struct FromIter_346  right686 ) {
+static  struct Zip_389   zip484 (    struct Drop_355  left684 ,    struct FromIter_346  right686 ) {
     struct Drop_355  left_dash_it687 = ( (  into_dash_iter354 ) ( (  left684 ) ) );
     struct FromIter_346  right_dash_it688 = ( (  into_dash_iter385 ) ( (  right686 ) ) );
-    return ( (struct Zip_387) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
+    return ( (struct Zip_389) { .f_left_dash_it = (  left_dash_it687 ) , .f_right_dash_it = (  right_dash_it688 ) } );
 }
 
 static  struct StrConcatIter_395   into_dash_iter486 (    struct StrConcatIter_395  self1080 ) {
@@ -3363,7 +3363,7 @@ static struct Key_540 Key_540_Ctrl (  char  field0 ) {
 };
 
 struct MouseEvent_541 {
-    enum MouseButton_141  f_button;
+    enum MouseButton_143  f_button;
     int32_t  f_x;
     int32_t  f_y;
     bool  f_pressed;
@@ -3889,140 +3889,140 @@ static  enum Unit_13   for_dash_each605 (    struct Slice_5  iterable793 ,   str
     return ( Unit_13_Unit );
 }
 
-struct env610 {
-    struct env309 envinst309;
-    struct StrBuilder_564 *  builder1910;
+struct SliceAddressIter_610 {
+    struct Slice_351  f_slice;
+    size_t  f_current_dash_offset;
 };
 
-struct funenv610 {
-    enum Unit_13  (*fun) (  struct env610  ,    char  );
-    struct env610 env;
+static  struct SliceAddressIter_610   into_dash_iter612 (    struct SliceAddressIter_610  self1350 ) {
+    return (  self1350 );
+}
+
+struct Maybe_613 {
+    enum {
+        Maybe_613_None_t,
+        Maybe_613_Just_t,
+    } tag;
+    union {
+        struct {
+            struct List_3 *  field0;
+        } Maybe_613_Just_s;
+    } stuff;
 };
 
-static  enum Unit_13   for_dash_each609 (    struct TakeWhile_507  iterable793 ,   struct funenv610  fun795 ) {
-    struct TakeWhile_507  temp611 = ( (  into_dash_iter506 ) ( (  iterable793 ) ) );
-    struct TakeWhile_507 *  it796 = ( &temp611 );
+static struct Maybe_613 Maybe_613_Just (  struct List_3 *  field0 ) {
+    return ( struct Maybe_613 ) { .tag = Maybe_613_Just_t, .stuff = { .Maybe_613_Just_s = { .field0 = field0 } } };
+};
+
+static  struct Maybe_613   next614 (    struct SliceAddressIter_610 *  self1353 ) {
+    size_t  off1354 = ( ( * (  self1353 ) ) .f_current_dash_offset );
+    if ( (  cmp9 ( (  op_dash_add92 ( (  off1354 ) , (  from_dash_integral11 ( 1 ) ) ) ) , ( ( ( * (  self1353 ) ) .f_slice ) .f_count ) ) == 2 ) ) {
+        return ( (struct Maybe_613) { .tag = Maybe_613_None_t } );
+    }
+    struct List_3 *  elem1355 = ( (  offset_dash_ptr153 ) ( ( ( ( * (  self1353 ) ) .f_slice ) .f_ptr ) ,  ( (  size_dash_i6434 ) ( (  off1354 ) ) ) ) );
+    (*  self1353 ) .f_current_dash_offset = (  op_dash_add92 ( (  off1354 ) , (  from_dash_integral11 ( 1 ) ) ) );
+    return ( ( Maybe_613_Just ) ( (  elem1355 ) ) );
+}
+
+static  enum Unit_13   for_dash_each609 (    struct SliceAddressIter_610  iterable793 ,    enum Unit_13 (*  fun795 )(    struct List_3 *  ) ) {
+    struct SliceAddressIter_610  temp611 = ( (  into_dash_iter612 ) ( (  iterable793 ) ) );
+    struct SliceAddressIter_610 *  it796 = ( &temp611 );
     while ( ( true ) ) {
-        struct Maybe_49  dref797 = ( (  next517 ) ( (  it796 ) ) );
-        if ( dref797.tag == Maybe_49_None_t ) {
+        struct Maybe_613  dref797 = ( (  next614 ) ( (  it796 ) ) );
+        if ( dref797.tag == Maybe_613_None_t ) {
             return ( Unit_13_Unit );
         }
-        else if ( dref797.tag == Maybe_49_Just_t ) {
-            struct funenv610  temp612 = (  fun795 );
-            ( temp612.fun ( temp612.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
+        else if ( dref797.tag == Maybe_613_Just_t ) {
+            ( (  fun795 ) ( ( dref797 .stuff .Maybe_613_Just_s .field0 ) ) );
         }
     }
     return ( Unit_13_Unit );
 }
 
-struct env614 {
+struct env616 {
     struct env309 envinst309;
     struct StrBuilder_564 *  builder1910;
 };
 
-struct funenv614 {
-    enum Unit_13  (*fun) (  struct env614  ,    char  );
-    struct env614 env;
+struct funenv616 {
+    enum Unit_13  (*fun) (  struct env616  ,    char  );
+    struct env616 env;
 };
 
-static  enum Unit_13   for_dash_each613 (    struct TakeWhile_511  iterable793 ,   struct funenv614  fun795 ) {
-    struct TakeWhile_511  temp615 = ( (  into_dash_iter510 ) ( (  iterable793 ) ) );
-    struct TakeWhile_511 *  it796 = ( &temp615 );
+static  enum Unit_13   for_dash_each615 (    struct TakeWhile_511  iterable793 ,   struct funenv616  fun795 ) {
+    struct TakeWhile_511  temp617 = ( (  into_dash_iter510 ) ( (  iterable793 ) ) );
+    struct TakeWhile_511 *  it796 = ( &temp617 );
     while ( ( true ) ) {
         struct Maybe_49  dref797 = ( (  next520 ) ( (  it796 ) ) );
         if ( dref797.tag == Maybe_49_None_t ) {
             return ( Unit_13_Unit );
         }
         else if ( dref797.tag == Maybe_49_Just_t ) {
-            struct funenv614  temp616 = (  fun795 );
-            ( temp616.fun ( temp616.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
+            struct funenv616  temp618 = (  fun795 );
+            ( temp618.fun ( temp618.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
         }
     }
     return ( Unit_13_Unit );
 }
 
-struct env619 {
+struct env620 {
+    struct env309 envinst309;
+    struct StrBuilder_564 *  builder1910;
+};
+
+struct funenv620 {
+    enum Unit_13  (*fun) (  struct env620  ,    char  );
+    struct env620 env;
+};
+
+static  enum Unit_13   for_dash_each619 (    struct TakeWhile_507  iterable793 ,   struct funenv620  fun795 ) {
+    struct TakeWhile_507  temp621 = ( (  into_dash_iter506 ) ( (  iterable793 ) ) );
+    struct TakeWhile_507 *  it796 = ( &temp621 );
+    while ( ( true ) ) {
+        struct Maybe_49  dref797 = ( (  next517 ) ( (  it796 ) ) );
+        if ( dref797.tag == Maybe_49_None_t ) {
+            return ( Unit_13_Unit );
+        }
+        else if ( dref797.tag == Maybe_49_Just_t ) {
+            struct funenv620  temp622 = (  fun795 );
+            ( temp622.fun ( temp622.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
+        }
+    }
+    return ( Unit_13_Unit );
+}
+
+struct env625 {
     ;
     ;
     struct env309 envinst309;
 };
 
-struct funenv619 {
-    enum Unit_13  (*fun) (  struct env619  ,    struct StrBuilder_564 *  ,    char  );
-    struct env619 env;
+struct funenv625 {
+    enum Unit_13  (*fun) (  struct env625  ,    struct StrBuilder_564 *  ,    char  );
+    struct env625 env;
 };
 
-struct env618 {
-    struct env619 envinst619;
-    struct StrBuilder_564 *  sb2610;
+struct env624 {
+    struct env625 envinst625;
+    struct StrBuilder_564 *  sb2607;
 };
 
-struct funenv618 {
-    enum Unit_13  (*fun) (  struct env618  ,    char  );
-    struct env618 env;
+struct funenv624 {
+    enum Unit_13  (*fun) (  struct env624  ,    char  );
+    struct env624 env;
 };
 
-static  enum Unit_13   for_dash_each617 (    struct List_3  iterable793 ,   struct funenv618  fun795 ) {
-    struct SliceIter_278  temp620 = ( (  into_dash_iter281 ) ( (  iterable793 ) ) );
-    struct SliceIter_278 *  it796 = ( &temp620 );
+static  enum Unit_13   for_dash_each623 (    struct List_3  iterable793 ,   struct funenv624  fun795 ) {
+    struct SliceIter_278  temp626 = ( (  into_dash_iter281 ) ( (  iterable793 ) ) );
+    struct SliceIter_278 *  it796 = ( &temp626 );
     while ( ( true ) ) {
         struct Maybe_49  dref797 = ( (  next335 ) ( (  it796 ) ) );
         if ( dref797.tag == Maybe_49_None_t ) {
             return ( Unit_13_Unit );
         }
         else if ( dref797.tag == Maybe_49_Just_t ) {
-            struct funenv618  temp621 = (  fun795 );
-            ( temp621.fun ( temp621.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
-        }
-    }
-    return ( Unit_13_Unit );
-}
-
-struct SliceAddressIter_623 {
-    struct Slice_351  f_slice;
-    size_t  f_current_dash_offset;
-};
-
-static  struct SliceAddressIter_623   into_dash_iter625 (    struct SliceAddressIter_623  self1350 ) {
-    return (  self1350 );
-}
-
-struct Maybe_626 {
-    enum {
-        Maybe_626_None_t,
-        Maybe_626_Just_t,
-    } tag;
-    union {
-        struct {
-            struct List_3 *  field0;
-        } Maybe_626_Just_s;
-    } stuff;
-};
-
-static struct Maybe_626 Maybe_626_Just (  struct List_3 *  field0 ) {
-    return ( struct Maybe_626 ) { .tag = Maybe_626_Just_t, .stuff = { .Maybe_626_Just_s = { .field0 = field0 } } };
-};
-
-static  struct Maybe_626   next627 (    struct SliceAddressIter_623 *  self1353 ) {
-    size_t  off1354 = ( ( * (  self1353 ) ) .f_current_dash_offset );
-    if ( (  cmp9 ( (  op_dash_add92 ( (  off1354 ) , (  from_dash_integral11 ( 1 ) ) ) ) , ( ( ( * (  self1353 ) ) .f_slice ) .f_count ) ) == 2 ) ) {
-        return ( (struct Maybe_626) { .tag = Maybe_626_None_t } );
-    }
-    struct List_3 *  elem1355 = ( (  offset_dash_ptr153 ) ( ( ( ( * (  self1353 ) ) .f_slice ) .f_ptr ) ,  ( (  size_dash_i6434 ) ( (  off1354 ) ) ) ) );
-    (*  self1353 ) .f_current_dash_offset = (  op_dash_add92 ( (  off1354 ) , (  from_dash_integral11 ( 1 ) ) ) );
-    return ( ( Maybe_626_Just ) ( (  elem1355 ) ) );
-}
-
-static  enum Unit_13   for_dash_each622 (    struct SliceAddressIter_623  iterable793 ,    enum Unit_13 (*  fun795 )(    struct List_3 *  ) ) {
-    struct SliceAddressIter_623  temp624 = ( (  into_dash_iter625 ) ( (  iterable793 ) ) );
-    struct SliceAddressIter_623 *  it796 = ( &temp624 );
-    while ( ( true ) ) {
-        struct Maybe_626  dref797 = ( (  next627 ) ( (  it796 ) ) );
-        if ( dref797.tag == Maybe_626_None_t ) {
-            return ( Unit_13_Unit );
-        }
-        else if ( dref797.tag == Maybe_626_Just_t ) {
-            ( (  fun795 ) ( ( dref797 .stuff .Maybe_626_Just_s .field0 ) ) );
+            struct funenv624  temp627 = (  fun795 );
+            ( temp627.fun ( temp627.env ,  ( dref797 .stuff .Maybe_49_Just_s .field0 ) ) );
         }
     }
     return ( Unit_13_Unit );
@@ -4087,12 +4087,12 @@ struct Screen_634 {
 };
 
 struct env633 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4105,7 +4105,7 @@ static  enum Unit_13   for_dash_each632 (    struct Zip_391  iterable793 ,   str
     struct Zip_391  temp637 = ( (  into_dash_iter390 ) ( (  iterable793 ) ) );
     struct Zip_391 *  it796 = ( &temp637 );
     while ( ( true ) ) {
-        struct Maybe_357  dref797 = ( (  next431 ) ( (  it796 ) ) );
+        struct Maybe_357  dref797 = ( (  next429 ) ( (  it796 ) ) );
         if ( dref797.tag == Maybe_357_None_t ) {
             return ( Unit_13_Unit );
         }
@@ -4118,12 +4118,12 @@ static  enum Unit_13   for_dash_each632 (    struct Zip_391  iterable793 ,   str
 }
 
 struct env640 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4149,12 +4149,12 @@ static  enum Unit_13   for_dash_each639 (    struct Zip_394  iterable793 ,   str
 }
 
 struct env644 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4180,12 +4180,12 @@ static  enum Unit_13   for_dash_each643 (    struct Zip_401  iterable793 ,   str
 }
 
 struct env648 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4211,12 +4211,12 @@ static  enum Unit_13   for_dash_each647 (    struct Zip_405  iterable793 ,   str
 }
 
 struct env652 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4242,12 +4242,12 @@ static  enum Unit_13   for_dash_each651 (    struct Zip_415  iterable793 ,   str
 }
 
 struct env656 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4273,12 +4273,12 @@ static  enum Unit_13   for_dash_each655 (    struct Zip_420  iterable793 ,   str
 }
 
 struct env660 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4304,12 +4304,12 @@ static  enum Unit_13   for_dash_each659 (    struct Zip_424  iterable793 ,   str
 }
 
 struct env664 {
-    struct Color_53  bg2400;
     ;
-    struct Screen_634 *  screen2388;
-    struct Color_53  fg2399;
+    size_t  i2393;
+    struct Color_53  bg2397;
+    struct Screen_634 *  screen2385;
     ;
-    size_t  i2396;
+    struct Color_53  fg2396;
     ;
 };
 
@@ -4555,55 +4555,7 @@ static  uint32_t   reduce691 (    struct SmolArray_103  iterable812 ,    uint32_
     return (  temp697 );
 }
 
-struct Maybe_699 {
-    enum {
-        Maybe_699_None_t,
-        Maybe_699_Just_t,
-    } tag;
-    union {
-        struct {
-            int64_t  field0;
-        } Maybe_699_Just_s;
-    } stuff;
-};
-
-static struct Maybe_699 Maybe_699_Just (  int64_t  field0 ) {
-    return ( struct Maybe_699 ) { .tag = Maybe_699_Just_t, .stuff = { .Maybe_699_Just_s = { .field0 = field0 } } };
-};
-
-static  struct Maybe_699   reduce698 (    struct TakeWhile_500  iterable812 ,    struct Maybe_699  base814 ,    struct Maybe_699 (*  fun816 )(    char  ,    struct Maybe_699  ) ) {
-    struct Maybe_699  x817 = (  base814 );
-    struct TakeWhile_500  it818 = ( (  into_dash_iter499 ) ( (  iterable812 ) ) );
-    while ( ( true ) ) {
-        struct Maybe_49  dref819 = ( (  next512 ) ( ( & (  it818 ) ) ) );
-        if ( dref819.tag == Maybe_49_None_t ) {
-            return (  x817 );
-        }
-        else if ( dref819.tag == Maybe_49_Just_t ) {
-            x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_49_Just_s .field0 ) ,  (  x817 ) ) );
-        }
-    }
-    struct Maybe_699  temp700;
-    return (  temp700 );
-}
-
-static  size_t   reduce701 (    struct TakeWhile_500  iterable812 ,    size_t  base814 ,    size_t (*  fun816 )(    char  ,    size_t  ) ) {
-    size_t  x817 = (  base814 );
-    struct TakeWhile_500  it818 = ( (  into_dash_iter499 ) ( (  iterable812 ) ) );
-    while ( ( true ) ) {
-        struct Maybe_49  dref819 = ( (  next512 ) ( ( & (  it818 ) ) ) );
-        if ( dref819.tag == Maybe_49_None_t ) {
-            return (  x817 );
-        }
-        else if ( dref819.tag == Maybe_49_Just_t ) {
-            x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_49_Just_s .field0 ) ,  (  x817 ) ) );
-        }
-    }
-    size_t  temp702;
-    return (  temp702 );
-}
-
-static  uint32_t   reduce703 (    struct Map_312  iterable812 ,    uint32_t  base814 ,    uint32_t (*  fun816 )(    uint32_t  ,    uint32_t  ) ) {
+static  uint32_t   reduce698 (    struct Map_312  iterable812 ,    uint32_t  base814 ,    uint32_t (*  fun816 )(    uint32_t  ,    uint32_t  ) ) {
     uint32_t  x817 = (  base814 );
     struct Map_312  it818 = ( (  into_dash_iter311 ) ( (  iterable812 ) ) );
     while ( ( true ) ) {
@@ -4615,7 +4567,55 @@ static  uint32_t   reduce703 (    struct Map_312  iterable812 ,    uint32_t  bas
             x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_330_Just_s .field0 ) ,  (  x817 ) ) );
         }
     }
-    uint32_t  temp704;
+    uint32_t  temp699;
+    return (  temp699 );
+}
+
+struct Maybe_701 {
+    enum {
+        Maybe_701_None_t,
+        Maybe_701_Just_t,
+    } tag;
+    union {
+        struct {
+            int64_t  field0;
+        } Maybe_701_Just_s;
+    } stuff;
+};
+
+static struct Maybe_701 Maybe_701_Just (  int64_t  field0 ) {
+    return ( struct Maybe_701 ) { .tag = Maybe_701_Just_t, .stuff = { .Maybe_701_Just_s = { .field0 = field0 } } };
+};
+
+static  struct Maybe_701   reduce700 (    struct TakeWhile_500  iterable812 ,    struct Maybe_701  base814 ,    struct Maybe_701 (*  fun816 )(    char  ,    struct Maybe_701  ) ) {
+    struct Maybe_701  x817 = (  base814 );
+    struct TakeWhile_500  it818 = ( (  into_dash_iter499 ) ( (  iterable812 ) ) );
+    while ( ( true ) ) {
+        struct Maybe_49  dref819 = ( (  next512 ) ( ( & (  it818 ) ) ) );
+        if ( dref819.tag == Maybe_49_None_t ) {
+            return (  x817 );
+        }
+        else if ( dref819.tag == Maybe_49_Just_t ) {
+            x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_49_Just_s .field0 ) ,  (  x817 ) ) );
+        }
+    }
+    struct Maybe_701  temp702;
+    return (  temp702 );
+}
+
+static  size_t   reduce703 (    struct TakeWhile_500  iterable812 ,    size_t  base814 ,    size_t (*  fun816 )(    char  ,    size_t  ) ) {
+    size_t  x817 = (  base814 );
+    struct TakeWhile_500  it818 = ( (  into_dash_iter499 ) ( (  iterable812 ) ) );
+    while ( ( true ) ) {
+        struct Maybe_49  dref819 = ( (  next512 ) ( ( & (  it818 ) ) ) );
+        if ( dref819.tag == Maybe_49_None_t ) {
+            return (  x817 );
+        }
+        else if ( dref819.tag == Maybe_49_Just_t ) {
+            x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_49_Just_s .field0 ) ,  (  x817 ) ) );
+        }
+    }
+    size_t  temp704;
     return (  temp704 );
 }
 
@@ -4651,8 +4651,8 @@ static  size_t   reduce707 (    struct TakeWhile_502  iterable812 ,    size_t  b
     return (  temp708 );
 }
 
-static  struct Maybe_699   reduce709 (    struct TakeWhile_504  iterable812 ,    struct Maybe_699  base814 ,    struct Maybe_699 (*  fun816 )(    char  ,    struct Maybe_699  ) ) {
-    struct Maybe_699  x817 = (  base814 );
+static  struct Maybe_701   reduce709 (    struct TakeWhile_504  iterable812 ,    struct Maybe_701  base814 ,    struct Maybe_701 (*  fun816 )(    char  ,    struct Maybe_701  ) ) {
+    struct Maybe_701  x817 = (  base814 );
     struct TakeWhile_504  it818 = ( (  into_dash_iter503 ) ( (  iterable812 ) ) );
     while ( ( true ) ) {
         struct Maybe_49  dref819 = ( (  next515 ) ( ( & (  it818 ) ) ) );
@@ -4663,15 +4663,15 @@ static  struct Maybe_699   reduce709 (    struct TakeWhile_504  iterable812 ,   
             x817 = ( (  fun816 ) ( ( dref819 .stuff .Maybe_49_Just_s .field0 ) ,  (  x817 ) ) );
         }
     }
-    struct Maybe_699  temp710;
+    struct Maybe_701  temp710;
     return (  temp710 );
 }
 
 static  size_t   reduce711 (    struct IntStrIter_392  iterable812 ,    size_t  base814 ,    size_t (*  fun816 )(    char  ,    size_t  ) ) {
     size_t  x817 = (  base814 );
-    struct IntStrIter_392  it818 = ( (  into_dash_iter482 ) ( (  iterable812 ) ) );
+    struct IntStrIter_392  it818 = ( (  into_dash_iter483 ) ( (  iterable812 ) ) );
     while ( ( true ) ) {
-        struct Maybe_49  dref819 = ( (  next432 ) ( ( & (  it818 ) ) ) );
+        struct Maybe_49  dref819 = ( (  next430 ) ( ( & (  it818 ) ) ) );
         if ( dref819.tag == Maybe_49_None_t ) {
             return (  x817 );
         }
@@ -4800,7 +4800,7 @@ static  size_t   lam728 (    char  dref824 ,    size_t  x826 ) {
 }
 
 static  size_t   count727 (    struct TakeWhile_500  it823 ) {
-    return ( (  reduce701 ) ( (  it823 ) ,  (  from_dash_integral11 ( 0 ) ) ,  (  lam728 ) ) );
+    return ( (  reduce703 ) ( (  it823 ) ,  (  from_dash_integral11 ( 0 ) ) ,  (  lam728 ) ) );
 }
 
 static  size_t   lam730 (    char  dref824 ,    size_t  x826 ) {
@@ -5151,21 +5151,21 @@ static  struct StrCaseIter_396   chars787 (    struct StrCase_782  self1123 ) {
     return ( (  into_dash_iter788 ) ( (  self1123 ) ) );
 }
 
-static  struct StrCaseIter_396   chars781 (    struct Mode_780  self2439 ) {
+static  struct StrCaseIter_396   chars781 (    struct Mode_780  self2436 ) {
     struct StrCase_782  temp785;
-    struct StrCase_782  c2440 = (  temp785 );
-    struct Mode_780  dref2441 = (  self2439 );
-    if ( dref2441.tag == Mode_780_Normal_t ) {
-        c2440 = ( ( StrCase_782_StrCase1 ) ( ( "Normal" ) ) );
+    struct StrCase_782  c2437 = (  temp785 );
+    struct Mode_780  dref2438 = (  self2436 );
+    if ( dref2438.tag == Mode_780_Normal_t ) {
+        c2437 = ( ( StrCase_782_StrCase1 ) ( ( "Normal" ) ) );
     }
-    else if ( dref2441.tag == Mode_780_Insert_t ) {
-        c2440 = ( ( StrCase_782_StrCase1 ) ( ( "Insert" ) ) );
+    else if ( dref2438.tag == Mode_780_Insert_t ) {
+        c2437 = ( ( StrCase_782_StrCase1 ) ( ( "Insert" ) ) );
     }
-    else if ( dref2441.tag == Mode_780_Cmd_t ) {
-        struct DynStr_130  ss2443 = ( (  as_dash_str786 ) ( ( & ( dref2441 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
-        c2440 = ( ( StrCase_782_StrCase2 ) ( ( ( StrConcat_783_StrConcat ) ( ( ( StrConcat_784_StrConcat ) ( ( "Cmd(" ) ,  (  ss2443 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ")" ) ) ) ) ) ) );
+    else if ( dref2438.tag == Mode_780_Cmd_t ) {
+        struct DynStr_130  ss2440 = ( (  as_dash_str786 ) ( ( & ( dref2438 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
+        c2437 = ( ( StrCase_782_StrCase2 ) ( ( ( StrConcat_783_StrConcat ) ( ( ( StrConcat_784_StrConcat ) ( ( "Cmd(" ) ,  (  ss2440 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ")" ) ) ) ) ) ) );
     }
-    return ( (  chars787 ) ( (  c2440 ) ) );
+    return ( (  chars787 ) ( (  c2437 ) ) );
 }
 
 static  struct StrConcatIter_395   into_dash_iter778 (    struct StrConcat_779  dref1087 ) {
@@ -5651,21 +5651,12 @@ static  enum Unit_13   print_dash_str856 (    struct StrConcat_857  self1092 ) {
     return ( Unit_13_Unit );
 }
 
-struct StrConcat_863 {
-    struct StrConcat_795  field0;
-    char  field1;
-};
-
-static struct StrConcat_863 StrConcat_863_StrConcat (  struct StrConcat_795  field0 ,  char  field1 ) {
-    return ( struct StrConcat_863 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
 struct StrConcat_862 {
-    struct StrConcat_863  field0;
-    uint32_t  field1;
+    const char*  field0;
+    uint8_t  field1;
 };
 
-static struct StrConcat_862 StrConcat_862_StrConcat (  struct StrConcat_863  field0 ,  uint32_t  field1 ) {
+static struct StrConcat_862 StrConcat_862_StrConcat (  const char*  field0 ,  uint8_t  field1 ) {
     return ( struct StrConcat_862 ) { .field0 = field0 ,  .field1 = field1 };
 };
 
@@ -5678,7 +5669,124 @@ static struct StrConcat_861 StrConcat_861_StrConcat (  struct StrConcat_862  fie
     return ( struct StrConcat_861 ) { .field0 = field0 ,  .field1 = field1 };
 };
 
-static  enum Unit_13   print_dash_str866 (    struct StrConcat_795  self1092 ) {
+static  enum Unit_13   print_dash_str863 (    struct StrConcat_862  self1092 ) {
+    struct StrConcat_862  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str22 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+static  enum Unit_13   print_dash_str860 (    struct StrConcat_861  self1092 ) {
+    struct StrConcat_861  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str863 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+struct StrConcat_868 {
+    struct StrConcat_861  field0;
+    uint8_t  field1;
+};
+
+static struct StrConcat_868 StrConcat_868_StrConcat (  struct StrConcat_861  field0 ,  uint8_t  field1 ) {
+    return ( struct StrConcat_868 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+struct StrConcat_867 {
+    struct StrConcat_868  field0;
+    char  field1;
+};
+
+static struct StrConcat_867 StrConcat_867_StrConcat (  struct StrConcat_868  field0 ,  char  field1 ) {
+    return ( struct StrConcat_867 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+struct StrConcat_866 {
+    struct StrConcat_867  field0;
+    uint8_t  field1;
+};
+
+static struct StrConcat_866 StrConcat_866_StrConcat (  struct StrConcat_867  field0 ,  uint8_t  field1 ) {
+    return ( struct StrConcat_866 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+struct StrConcat_865 {
+    struct StrConcat_866  field0;
+    char  field1;
+};
+
+static struct StrConcat_865 StrConcat_865_StrConcat (  struct StrConcat_866  field0 ,  char  field1 ) {
+    return ( struct StrConcat_865 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+static  enum Unit_13   print_dash_str871 (    struct StrConcat_868  self1092 ) {
+    struct StrConcat_868  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str860 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+static  enum Unit_13   print_dash_str870 (    struct StrConcat_867  self1092 ) {
+    struct StrConcat_867  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str871 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+static  enum Unit_13   print_dash_str869 (    struct StrConcat_866  self1092 ) {
+    struct StrConcat_866  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str870 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+static  enum Unit_13   print_dash_str864 (    struct StrConcat_865  self1092 ) {
+    struct StrConcat_865  dref1093 = (  self1092 );
+    if ( true ) {
+        ( (  print_dash_str869 ) ( ( dref1093 .field0 ) ) );
+        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
+    }
+    return ( Unit_13_Unit );
+}
+
+struct StrConcat_875 {
+    struct StrConcat_795  field0;
+    char  field1;
+};
+
+static struct StrConcat_875 StrConcat_875_StrConcat (  struct StrConcat_795  field0 ,  char  field1 ) {
+    return ( struct StrConcat_875 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+struct StrConcat_874 {
+    struct StrConcat_875  field0;
+    uint32_t  field1;
+};
+
+static struct StrConcat_874 StrConcat_874_StrConcat (  struct StrConcat_875  field0 ,  uint32_t  field1 ) {
+    return ( struct StrConcat_874 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+struct StrConcat_873 {
+    struct StrConcat_874  field0;
+    char  field1;
+};
+
+static struct StrConcat_873 StrConcat_873_StrConcat (  struct StrConcat_874  field0 ,  char  field1 ) {
+    return ( struct StrConcat_873 ) { .field0 = field0 ,  .field1 = field1 };
+};
+
+static  enum Unit_13   print_dash_str878 (    struct StrConcat_795  self1092 ) {
     struct StrConcat_795  dref1093 = (  self1092 );
     if ( true ) {
         ( (  print_dash_str22 ) ( ( dref1093 .field0 ) ) );
@@ -5687,116 +5795,8 @@ static  enum Unit_13   print_dash_str866 (    struct StrConcat_795  self1092 ) {
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   print_dash_str865 (    struct StrConcat_863  self1092 ) {
-    struct StrConcat_863  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str866 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-static  enum Unit_13   print_dash_str864 (    struct StrConcat_862  self1092 ) {
-    struct StrConcat_862  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str865 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str774 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-static  enum Unit_13   print_dash_str860 (    struct StrConcat_861  self1092 ) {
-    struct StrConcat_861  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str864 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-struct StrConcat_869 {
-    const char*  field0;
-    uint8_t  field1;
-};
-
-static struct StrConcat_869 StrConcat_869_StrConcat (  const char*  field0 ,  uint8_t  field1 ) {
-    return ( struct StrConcat_869 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-struct StrConcat_868 {
-    struct StrConcat_869  field0;
-    char  field1;
-};
-
-static struct StrConcat_868 StrConcat_868_StrConcat (  struct StrConcat_869  field0 ,  char  field1 ) {
-    return ( struct StrConcat_868 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-static  enum Unit_13   print_dash_str870 (    struct StrConcat_869  self1092 ) {
-    struct StrConcat_869  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str22 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-static  enum Unit_13   print_dash_str867 (    struct StrConcat_868  self1092 ) {
-    struct StrConcat_868  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str870 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-struct StrConcat_875 {
-    struct StrConcat_868  field0;
-    uint8_t  field1;
-};
-
-static struct StrConcat_875 StrConcat_875_StrConcat (  struct StrConcat_868  field0 ,  uint8_t  field1 ) {
-    return ( struct StrConcat_875 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-struct StrConcat_874 {
-    struct StrConcat_875  field0;
-    char  field1;
-};
-
-static struct StrConcat_874 StrConcat_874_StrConcat (  struct StrConcat_875  field0 ,  char  field1 ) {
-    return ( struct StrConcat_874 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-struct StrConcat_873 {
-    struct StrConcat_874  field0;
-    uint8_t  field1;
-};
-
-static struct StrConcat_873 StrConcat_873_StrConcat (  struct StrConcat_874  field0 ,  uint8_t  field1 ) {
-    return ( struct StrConcat_873 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-struct StrConcat_872 {
-    struct StrConcat_873  field0;
-    char  field1;
-};
-
-static struct StrConcat_872 StrConcat_872_StrConcat (  struct StrConcat_873  field0 ,  char  field1 ) {
-    return ( struct StrConcat_872 ) { .field0 = field0 ,  .field1 = field1 };
-};
-
-static  enum Unit_13   print_dash_str878 (    struct StrConcat_875  self1092 ) {
+static  enum Unit_13   print_dash_str877 (    struct StrConcat_875  self1092 ) {
     struct StrConcat_875  dref1093 = (  self1092 );
-    if ( true ) {
-        ( (  print_dash_str867 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
-    }
-    return ( Unit_13_Unit );
-}
-
-static  enum Unit_13   print_dash_str877 (    struct StrConcat_874  self1092 ) {
-    struct StrConcat_874  dref1093 = (  self1092 );
     if ( true ) {
         ( (  print_dash_str878 ) ( ( dref1093 .field0 ) ) );
         ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
@@ -5804,17 +5804,17 @@ static  enum Unit_13   print_dash_str877 (    struct StrConcat_874  self1092 ) {
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   print_dash_str876 (    struct StrConcat_873  self1092 ) {
-    struct StrConcat_873  dref1093 = (  self1092 );
+static  enum Unit_13   print_dash_str876 (    struct StrConcat_874  self1092 ) {
+    struct StrConcat_874  dref1093 = (  self1092 );
     if ( true ) {
         ( (  print_dash_str877 ) ( ( dref1093 .field0 ) ) );
-        ( (  print_dash_str776 ) ( ( dref1093 .field1 ) ) );
+        ( (  print_dash_str774 ) ( ( dref1093 .field1 ) ) );
     }
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   print_dash_str871 (    struct StrConcat_872  self1092 ) {
-    struct StrConcat_872  dref1093 = (  self1092 );
+static  enum Unit_13   print_dash_str872 (    struct StrConcat_873  self1092 ) {
+    struct StrConcat_873  dref1093 = (  self1092 );
     if ( true ) {
         ( (  print_dash_str876 ) ( ( dref1093 .field0 ) ) );
         ( (  print_dash_str28 ) ( ( dref1093 .field1 ) ) );
@@ -5854,11 +5854,11 @@ static  struct TakeWhile_504   chars886 (    struct TakeWhile_504  self1183 ) {
     return (  self1183 );
 }
 
-static  struct TakeWhile_507   chars887 (    struct TakeWhile_507  self1183 ) {
+static  struct TakeWhile_511   chars887 (    struct TakeWhile_511  self1183 ) {
     return (  self1183 );
 }
 
-static  struct TakeWhile_511   chars888 (    struct TakeWhile_511  self1183 ) {
+static  struct TakeWhile_507   chars888 (    struct TakeWhile_507  self1183 ) {
     return (  self1183 );
 }
 
@@ -5947,10 +5947,10 @@ static  enum Unit_13   panic903 (    struct StrConcat_838  errmsg1244 ) {
     return ( Unit_13_Unit );
 }
 
-static  enum MouseButton_141   panic_prime_904 (    const char*  errmsg1247 ) {
+static  enum MouseButton_143   panic_prime_904 (    const char*  errmsg1247 ) {
     ( (  print_dash_str836 ) ( ( ( StrConcat_837_StrConcat ) ( ( ( StrConcat_838_StrConcat ) ( ( "PANIC: " ) ,  (  errmsg1247 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "\n" ) ) ) ) ) ) );
     ( ( exit ) ( (  from_dash_integral29 ( 1 ) ) ) );
-    return ( (  undefined140 ) ( ) );
+    return ( (  undefined142 ) ( ) );
 }
 
 static  enum Unit_13   assert905 (    bool  cond1250 ,    const char*  msg1252 ) {
@@ -6030,7 +6030,7 @@ static  uint8_t   or_dash_fail910 (    struct Maybe_911  x1257 ,    struct StrCo
     struct Maybe_911  dref1260 = (  x1257 );
     if ( dref1260.tag == Maybe_911_None_t ) {
         ( (  panic900 ) ( (  errmsg1259 ) ) );
-        return ( (  undefined143 ) ( ) );
+        return ( (  undefined140 ) ( ) );
     }
     else if ( dref1260.tag == Maybe_911_Just_t ) {
         return ( dref1260 .stuff .Maybe_911_Just_s .field0 );
@@ -6135,8 +6135,8 @@ static  enum Unit_13   set925 (    struct Slice_570  slice1307 ,    size_t  i130
     return ( Unit_13_Unit );
 }
 
-static  struct SliceAddressIter_623   addresses926 (    struct Slice_351  slice1347 ) {
-    return ( (struct SliceAddressIter_623) { .f_slice = (  slice1347 ) , .f_current_dash_offset = (  from_dash_integral11 ( 0 ) ) } );
+static  struct SliceAddressIter_610   addresses926 (    struct Slice_351  slice1347 ) {
+    return ( (struct SliceAddressIter_610) { .f_slice = (  slice1347 ) , .f_current_dash_offset = (  from_dash_integral11 ( 0 ) ) } );
 }
 
 static  enum Unit_13   lam590 (   struct env590 env ,    struct Tuple2_358  dref1361 ) {
@@ -6307,7 +6307,7 @@ static  char *   get_dash_ptr945 (    struct Array_180 *  arr1449 ,    size_t  i
     if ( ( (  cmp9 ( (  i1452 ) , (  from_dash_integral11 ( 0 ) ) ) == 0 ) || (  cmp9 ( (  i1452 ) , ( (size_t ) ( 32 ) ) ) != 0 ) ) ) {
         ( (  panic673 ) ( ( ( StrConcat_674_StrConcat ) ( ( ( StrConcat_675_StrConcat ) ( ( ( StrConcat_16_StrConcat ) ( ( ( StrConcat_17_StrConcat ) ( ( "Access to array at index " ) ,  (  i1452 ) ) ) ,  ( ". (max: " ) ) ) ,  ( 32 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ")" ) ) ) ) ) ) );
     }
-    char *  p1453 = ( ( (  cast193 ) ( (  arr1449 ) ) ) );
+    char *  p1453 = ( ( (  cast192 ) ( (  arr1449 ) ) ) );
     return ( (  offset_dash_ptr31 ) ( (  p1453 ) ,  ( (int64_t ) (  i1452 ) ) ) );
 }
 
@@ -6324,7 +6324,7 @@ static  enum Unit_13   set947 (    struct Array_180 *  arr1462 ,    size_t  i146
 }
 
 static  struct Slice_5   as_dash_slice948 (    struct Array_180 *  arr1471 ) {
-    return ( (struct Slice_5) { .f_ptr = ( (  cast193 ) ( (  arr1471 ) ) ) , .f_count = ( (size_t ) ( 32 ) ) } );
+    return ( (struct Slice_5) { .f_ptr = ( (  cast192 ) ( (  arr1471 ) ) ) , .f_count = ( (size_t ) ( 32 ) ) } );
 }
 
 static  bool   is_dash_whitespace949 (    char  c1522 ) {
@@ -6351,57 +6351,57 @@ static  struct Maybe_333   parse_dash_digit953 (    char  c1564 ) {
     }
 }
 
-static  struct Maybe_699   sequence_dash_maybe955 (    char  e1570 ,    struct Maybe_699  b1572 ) {
-    struct Maybe_699  dref1573 = (  b1572 );
-    if ( dref1573.tag == Maybe_699_None_t ) {
-        return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+static  struct Maybe_701   sequence_dash_maybe955 (    char  e1570 ,    struct Maybe_701  b1572 ) {
+    struct Maybe_701  dref1573 = (  b1572 );
+    if ( dref1573.tag == Maybe_701_None_t ) {
+        return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
     }
-    else if ( dref1573.tag == Maybe_699_Just_t ) {
+    else if ( dref1573.tag == Maybe_701_Just_t ) {
         struct Maybe_333  dref1575 = ( (  parse_dash_digit953 ) ( (  e1570 ) ) );
         if ( dref1575.tag == Maybe_333_None_t ) {
-            return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+            return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
         }
         else if ( dref1575.tag == Maybe_333_Just_t ) {
-            return ( ( Maybe_699_Just ) ( (  op_dash_add77 ( (  op_dash_mul32 ( ( dref1573 .stuff .Maybe_699_Just_s .field0 ) , (  from_dash_integral35 ( 10 ) ) ) ) , ( (  i32_dash_i64266 ) ( ( dref1575 .stuff .Maybe_333_Just_s .field0 ) ) ) ) ) ) );
+            return ( ( Maybe_701_Just ) ( (  op_dash_add77 ( (  op_dash_mul32 ( ( dref1573 .stuff .Maybe_701_Just_s .field0 ) , (  from_dash_integral35 ( 10 ) ) ) ) , ( (  i32_dash_i64266 ) ( ( dref1575 .stuff .Maybe_333_Just_s .field0 ) ) ) ) ) ) );
         }
     }
 }
 
-static  struct Maybe_699   parse_dash_int954 (    struct TakeWhile_500  s1567 ) {
+static  struct Maybe_701   parse_dash_int954 (    struct TakeWhile_500  s1567 ) {
     struct TakeWhile_500  cs1577 = ( (  chars885 ) ( (  s1567 ) ) );
     struct Maybe_49  dref1578 = ( (  head749 ) ( (  cs1577 ) ) );
     if ( dref1578.tag == Maybe_49_Just_t ) {
-        return ( (  reduce698 ) ( (  cs1577 ) ,  ( ( Maybe_699_Just ) ( (  from_dash_integral35 ( 0 ) ) ) ) ,  (  sequence_dash_maybe955 ) ) );
+        return ( (  reduce700 ) ( (  cs1577 ) ,  ( ( Maybe_701_Just ) ( (  from_dash_integral35 ( 0 ) ) ) ) ,  (  sequence_dash_maybe955 ) ) );
     }
     else if ( dref1578.tag == Maybe_49_None_t ) {
-        return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+        return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
     }
 }
 
-static  struct Maybe_699   sequence_dash_maybe957 (    char  e1570 ,    struct Maybe_699  b1572 ) {
-    struct Maybe_699  dref1573 = (  b1572 );
-    if ( dref1573.tag == Maybe_699_None_t ) {
-        return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+static  struct Maybe_701   sequence_dash_maybe957 (    char  e1570 ,    struct Maybe_701  b1572 ) {
+    struct Maybe_701  dref1573 = (  b1572 );
+    if ( dref1573.tag == Maybe_701_None_t ) {
+        return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
     }
-    else if ( dref1573.tag == Maybe_699_Just_t ) {
+    else if ( dref1573.tag == Maybe_701_Just_t ) {
         struct Maybe_333  dref1575 = ( (  parse_dash_digit953 ) ( (  e1570 ) ) );
         if ( dref1575.tag == Maybe_333_None_t ) {
-            return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+            return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
         }
         else if ( dref1575.tag == Maybe_333_Just_t ) {
-            return ( ( Maybe_699_Just ) ( (  op_dash_add77 ( (  op_dash_mul32 ( ( dref1573 .stuff .Maybe_699_Just_s .field0 ) , (  from_dash_integral35 ( 10 ) ) ) ) , ( (  i32_dash_i64266 ) ( ( dref1575 .stuff .Maybe_333_Just_s .field0 ) ) ) ) ) ) );
+            return ( ( Maybe_701_Just ) ( (  op_dash_add77 ( (  op_dash_mul32 ( ( dref1573 .stuff .Maybe_701_Just_s .field0 ) , (  from_dash_integral35 ( 10 ) ) ) ) , ( (  i32_dash_i64266 ) ( ( dref1575 .stuff .Maybe_333_Just_s .field0 ) ) ) ) ) ) );
         }
     }
 }
 
-static  struct Maybe_699   parse_dash_int956 (    struct TakeWhile_504  s1567 ) {
+static  struct Maybe_701   parse_dash_int956 (    struct TakeWhile_504  s1567 ) {
     struct TakeWhile_504  cs1577 = ( (  chars886 ) ( (  s1567 ) ) );
     struct Maybe_49  dref1578 = ( (  head751 ) ( (  cs1577 ) ) );
     if ( dref1578.tag == Maybe_49_Just_t ) {
-        return ( (  reduce709 ) ( (  cs1577 ) ,  ( ( Maybe_699_Just ) ( (  from_dash_integral35 ( 0 ) ) ) ) ,  (  sequence_dash_maybe957 ) ) );
+        return ( (  reduce709 ) ( (  cs1577 ) ,  ( ( Maybe_701_Just ) ( (  from_dash_integral35 ( 0 ) ) ) ) ,  (  sequence_dash_maybe957 ) ) );
     }
     else if ( dref1578.tag == Maybe_49_None_t ) {
-        return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+        return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
     }
 }
 
@@ -6888,7 +6888,7 @@ static  struct Slice_351   to_dash_slice996 (    struct List_373  l1689 ) {
     return ( (struct Slice_351) { .f_ptr = (  ptr1690 ) , .f_count = ( (  l1689 ) .f_count ) } );
 }
 
-static  struct SliceAddressIter_623   addresses997 (    struct List_373  l1693 ) {
+static  struct SliceAddressIter_610   addresses997 (    struct List_373  l1693 ) {
     return ( (  addresses926 ) ( ( (  to_dash_slice996 ) ( (  l1693 ) ) ) ) );
 }
 
@@ -6918,7 +6918,7 @@ static  uint32_t   lam1002 (    uint32_t  elem1731 ,    uint32_t  b1733 ) {
 }
 
 static  uint32_t   from_dash_hex1000 (    const char*  arr1727 ) {
-    return ( (  reduce703 ) ( ( (  map339 ) ( (  arr1727 ) ,  (  lam1001 ) ) ) ,  (  from_dash_integral36 ( 0 ) ) ,  (  lam1002 ) ) );
+    return ( (  reduce698 ) ( ( (  map339 ) ( (  arr1727 ) ,  (  lam1001 ) ) ) ,  (  from_dash_integral36 ( 0 ) ) ,  (  lam1002 ) ) );
 }
 
 static  struct Maybe_264   get1003 (    const char*  s1767 ) {
@@ -6938,7 +6938,7 @@ static  enum Unit_13   hide_dash_cursor1005 (  ) {
 static  enum Unit_13   move_dash_cursor_dash_to1006 (    uint32_t  x1744 ,    uint32_t  y1746 ) {
     uint32_t  x1747 = (  op_dash_add86 ( (  x1744 ) , (  from_dash_integral36 ( 1 ) ) ) );
     uint32_t  y1748 = (  op_dash_add86 ( (  y1746 ) , (  from_dash_integral36 ( 1 ) ) ) );
-    ( (  print_dash_str860 ) ( ( ( StrConcat_861_StrConcat ) ( ( ( StrConcat_862_StrConcat ) ( ( ( StrConcat_863_StrConcat ) ( ( ( StrConcat_795_StrConcat ) ( ( "\x1b[" ) ,  (  y1748 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  (  x1747 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) );
+    ( (  print_dash_str872 ) ( ( ( StrConcat_873_StrConcat ) ( ( ( StrConcat_874_StrConcat ) ( ( ( StrConcat_875_StrConcat ) ( ( ( StrConcat_795_StrConcat ) ( ( "\x1b[" ) ,  (  y1748 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  (  x1747 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
@@ -7227,22 +7227,22 @@ static  enum Unit_13   clear_dash_screen1019 (  ) {
 }
 
 static  enum Unit_13   set_dash_fg2561020 (    uint8_t  color1805 ) {
-    ( (  print_dash_str867 ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_869_StrConcat ) ( ( "\x1b[38;5;" ) ,  (  color1805 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
+    ( (  print_dash_str860 ) ( ( ( StrConcat_861_StrConcat ) ( ( ( StrConcat_862_StrConcat ) ( ( "\x1b[38;5;" ) ,  (  color1805 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
 static  enum Unit_13   set_dash_bg2561021 (    uint8_t  color1808 ) {
-    ( (  print_dash_str867 ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_869_StrConcat ) ( ( "\x1b[48;5;" ) ,  (  color1808 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
+    ( (  print_dash_str860 ) ( ( ( StrConcat_861_StrConcat ) ( ( ( StrConcat_862_StrConcat ) ( ( "\x1b[48;5;" ) ,  (  color1808 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
 static  enum Unit_13   set_dash_fg_dash_rgb1022 (    struct RGB_56  c1828 ) {
-    ( (  print_dash_str871 ) ( ( ( StrConcat_872_StrConcat ) ( ( ( StrConcat_873_StrConcat ) ( ( ( StrConcat_874_StrConcat ) ( ( ( StrConcat_875_StrConcat ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_869_StrConcat ) ( ( "\x1b[38;2;" ) ,  ( (  c1828 ) .f_r ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1828 ) .f_g ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1828 ) .f_b ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
+    ( (  print_dash_str864 ) ( ( ( StrConcat_865_StrConcat ) ( ( ( StrConcat_866_StrConcat ) ( ( ( StrConcat_867_StrConcat ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_861_StrConcat ) ( ( ( StrConcat_862_StrConcat ) ( ( "\x1b[38;2;" ) ,  ( (  c1828 ) .f_r ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1828 ) .f_g ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1828 ) .f_b ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
 static  enum Unit_13   set_dash_bg_dash_rgb1023 (    struct RGB_56  c1831 ) {
-    ( (  print_dash_str871 ) ( ( ( StrConcat_872_StrConcat ) ( ( ( StrConcat_873_StrConcat ) ( ( ( StrConcat_874_StrConcat ) ( ( ( StrConcat_875_StrConcat ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_869_StrConcat ) ( ( "\x1b[48;2;" ) ,  ( (  c1831 ) .f_r ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1831 ) .f_g ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1831 ) .f_b ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
+    ( (  print_dash_str864 ) ( ( ( StrConcat_865_StrConcat ) ( ( ( StrConcat_866_StrConcat ) ( ( ( StrConcat_867_StrConcat ) ( ( ( StrConcat_868_StrConcat ) ( ( ( StrConcat_861_StrConcat ) ( ( ( StrConcat_862_StrConcat ) ( ( "\x1b[48;2;" ) ,  ( (  c1831 ) .f_r ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1831 ) .f_g ) ) ) ,  ( (  from_dash_charlike1 ) ( ( ";" ) ) ) ) ) ,  ( (  c1831 ) .f_b ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
@@ -7320,17 +7320,17 @@ struct env1028 {
     ;
 };
 
-static  enum Unit_13   lam610 (   struct env610 env ,    char  c1914 ) {
+static  enum Unit_13   lam616 (   struct env616 env ,    char  c1914 ) {
     struct funenv309  temp1029 = ( (struct funenv309){ .fun = add309, .env =  env.envinst309  } );
     return ( temp1029.fun ( temp1029.env ,  ( & ( ( * ( env.builder1910 ) ) .f_chars ) ) ,  (  c1914 ) ) );
 }
 
-static  enum Unit_13   write1028 (   struct env1028 env ,    struct StrBuilder_564 *  builder1910 ,    struct TakeWhile_507  s1912 ) {
-    struct env610 envinst610 = {
+static  enum Unit_13   write1028 (   struct env1028 env ,    struct StrBuilder_564 *  builder1910 ,    struct TakeWhile_511  s1912 ) {
+    struct env616 envinst616 = {
         .envinst309 = env.envinst309 ,
         .builder1910 =  builder1910 ,
     };
-    ( (  for_dash_each609 ) ( ( (  chars887 ) ( (  s1912 ) ) ) ,  ( (struct funenv610){ .fun = lam610, .env = envinst610 } ) ) );
+    ( (  for_dash_each615 ) ( ( (  chars887 ) ( (  s1912 ) ) ) ,  ( (struct funenv616){ .fun = lam616, .env = envinst616 } ) ) );
     return ( Unit_13_Unit );
 }
 
@@ -7344,21 +7344,21 @@ struct env1030 {
     ;
 };
 
-static  enum Unit_13   lam614 (   struct env614 env ,    char  c1914 ) {
+static  enum Unit_13   lam620 (   struct env620 env ,    char  c1914 ) {
     struct funenv309  temp1031 = ( (struct funenv309){ .fun = add309, .env =  env.envinst309  } );
     return ( temp1031.fun ( temp1031.env ,  ( & ( ( * ( env.builder1910 ) ) .f_chars ) ) ,  (  c1914 ) ) );
 }
 
-static  enum Unit_13   write1030 (   struct env1030 env ,    struct StrBuilder_564 *  builder1910 ,    struct TakeWhile_511  s1912 ) {
-    struct env614 envinst614 = {
+static  enum Unit_13   write1030 (   struct env1030 env ,    struct StrBuilder_564 *  builder1910 ,    struct TakeWhile_507  s1912 ) {
+    struct env620 envinst620 = {
         .envinst309 = env.envinst309 ,
         .builder1910 =  builder1910 ,
     };
-    ( (  for_dash_each613 ) ( ( (  chars888 ) ( (  s1912 ) ) ) ,  ( (struct funenv614){ .fun = lam614, .env = envinst614 } ) ) );
+    ( (  for_dash_each619 ) ( ( (  chars888 ) ( (  s1912 ) ) ) ,  ( (struct funenv620){ .fun = lam620, .env = envinst620 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   write_dash_char619 (   struct env619 env ,    struct StrBuilder_564 *  builder1917 ,    char  c1919 ) {
+static  enum Unit_13   write_dash_char625 (   struct env625 env ,    struct StrBuilder_564 *  builder1917 ,    char  c1919 ) {
     struct funenv309  temp1032 = ( (struct funenv309){ .fun = add309, .env =  env.envinst309  } );
     ( temp1032.fun ( temp1032.env ,  ( & ( ( * (  builder1917 ) ) .f_chars ) ) ,  (  c1919 ) ) );
     return ( Unit_13_Unit );
@@ -7401,7 +7401,7 @@ struct funenv1026 {
 struct env1038 {
     ;
     ;
-    struct env619 envinst619;
+    struct env625 envinst625;
     ;
     ;
     ;
@@ -7417,20 +7417,20 @@ static  const char*   mk_dash_const_dash_str1038 (   struct env1038 env ,    con
     struct StrBuilder_564 *  sb1956 = ( &temp1039 );
     struct funenv1026  temp1040 = ( (struct funenv1026){ .fun = write1026, .env =  env.envinst1026  } );
     ( temp1040.fun ( temp1040.env ,  (  sb1956 ) ,  (  s1953 ) ) );
-    struct funenv619  temp1041 = ( (struct funenv619){ .fun = write_dash_char619, .env =  env.envinst619  } );
+    struct funenv625  temp1041 = ( (struct funenv625){ .fun = write_dash_char625, .env =  env.envinst625  } );
     ( temp1041.fun ( temp1041.env ,  (  sb1956 ) ,  ( (  nullchar325 ) ( ) ) ) );
     return ( ( (  cast184 ) ( ( ( ( (  as_dash_str786 ) ( (  sb1956 ) ) ) .f_contents ) .f_ptr ) ) ) );
 }
 
 struct funenv1028 {
-    enum Unit_13  (*fun) (  struct env1028  ,    struct StrBuilder_564 *  ,    struct TakeWhile_507  );
+    enum Unit_13  (*fun) (  struct env1028  ,    struct StrBuilder_564 *  ,    struct TakeWhile_511  );
     struct env1028 env;
 };
 
 struct env1042 {
     ;
     ;
-    struct env619 envinst619;
+    struct env625 envinst625;
     ;
     ;
     ;
@@ -7441,25 +7441,25 @@ struct env1042 {
     ;
 };
 
-static  const char*   mk_dash_const_dash_str1042 (   struct env1042 env ,    struct TakeWhile_507  s1953 ,    enum CAllocator_4  al1955 ) {
+static  const char*   mk_dash_const_dash_str1042 (   struct env1042 env ,    struct TakeWhile_511  s1953 ,    enum CAllocator_4  al1955 ) {
     struct StrBuilder_564  temp1043 = ( (  mk1036 ) ( (  al1955 ) ) );
     struct StrBuilder_564 *  sb1956 = ( &temp1043 );
     struct funenv1028  temp1044 = ( (struct funenv1028){ .fun = write1028, .env =  env.envinst1028  } );
     ( temp1044.fun ( temp1044.env ,  (  sb1956 ) ,  (  s1953 ) ) );
-    struct funenv619  temp1045 = ( (struct funenv619){ .fun = write_dash_char619, .env =  env.envinst619  } );
+    struct funenv625  temp1045 = ( (struct funenv625){ .fun = write_dash_char625, .env =  env.envinst625  } );
     ( temp1045.fun ( temp1045.env ,  (  sb1956 ) ,  ( (  nullchar325 ) ( ) ) ) );
     return ( ( (  cast184 ) ( ( ( ( (  as_dash_str786 ) ( (  sb1956 ) ) ) .f_contents ) .f_ptr ) ) ) );
 }
 
 struct funenv1030 {
-    enum Unit_13  (*fun) (  struct env1030  ,    struct StrBuilder_564 *  ,    struct TakeWhile_511  );
+    enum Unit_13  (*fun) (  struct env1030  ,    struct StrBuilder_564 *  ,    struct TakeWhile_507  );
     struct env1030 env;
 };
 
 struct env1046 {
     ;
     ;
-    struct env619 envinst619;
+    struct env625 envinst625;
     ;
     ;
     ;
@@ -7470,12 +7470,12 @@ struct env1046 {
     ;
 };
 
-static  const char*   mk_dash_const_dash_str1046 (   struct env1046 env ,    struct TakeWhile_511  s1953 ,    enum CAllocator_4  al1955 ) {
+static  const char*   mk_dash_const_dash_str1046 (   struct env1046 env ,    struct TakeWhile_507  s1953 ,    enum CAllocator_4  al1955 ) {
     struct StrBuilder_564  temp1047 = ( (  mk1036 ) ( (  al1955 ) ) );
     struct StrBuilder_564 *  sb1956 = ( &temp1047 );
     struct funenv1030  temp1048 = ( (struct funenv1030){ .fun = write1030, .env =  env.envinst1030  } );
     ( temp1048.fun ( temp1048.env ,  (  sb1956 ) ,  (  s1953 ) ) );
-    struct funenv619  temp1049 = ( (struct funenv619){ .fun = write_dash_char619, .env =  env.envinst619  } );
+    struct funenv625  temp1049 = ( (struct funenv625){ .fun = write_dash_char625, .env =  env.envinst625  } );
     ( temp1049.fun ( temp1049.env ,  (  sb1956 ) ,  ( (  nullchar325 ) ( ) ) ) );
     return ( ( (  cast184 ) ( ( ( ( (  as_dash_str786 ) ( (  sb1956 ) ) ) .f_contents ) .f_ptr ) ) ) );
 }
@@ -7527,6 +7527,22 @@ static struct Visual_1058 Visual_1058_Visual (  int32_t  field0 ) {
     return ( struct Visual_1058 ) { .field0 = field0 };
 };
 
+struct Maybe_1059 {
+    enum {
+        Maybe_1059_None_t,
+        Maybe_1059_Just_t,
+    } tag;
+    union {
+        struct {
+            struct Cursor_1057  field0;
+        } Maybe_1059_Just_s;
+    } stuff;
+};
+
+static struct Maybe_1059 Maybe_1059_Just (  struct Cursor_1057  field0 ) {
+    return ( struct Maybe_1059 ) { .tag = Maybe_1059_Just_t, .stuff = { .Maybe_1059_Just_s = { .field0 = field0 } } };
+};
+
 struct Editor_1056 {
     bool  f_running;
     struct Cursor_1057  f_cursor;
@@ -7537,12 +7553,13 @@ struct Editor_1056 {
     int32_t  f_screen_dash_top;
     int32_t  f_screen_dash_left;
     struct Maybe_1053  f_anim;
+    struct Maybe_1059  f_selected;
 };
 
 struct env1055 {
-    struct Editor_1056 *  ed2720;
     ;
     ;
+    struct Editor_1056 *  ed2719;
 };
 
 struct funenv1055 {
@@ -7556,12 +7573,12 @@ static  struct Maybe_49   and_dash_maybe1054 (    struct Maybe_319  m2006 ,   st
         return ( (struct Maybe_49) { .tag = Maybe_49_None_t } );
     }
     else if ( dref2009.tag == Maybe_319_Just_t ) {
-        struct funenv1055  temp1059 = (  fun2008 );
-        return ( temp1059.fun ( temp1059.env ,  ( dref2009 .stuff .Maybe_319_Just_s .field0 ) ) );
+        struct funenv1055  temp1060 = (  fun2008 );
+        return ( temp1060.fun ( temp1060.env ,  ( dref2009 .stuff .Maybe_319_Just_s .field0 ) ) );
     }
 }
 
-static  struct Maybe_357   fmap_dash_maybe1060 (    struct Maybe_49  x2013 ,    struct Tuple2_358 (*  fun2015 )(    char  ) ) {
+static  struct Maybe_357   fmap_dash_maybe1061 (    struct Maybe_49  x2013 ,    struct Tuple2_358 (*  fun2015 )(    char  ) ) {
     struct Maybe_49  dref2016 = (  x2013 );
     if ( dref2016.tag == Maybe_49_None_t ) {
         return ( (struct Maybe_357) { .tag = Maybe_357_None_t } );
@@ -7569,10 +7586,6 @@ static  struct Maybe_357   fmap_dash_maybe1060 (    struct Maybe_49  x2013 ,    
     else if ( dref2016.tag == Maybe_49_Just_t ) {
         return ( ( Maybe_357_Just ) ( ( (  fun2015 ) ( ( dref2016 .stuff .Maybe_49_Just_s .field0 ) ) ) ) );
     }
-}
-
-static  bool   maybe1061 (    struct Maybe_49  x2020 ,    bool (*  fun2022 )(    char  ) ,    bool  default2024 ) {
-    return ( {  struct Maybe_49  dref2025 = (  x2020 ) ; dref2025.tag == Maybe_49_Just_t ? ( (  fun2022 ) ( ( dref2025 .stuff .Maybe_49_Just_s .field0 ) ) ) : (  default2024 ) ; } );
 }
 
 static  bool   maybe1062 (    struct Maybe_49  x2020 ,    bool (*  fun2022 )(    char  ) ,    bool  default2024 ) {
@@ -7595,24 +7608,28 @@ static  bool   maybe1066 (    struct Maybe_49  x2020 ,    bool (*  fun2022 )(   
     return ( {  struct Maybe_49  dref2025 = (  x2020 ) ; dref2025.tag == Maybe_49_Just_t ? ( (  fun2022 ) ( ( dref2025 .stuff .Maybe_49_Just_s .field0 ) ) ) : (  default2024 ) ; } );
 }
 
-static  int32_t   maybe1067 (    struct Maybe_49  x2020 ,   struct funenv317  fun2022 ,    int32_t  default2024 ) {
-    struct funenv317  temp1068 = (  fun2022 );
-    return ( {  struct Maybe_49  dref2025 = (  x2020 ) ; dref2025.tag == Maybe_49_Just_t ? ( temp1068.fun ( temp1068.env ,  ( dref2025 .stuff .Maybe_49_Just_s .field0 ) ) ) : (  default2024 ) ; } );
+static  bool   maybe1067 (    struct Maybe_49  x2020 ,    bool (*  fun2022 )(    char  ) ,    bool  default2024 ) {
+    return ( {  struct Maybe_49  dref2025 = (  x2020 ) ; dref2025.tag == Maybe_49_Just_t ? ( (  fun2022 ) ( ( dref2025 .stuff .Maybe_49_Just_s .field0 ) ) ) : (  default2024 ) ; } );
 }
 
-static  struct timespec   now1069 (  ) {
-    struct timespec  temp1070 = ( (  undefined132 ) ( ) );
-    struct timespec *  t2140 = ( &temp1070 );
+static  int32_t   maybe1068 (    struct Maybe_49  x2020 ,   struct funenv317  fun2022 ,    int32_t  default2024 ) {
+    struct funenv317  temp1069 = (  fun2022 );
+    return ( {  struct Maybe_49  dref2025 = (  x2020 ) ; dref2025.tag == Maybe_49_Just_t ? ( temp1069.fun ( temp1069.env ,  ( dref2025 .stuff .Maybe_49_Just_s .field0 ) ) ) : (  default2024 ) ; } );
+}
+
+static  struct timespec   now1070 (  ) {
+    struct timespec  temp1071 = ( (  undefined132 ) ( ) );
+    struct timespec *  t2140 = ( &temp1071 );
     ( ( clock_gettime ) ( ( (  clock_dash_monotonic105 ) ( ) ) ,  (  t2140 ) ) );
     return ( * (  t2140 ) );
 }
 
-struct Duration_1072 {
+struct Duration_1073 {
     int64_t  f_secs;
     int64_t  f_nsecs;
 };
 
-static  enum Ordering_10   cmp1071 (    struct Duration_1072  l2144 ,    struct Duration_1072  r2146 ) {
+static  enum Ordering_10   cmp1072 (    struct Duration_1073  l2144 ,    struct Duration_1073  r2146 ) {
     enum Ordering_10  scmp2147 = ( (  cmp73 ) ( ( (  l2144 ) .f_secs ) ,  ( (  r2146 ) .f_secs ) ) );
     if ( ( !  eq46 ( (  scmp2147 ) , ( Ordering_10_EQ ) ) ) ) {
         return (  scmp2147 );
@@ -7620,55 +7637,55 @@ static  enum Ordering_10   cmp1071 (    struct Duration_1072  l2144 ,    struct 
     return ( (  cmp73 ) ( ( (  l2144 ) .f_nsecs ) ,  ( (  r2146 ) .f_nsecs ) ) );
 }
 
-static  struct Duration_1072   diff1073 (    struct timespec  l2150 ,    struct timespec  r2152 ) {
+static  struct Duration_1073   diff1074 (    struct timespec  l2150 ,    struct timespec  r2152 ) {
     int64_t  secdiff2153 = (  op_dash_sub78 ( ( (  l2150 ) .tv_sec ) , ( (  r2152 ) .tv_sec ) ) );
     int64_t  nsdiff2154 = (  op_dash_sub78 ( ( (  l2150 ) .tv_nsec ) , ( (  r2152 ) .tv_nsec ) ) );
     int64_t  ns_dash_in_dash_secs2155 = (  from_dash_integral35 ( 1000000000 ) );
     if ( (  cmp73 ( (  nsdiff2154 ) , (  from_dash_integral35 ( 0 ) ) ) == 0 ) ) {
         if ( (  cmp73 ( (  secdiff2153 ) , (  from_dash_integral35 ( 0 ) ) ) == 0 ) ) {
-            return ( (struct Duration_1072) { .f_secs = (  secdiff2153 ) , .f_nsecs = (  op_dash_neg80 ( (  nsdiff2154 ) ) ) } );
+            return ( (struct Duration_1073) { .f_secs = (  secdiff2153 ) , .f_nsecs = (  op_dash_neg80 ( (  nsdiff2154 ) ) ) } );
         } else {
             if ( (  eq40 ( (  secdiff2153 ) , (  from_dash_integral35 ( 0 ) ) ) ) ) {
-                return ( (struct Duration_1072) { .f_secs = (  from_dash_integral35 ( 0 ) ) , .f_nsecs = (  nsdiff2154 ) } );
+                return ( (struct Duration_1073) { .f_secs = (  from_dash_integral35 ( 0 ) ) , .f_nsecs = (  nsdiff2154 ) } );
             } else {
-                return ( (struct Duration_1072) { .f_secs = (  op_dash_sub78 ( (  secdiff2153 ) , (  from_dash_integral35 ( 1 ) ) ) ) , .f_nsecs = (  op_dash_add77 ( (  ns_dash_in_dash_secs2155 ) , (  nsdiff2154 ) ) ) } );
+                return ( (struct Duration_1073) { .f_secs = (  op_dash_sub78 ( (  secdiff2153 ) , (  from_dash_integral35 ( 1 ) ) ) ) , .f_nsecs = (  op_dash_add77 ( (  ns_dash_in_dash_secs2155 ) , (  nsdiff2154 ) ) ) } );
             }
         }
     } else {
         if ( (  cmp73 ( (  secdiff2153 ) , (  from_dash_integral35 ( 0 ) ) ) != 0 ) ) {
-            return ( (struct Duration_1072) { .f_secs = (  secdiff2153 ) , .f_nsecs = (  nsdiff2154 ) } );
+            return ( (struct Duration_1073) { .f_secs = (  secdiff2153 ) , .f_nsecs = (  nsdiff2154 ) } );
         } else {
-            return ( (struct Duration_1072) { .f_secs = (  op_dash_sub78 ( (  secdiff2153 ) , (  from_dash_integral35 ( 1 ) ) ) ) , .f_nsecs = (  op_dash_sub78 ( (  ns_dash_in_dash_secs2155 ) , (  nsdiff2154 ) ) ) } );
+            return ( (struct Duration_1073) { .f_secs = (  op_dash_sub78 ( (  secdiff2153 ) , (  from_dash_integral35 ( 1 ) ) ) ) , .f_nsecs = (  op_dash_sub78 ( (  ns_dash_in_dash_secs2155 ) , (  nsdiff2154 ) ) ) } );
         }
     }
 }
 
-static  struct Duration_1072   duration_dash_from_dash_ns1074 (    int64_t  ns2158 ) {
+static  struct Duration_1073   duration_dash_from_dash_ns1075 (    int64_t  ns2158 ) {
     int64_t  ns_dash_in_dash_secs2159 = (  from_dash_integral35 ( 1000000000 ) );
-    return ( (struct Duration_1072) { .f_secs = (  op_dash_div79 ( (  ns2158 ) , (  ns_dash_in_dash_secs2159 ) ) ) , .f_nsecs = ( (  mod764 ) ( (  ns2158 ) ,  (  ns_dash_in_dash_secs2159 ) ) ) } );
+    return ( (struct Duration_1073) { .f_secs = (  op_dash_div79 ( (  ns2158 ) , (  ns_dash_in_dash_secs2159 ) ) ) , .f_nsecs = ( (  mod764 ) ( (  ns2158 ) ,  (  ns_dash_in_dash_secs2159 ) ) ) } );
 }
 
-static  int64_t   duration_dash_to_dash_ns1075 (    struct Duration_1072  d2170 ) {
+static  int64_t   duration_dash_to_dash_ns1076 (    struct Duration_1073  d2170 ) {
     int64_t  ns_dash_in_dash_secs2171 = (  from_dash_integral35 ( 1000000000 ) );
     return (  op_dash_add77 ( (  op_dash_mul32 ( ( (  d2170 ) .f_secs ) , (  ns_dash_in_dash_secs2171 ) ) ) , ( (  d2170 ) .f_nsecs ) ) );
 }
 
-static  struct Scanner_277   mk1076 (    struct DynStr_130  s2181 ) {
+static  struct Scanner_277   mk1077 (    struct DynStr_130  s2181 ) {
     return ( (struct Scanner_277) { .f_s = ( (  chars793 ) ( (  s2181 ) ) ) } );
 }
 
-static  struct Maybe_699   scan_dash_int1077 (    struct Scanner_277 *  sc2184 ) {
+static  struct Maybe_701   scan_dash_int1078 (    struct Scanner_277 *  sc2184 ) {
     struct TakeWhile_500  digit_dash_chars2185 = ( (  take_dash_while521 ) ( (  sc2184 ) ,  (  is_dash_digit952 ) ) );
     if ( ( (  null755 ) ( (  digit_dash_chars2185 ) ) ) ) {
-        return ( (struct Maybe_699) { .tag = Maybe_699_None_t } );
+        return ( (struct Maybe_701) { .tag = Maybe_701_None_t } );
     }
     ( (  drop_prime_757 ) ( (  sc2184 ) ,  ( (  count727 ) ( (  digit_dash_chars2185 ) ) ) ) );
     return ( (  parse_dash_int954 ) ( (  digit_dash_chars2185 ) ) );
 }
 
-static  struct Termios_135   enable_dash_raw_dash_mode1078 (  ) {
-    struct Termios_135  temp1079 = ( (  undefined134 ) ( ) );
-    struct Termios_135 *  orig_dash_termios2192 = ( &temp1079 );
+static  struct Termios_135   enable_dash_raw_dash_mode1079 (  ) {
+    struct Termios_135  temp1080 = ( (  undefined134 ) ( ) );
+    struct Termios_135 *  orig_dash_termios2192 = ( &temp1080 );
     ( ( tcgetattr ) ( ( (  stdin_dash_fileno109 ) ( ) ) ,  ( (  cast_dash_ptr212 ) ( (  orig_dash_termios2192 ) ) ) ) );
     struct Termios_135  raw2193 = ( * (  orig_dash_termios2192 ) );
     raw2193 .f_c_dash_lflag = ( (  u32_dash_and762 ) ( ( (  raw2193 ) .f_c_dash_lflag ) ,  ( (  u32_dash_neg763 ) ( ( (  u32_dash_ors759 ) ( ( (  from_dash_listlike96 ) ( ( (struct Array_98) { ._arr = { ( (  echo110 ) ( ) ) , ( (  icanon111 ) ( ) ) , ( (  isig112 ) ( ) ) , ( ( (  iexten113 ) ( ) ) ) } } ) ) ) ) ) ) ) ) );
@@ -7681,12 +7698,12 @@ static  struct Termios_135   enable_dash_raw_dash_mode1078 (  ) {
     return ( * (  orig_dash_termios2192 ) );
 }
 
-static  enum Unit_13   disable_dash_raw_dash_mode1080 (    struct Termios_135 *  og_dash_termios2196 ) {
+static  enum Unit_13   disable_dash_raw_dash_mode1081 (    struct Termios_135 *  og_dash_termios2196 ) {
     ( ( tcsetattr ) ( ( (  stdin_dash_fileno109 ) ( ) ) ,  ( (  tcsa_dash_flush123 ) ( ) ) ,  ( (  cast_dash_ptr212 ) ( (  og_dash_termios2196 ) ) ) ) );
     return ( Unit_13_Unit );
 }
 
-static  struct Maybe_49   read_dash_byte1081 (    int32_t  timeout_dash_ms2200 ) {
+static  struct Maybe_49   read_dash_byte1082 (    int32_t  timeout_dash_ms2200 ) {
     struct Pollfd_216  pfd2201 = ( (struct Pollfd_216) { .f_fd = (  from_dash_integral29 ( 0 ) ) , .f_events = (  from_dash_integral37 ( 1 ) ) , .f_revents = (  from_dash_integral37 ( 0 ) ) } );
     if ( (  cmp74 ( ( ( poll ) ( ( (  cast_dash_ptr215 ) ( ( & (  pfd2201 ) ) ) ) ,  (  from_dash_integral29 ( 1 ) ) ,  (  timeout_dash_ms2200 ) ) ) , (  from_dash_integral29 ( 0 ) ) ) != 2 ) ) {
         return ( (struct Maybe_49) { .tag = Maybe_49_None_t } );
@@ -7698,100 +7715,100 @@ static  struct Maybe_49   read_dash_byte1081 (    int32_t  timeout_dash_ms2200 )
     return ( ( Maybe_49_Just ) ( (  c2202 ) ) );
 }
 
-static  enum Unit_13   flush_dash_stdout1082 (  ) {
+static  enum Unit_13   flush_dash_stdout1083 (  ) {
     ( ( fflush ) ( ( (  null_dash_ptr258 ) ( ) ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   enable_dash_mouse1083 (  ) {
+static  enum Unit_13   enable_dash_mouse1084 (  ) {
     ( (  print_dash_str22 ) ( ( "\x1b[?1000h\x1b[?1006h" ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   disable_dash_mouse1084 (  ) {
+static  enum Unit_13   disable_dash_mouse1085 (  ) {
     ( (  print_dash_str22 ) ( ( "\x1b[?1000l\x1b[?1006l" ) ) );
     return ( Unit_13_Unit );
 }
 
-struct env1086 {
-    ;
-    ;
-    ;
-    ;
-    ;
-    bool *  should_dash_resize2206;
-    ;
-    ;
-    ;
-    ;
-    ;
-    ;
-    ;
-    ;
-};
-
 struct env1087 {
+    ;
+    ;
+    ;
+    ;
+    ;
+    bool *  should_dash_resize2206;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+};
+
+struct env1088 {
     bool *  should_dash_resize2206;
 };
 
-struct funenv1087 {
-    enum Unit_13  (*fun) (  struct env1087  ,    int32_t  );
-    struct env1087 env;
+struct funenv1088 {
+    enum Unit_13  (*fun) (  struct env1088  ,    int32_t  );
+    struct env1088 env;
 };
 
-struct funenv1087  _intr_sigarr[32];
+struct funenv1088  _intr_sigarr[32];
 
-static void _intr_sighandle (    int32_t  __intr__sig1088 ) {
-    struct funenv1087  temp1089 = _intr_sigarr [  __intr__sig1088 ];
-    temp1089.fun ( temp1089.env ,  __intr__sig1088 );
+static void _intr_sighandle (    int32_t  __intr__sig1089 ) {
+    struct funenv1088  temp1090 = _intr_sigarr [  __intr__sig1089 ];
+    temp1090.fun ( temp1090.env ,  __intr__sig1089 );
 }
 
-static  enum Unit_13  _intr_register_signal (    int32_t  __intr__sig1090 ,   struct funenv1087  __intr__fun1091 ) {
-    _intr_sigarr [  __intr__sig1090 ] =  __intr__fun1091;
-    signal(  __intr__sig1090 , _intr_sighandle );
+static  enum Unit_13  _intr_register_signal (    int32_t  __intr__sig1091 ,   struct funenv1088  __intr__fun1092 ) {
+    _intr_sigarr [  __intr__sig1091 ] =  __intr__fun1092;
+    signal(  __intr__sig1091 , _intr_sighandle );
     return Unit_13_Unit;
 }
 
-static  enum Unit_13   lam1087 (   struct env1087 env ,    int32_t  dref2213 ) {
+static  enum Unit_13   lam1088 (   struct env1088 env ,    int32_t  dref2213 ) {
     (* env.should_dash_resize2206 ) = ( true );
     return ( Unit_13_Unit );
 }
 
-static  struct Tui_635   mk1086 (   struct env1086 env ) {
-    struct Termios_135  og_dash_termios2208 = ( (  enable_dash_raw_dash_mode1078 ) ( ) );
+static  struct Tui_635   mk1087 (   struct env1087 env ) {
+    struct Termios_135  og_dash_termios2208 = ( (  enable_dash_raw_dash_mode1079 ) ( ) );
     ( (  hide_dash_cursor1005 ) ( ) );
     ( (  reset_dash_colors1018 ) ( ) );
     ( (  clear_dash_screen1019 ) ( ) );
-    ( (  enable_dash_mouse1083 ) ( ) );
-    ( (  flush_dash_stdout1082 ) ( ) );
+    ( (  enable_dash_mouse1084 ) ( ) );
+    ( (  flush_dash_stdout1083 ) ( ) );
     enum ColorPalette_636  palette2209 = ( (  query_dash_palette1013 ) ( ) );
     struct Tuple2_1009  dims2210 = ( (  get_dash_dimensions1008 ) ( ) );
     uint32_t  fps2211 = (  from_dash_integral36 ( 60 ) );
-    struct timespec  last_dash_sync2212 = ( (  now1069 ) ( ) );
-    struct env1087 envinst1087 = {
+    struct timespec  last_dash_sync2212 = ( (  now1070 ) ( ) );
+    struct env1088 envinst1088 = {
         .should_dash_resize2206 = env.should_dash_resize2206 ,
     };
-    ( _intr_register_signal ( (  from_dash_integral29 ( 28 ) ) , ( (struct funenv1087){ .fun = lam1087, .env = envinst1087 } ) ) );
+    ( _intr_register_signal ( (  from_dash_integral29 ( 28 ) ) , ( (struct funenv1088){ .fun = lam1088, .env = envinst1088 } ) ) );
     return ( (struct Tui_635) { .f_width = ( (  fst1050 ) ( (  dims2210 ) ) ) , .f_height = ( (  snd1051 ) ( (  dims2210 ) ) ) , .f_target_dash_fps = (  fps2211 ) , .f_actual_dash_fps = (  from_dash_integral36 ( 0 ) ) , .f_last_dash_sync = (  last_dash_sync2212 ) , .f_fps_dash_ts = (  last_dash_sync2212 ) , .f_fps_dash_count = (  from_dash_integral36 ( 0 ) ) , .f_orig_dash_termios = (  og_dash_termios2208 ) , .f_palette = (  palette2209 ) } );
 }
 
-static  enum Unit_13   sync1092 (    struct Tui_635 *  tui2216 ) {
+static  enum Unit_13   sync1093 (    struct Tui_635 *  tui2216 ) {
     if ( (  eq42 ( ( ( * (  tui2216 ) ) .f_target_dash_fps ) , (  from_dash_integral36 ( 0 ) ) ) ) ) {
         return ( Unit_13_Unit );
     }
     int64_t  frame_dash_ns2217 = (  op_dash_div79 ( (  from_dash_integral35 ( 1000000000 ) ) , ( (  size_dash_i6434 ) ( ( (  u32_dash_size271 ) ( ( ( * (  tui2216 ) ) .f_target_dash_fps ) ) ) ) ) ) );
-    struct timespec  temp1093 = ( (  undefined132 ) ( ) );
-    struct timespec *  now2218 = ( &temp1093 );
+    struct timespec  temp1094 = ( (  undefined132 ) ( ) );
+    struct timespec *  now2218 = ( &temp1094 );
     ( ( clock_gettime ) ( ( (  clock_dash_monotonic105 ) ( ) ) ,  (  now2218 ) ) );
     int64_t  elapsed_dash_ns2219 = (  op_dash_add77 ( (  op_dash_mul32 ( (  op_dash_sub78 ( ( ( * (  now2218 ) ) .tv_sec ) , ( ( ( * (  tui2216 ) ) .f_last_dash_sync ) .tv_sec ) ) ) , (  from_dash_integral35 ( 1000000000 ) ) ) ) , (  op_dash_sub78 ( ( ( * (  now2218 ) ) .tv_nsec ) , ( ( ( * (  tui2216 ) ) .f_last_dash_sync ) .tv_nsec ) ) ) ) );
     int64_t  sleep_dash_ns2220 = (  op_dash_sub78 ( (  frame_dash_ns2217 ) , (  elapsed_dash_ns2219 ) ) );
     if ( (  cmp73 ( (  sleep_dash_ns2220 ) , (  from_dash_integral35 ( 0 ) ) ) == 2 ) ) {
-        struct timespec  temp1094 = ( (struct timespec) { .tv_sec = (  from_dash_integral35 ( 0 ) ) , .tv_nsec = (  sleep_dash_ns2220 ) } );
-        struct timespec *  ts2221 = ( &temp1094 );
+        struct timespec  temp1095 = ( (struct timespec) { .tv_sec = (  from_dash_integral35 ( 0 ) ) , .tv_nsec = (  sleep_dash_ns2220 ) } );
+        struct timespec *  ts2221 = ( &temp1095 );
         ( ( nanosleep ) ( (  ts2221 ) ,  ( (  null_dash_ptr260 ) ( ) ) ) );
     }
-    struct timespec  temp1095 = ( (  undefined132 ) ( ) );
-    struct timespec *  last_dash_sync2222 = ( &temp1095 );
+    struct timespec  temp1096 = ( (  undefined132 ) ( ) );
+    struct timespec *  last_dash_sync2222 = ( &temp1096 );
     ( ( clock_gettime ) ( ( (  clock_dash_monotonic105 ) ( ) ) ,  (  last_dash_sync2222 ) ) );
     (*  tui2216 ) .f_last_dash_sync = ( * (  last_dash_sync2222 ) );
     (*  tui2216 ) .f_fps_dash_count = (  op_dash_add86 ( ( ( * (  tui2216 ) ) .f_fps_dash_count ) , (  from_dash_integral36 ( 1 ) ) ) );
@@ -7804,268 +7821,268 @@ static  enum Unit_13   sync1092 (    struct Tui_635 *  tui2216 ) {
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   deinit1096 (    struct Tui_635 *  tui2226 ) {
-    ( (  disable_dash_mouse1084 ) ( ) );
+static  enum Unit_13   deinit1097 (    struct Tui_635 *  tui2226 ) {
+    ( (  disable_dash_mouse1085 ) ( ) );
     ( (  show_dash_cursor1004 ) ( ) );
     ( (  reset_dash_colors1018 ) ( ) );
     ( (  clear_dash_screen1019 ) ( ) );
     ( (  reset_dash_cursor_dash_position1007 ) ( ) );
-    ( (  disable_dash_raw_dash_mode1080 ) ( ( & ( ( * (  tui2226 ) ) .f_orig_dash_termios ) ) ) );
-    ( (  flush_dash_stdout1082 ) ( ) );
+    ( (  disable_dash_raw_dash_mode1081 ) ( ( & ( ( * (  tui2226 ) ) .f_orig_dash_termios ) ) ) );
+    ( (  flush_dash_stdout1083 ) ( ) );
     return ( Unit_13_Unit );
 }
 
-static  enum MouseButton_141   btn_dash_to_dash_mouse_dash_button1097 (    int64_t  btn2233 ) {
-    return ( {  int32_t  dref2234 = ( (  i64_dash_i32268 ) ( (  btn2233 ) ) ) ;  dref2234 == 0 ? ( MouseButton_141_MouseLeft ) :  dref2234 == 1 ? ( MouseButton_141_MouseMiddle ) :  dref2234 == 2 ? ( MouseButton_141_MouseRight ) :  dref2234 == 64 ? ( MouseButton_141_ScrollUp ) :  dref2234 == 65 ? ( MouseButton_141_ScrollDown ) : ( (  panic_prime_904 ) ( ( "incorrect mouse button" ) ) ) ; } );
+static  enum MouseButton_143   btn_dash_to_dash_mouse_dash_button1098 (    int64_t  btn2233 ) {
+    return ( {  int32_t  dref2234 = ( (  i64_dash_i32268 ) ( (  btn2233 ) ) ) ;  dref2234 == 0 ? ( MouseButton_143_MouseLeft ) :  dref2234 == 1 ? ( MouseButton_143_MouseMiddle ) :  dref2234 == 2 ? ( MouseButton_143_MouseRight ) :  dref2234 == 64 ? ( MouseButton_143_ScrollUp ) :  dref2234 == 65 ? ( MouseButton_143_ScrollDown ) : ( (  panic_prime_904 ) ( ( "incorrect mouse button" ) ) ) ; } );
 }
 
-struct Maybe_1099 {
+struct Maybe_1100 {
     enum {
-        Maybe_1099_None_t,
-        Maybe_1099_Just_t,
+        Maybe_1100_None_t,
+        Maybe_1100_Just_t,
     } tag;
     union {
         struct {
             struct Key_540  field0;
-        } Maybe_1099_Just_s;
+        } Maybe_1100_Just_s;
     } stuff;
 };
 
-static struct Maybe_1099 Maybe_1099_Just (  struct Key_540  field0 ) {
-    return ( struct Maybe_1099 ) { .tag = Maybe_1099_Just_t, .stuff = { .Maybe_1099_Just_s = { .field0 = field0 } } };
+static struct Maybe_1100 Maybe_1100_Just (  struct Key_540  field0 ) {
+    return ( struct Maybe_1100 ) { .tag = Maybe_1100_Just_t, .stuff = { .Maybe_1100_Just_s = { .field0 = field0 } } };
 };
 
-static  struct Maybe_1099   parse_dash_ss31098 (    char  c2240 ) {
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_Up_t } ) ) );
+static  struct Maybe_1100   parse_dash_ss31099 (    char  c2237 ) {
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_Up_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "B" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_Down_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "B" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_Down_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "C" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_Right_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "C" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_Right_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "D" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_Left_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "D" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_Left_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_Home_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_Home_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "F" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_End_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "F" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_End_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "P" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_F1_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "P" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_F1_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "Q" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_F2_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "Q" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_F2_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "R" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_F3_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "R" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_F3_t } ) ) );
     }
-    if ( (  eq47 ( (  c2240 ) , ( (  from_dash_charlike1 ) ( ( "S" ) ) ) ) ) ) {
-        return ( ( Maybe_1099_Just ) ( ( (struct Key_540) { .tag = Key_540_F4_t } ) ) );
+    if ( (  eq47 ( (  c2237 ) , ( (  from_dash_charlike1 ) ( ( "S" ) ) ) ) ) ) {
+        return ( ( Maybe_1100_Just ) ( ( (struct Key_540) { .tag = Key_540_F4_t } ) ) );
     }
-    return ( (struct Maybe_1099) { .tag = Maybe_1099_None_t } );
+    return ( (struct Maybe_1100) { .tag = Maybe_1100_None_t } );
 }
 
-static  struct Maybe_538   parse_dash_csi1100 (    struct DynStr_130  seq2243 ) {
-    if ( (  eq45 ( ( ( (  seq2243 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) ) ) {
+static  struct Maybe_538   parse_dash_csi1101 (    struct DynStr_130  seq2240 ) {
+    if ( (  eq45 ( ( ( (  seq2240 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) ) ) {
         return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
     }
-    char  last2244 = (  elem_dash_get931 ( ( (  seq2243 ) .f_contents ) , (  op_dash_sub93 ( ( ( (  seq2243 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 1 ) ) ) ) ) );
-    if ( ( (  eq47 ( (  elem_dash_get931 ( ( (  seq2243 ) .f_contents ) , (  from_dash_integral11 ( 0 ) ) ) ) , ( (  from_dash_charlike1 ) ( ( "<" ) ) ) ) ) && ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "M" ) ) ) ) ) || (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) ) ) {
-        struct Scanner_277  temp1101 = ( (  mk1076 ) ( ( (  substr327 ) ( (  seq2243 ) ,  (  from_dash_integral11 ( 1 ) ) ,  ( ( (  seq2243 ) .f_contents ) .f_count ) ) ) ) );
-        struct Scanner_277 *  sc2245 = ( &temp1101 );
-        struct Maybe_699  dref2246 = ( (  scan_dash_int1077 ) ( (  sc2245 ) ) );
-        if ( dref2246.tag == Maybe_699_None_t ) {
+    char  last2241 = (  elem_dash_get931 ( ( (  seq2240 ) .f_contents ) , (  op_dash_sub93 ( ( ( (  seq2240 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 1 ) ) ) ) ) );
+    if ( ( (  eq47 ( (  elem_dash_get931 ( ( (  seq2240 ) .f_contents ) , (  from_dash_integral11 ( 0 ) ) ) ) , ( (  from_dash_charlike1 ) ( ( "<" ) ) ) ) ) && ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "M" ) ) ) ) ) || (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "m" ) ) ) ) ) ) ) ) {
+        struct Scanner_277  temp1102 = ( (  mk1077 ) ( ( (  substr327 ) ( (  seq2240 ) ,  (  from_dash_integral11 ( 1 ) ) ,  ( ( (  seq2240 ) .f_contents ) .f_count ) ) ) ) );
+        struct Scanner_277 *  sc2242 = ( &temp1102 );
+        struct Maybe_701  dref2243 = ( (  scan_dash_int1078 ) ( (  sc2242 ) ) );
+        if ( dref2243.tag == Maybe_701_None_t ) {
             return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
         }
-        else if ( dref2246.tag == Maybe_699_Just_t ) {
-            ( (  next513 ) ( (  sc2245 ) ) );
-            struct Maybe_699  dref2248 = ( (  scan_dash_int1077 ) ( (  sc2245 ) ) );
-            if ( dref2248.tag == Maybe_699_None_t ) {
+        else if ( dref2243.tag == Maybe_701_Just_t ) {
+            ( (  next513 ) ( (  sc2242 ) ) );
+            struct Maybe_701  dref2245 = ( (  scan_dash_int1078 ) ( (  sc2242 ) ) );
+            if ( dref2245.tag == Maybe_701_None_t ) {
                 return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
             }
-            else if ( dref2248.tag == Maybe_699_Just_t ) {
-                ( (  next513 ) ( (  sc2245 ) ) );
-                struct Maybe_699  dref2250 = ( (  scan_dash_int1077 ) ( (  sc2245 ) ) );
-                if ( dref2250.tag == Maybe_699_None_t ) {
+            else if ( dref2245.tag == Maybe_701_Just_t ) {
+                ( (  next513 ) ( (  sc2242 ) ) );
+                struct Maybe_701  dref2247 = ( (  scan_dash_int1078 ) ( (  sc2242 ) ) );
+                if ( dref2247.tag == Maybe_701_None_t ) {
                     return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
                 }
-                else if ( dref2250.tag == Maybe_699_Just_t ) {
-                    return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Mouse ) ( ( (struct MouseEvent_541) { .f_button = ( (  btn_dash_to_dash_mouse_dash_button1097 ) ( ( dref2246 .stuff .Maybe_699_Just_s .field0 ) ) ) , .f_x = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( ( dref2248 .stuff .Maybe_699_Just_s .field0 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) , .f_y = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( ( dref2250 .stuff .Maybe_699_Just_s .field0 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) , .f_pressed = (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "M" ) ) ) ) ) } ) ) ) ) );
+                else if ( dref2247.tag == Maybe_701_Just_t ) {
+                    return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Mouse ) ( ( (struct MouseEvent_541) { .f_button = ( (  btn_dash_to_dash_mouse_dash_button1098 ) ( ( dref2243 .stuff .Maybe_701_Just_s .field0 ) ) ) , .f_x = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( ( dref2245 .stuff .Maybe_701_Just_s .field0 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) , .f_y = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( ( dref2247 .stuff .Maybe_701_Just_s .field0 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) , .f_pressed = (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "M" ) ) ) ) ) } ) ) ) ) );
                 }
             }
         }
     }
-    if ( (  eq45 ( ( ( (  seq2243 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 1 ) ) ) ) ) {
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
+    if ( (  eq45 ( ( ( (  seq2240 ) .f_contents ) .f_count ) , (  from_dash_integral11 ( 1 ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Up_t } ) ) ) ) );
         }
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "B" ) ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "B" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Down_t } ) ) ) ) );
         }
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "C" ) ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "C" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Right_t } ) ) ) ) );
         }
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "D" ) ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "D" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Left_t } ) ) ) ) );
         }
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "H" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Home_t } ) ) ) ) );
         }
-        if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "F" ) ) ) ) ) ) {
+        if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "F" ) ) ) ) ) ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_End_t } ) ) ) ) );
         }
         return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
     }
-    if ( (  eq47 ( (  last2244 ) , ( (  from_dash_charlike1 ) ( ( "~" ) ) ) ) ) ) {
-        struct Scanner_277  temp1102 = ( (  mk1076 ) ( (  seq2243 ) ) );
-        struct Scanner_277 *  sc2252 = ( &temp1102 );
-        struct Maybe_699  dref2253 = ( (  scan_dash_int1077 ) ( (  sc2252 ) ) );
-        if ( dref2253.tag == Maybe_699_None_t ) {
+    if ( (  eq47 ( (  last2241 ) , ( (  from_dash_charlike1 ) ( ( "~" ) ) ) ) ) ) {
+        struct Scanner_277  temp1103 = ( (  mk1077 ) ( (  seq2240 ) ) );
+        struct Scanner_277 *  sc2249 = ( &temp1103 );
+        struct Maybe_701  dref2250 = ( (  scan_dash_int1078 ) ( (  sc2249 ) ) );
+        if ( dref2250.tag == Maybe_701_None_t ) {
             return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
         }
-        else if ( dref2253.tag == Maybe_699_Just_t ) {
-            return ( {  int32_t  dref2255 = ( (  i64_dash_i32268 ) ( ( dref2253 .stuff .Maybe_699_Just_s .field0 ) ) ) ;  dref2255 == 1 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Home_t } ) ) ) ) ) :  dref2255 == 2 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Insert_t } ) ) ) ) ) :  dref2255 == 3 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Delete_t } ) ) ) ) ) :  dref2255 == 4 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_End_t } ) ) ) ) ) :  dref2255 == 5 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_PageUp_t } ) ) ) ) ) :  dref2255 == 6 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_PageDown_t } ) ) ) ) ) :  dref2255 == 15 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F5_t } ) ) ) ) ) :  dref2255 == 17 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F6_t } ) ) ) ) ) :  dref2255 == 18 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F7_t } ) ) ) ) ) :  dref2255 == 19 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F8_t } ) ) ) ) ) :  dref2255 == 20 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F9_t } ) ) ) ) ) :  dref2255 == 21 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F10_t } ) ) ) ) ) :  dref2255 == 23 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F11_t } ) ) ) ) ) :  dref2255 == 24 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F12_t } ) ) ) ) ) : ( (struct Maybe_538) { .tag = Maybe_538_None_t } ) ; } );
+        else if ( dref2250.tag == Maybe_701_Just_t ) {
+            return ( {  int32_t  dref2252 = ( (  i64_dash_i32268 ) ( ( dref2250 .stuff .Maybe_701_Just_s .field0 ) ) ) ;  dref2252 == 1 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Home_t } ) ) ) ) ) :  dref2252 == 2 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Insert_t } ) ) ) ) ) :  dref2252 == 3 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Delete_t } ) ) ) ) ) :  dref2252 == 4 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_End_t } ) ) ) ) ) :  dref2252 == 5 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_PageUp_t } ) ) ) ) ) :  dref2252 == 6 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_PageDown_t } ) ) ) ) ) :  dref2252 == 15 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F5_t } ) ) ) ) ) :  dref2252 == 17 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F6_t } ) ) ) ) ) :  dref2252 == 18 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F7_t } ) ) ) ) ) :  dref2252 == 19 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F8_t } ) ) ) ) ) :  dref2252 == 20 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F9_t } ) ) ) ) ) :  dref2252 == 21 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F10_t } ) ) ) ) ) :  dref2252 == 23 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F11_t } ) ) ) ) ) :  dref2252 == 24 ? ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_F12_t } ) ) ) ) ) : ( (struct Maybe_538) { .tag = Maybe_538_None_t } ) ; } );
         }
     }
     return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
 }
 
-static  struct Maybe_538   read_dash_key1103 (  ) {
-    char  temp1104 = ( (  undefined127 ) ( ) );
-    char *  ch2257 = ( &temp1104 );
-    struct Maybe_49  dref2258 = ( (  read_dash_byte1081 ) ( (  from_dash_integral29 ( 0 ) ) ) );
-    if ( dref2258.tag == Maybe_49_None_t ) {
+static  struct Maybe_538   read_dash_key1104 (  ) {
+    char  temp1105 = ( (  undefined127 ) ( ) );
+    char *  ch2254 = ( &temp1105 );
+    struct Maybe_49  dref2255 = ( (  read_dash_byte1082 ) ( (  from_dash_integral29 ( 0 ) ) ) );
+    if ( dref2255.tag == Maybe_49_None_t ) {
         return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
     }
-    else if ( dref2258.tag == Maybe_49_Just_t ) {
-        (*  ch2257 ) = ( dref2258 .stuff .Maybe_49_Just_s .field0 );
+    else if ( dref2255.tag == Maybe_49_Just_t ) {
+        (*  ch2254 ) = ( dref2255 .stuff .Maybe_49_Just_s .field0 );
     }
-    if ( (  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 13 ) ) ) ) ) {
+    if ( (  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 13 ) ) ) ) ) {
         return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Enter_t } ) ) ) ) );
     }
-    if ( (  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 127 ) ) ) ) ) {
+    if ( (  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 127 ) ) ) ) ) {
         return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Backspace_t } ) ) ) ) );
     }
-    if ( ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 27 ) ) ) == 0 ) && ( !  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 9 ) ) ) ) ) ) {
-        char  letter2260 = ( (  i32_dash_char894 ) ( ( (  u32_dash_i32273 ) ( ( (  u32_dash_or758 ) ( ( (  i32_dash_u32265 ) ( ( (  char_dash_i32892 ) ( ( * (  ch2257 ) ) ) ) ) ) ,  ( (  from_dash_hex1000 ) ( ( "60" ) ) ) ) ) ) ) ) );
-        return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( ( Key_540_Ctrl ) ( (  letter2260 ) ) ) ) ) ) );
+    if ( ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 27 ) ) ) == 0 ) && ( !  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 9 ) ) ) ) ) ) {
+        char  letter2257 = ( (  i32_dash_char894 ) ( ( (  u32_dash_i32273 ) ( ( (  u32_dash_or758 ) ( ( (  i32_dash_u32265 ) ( ( (  char_dash_i32892 ) ( ( * (  ch2254 ) ) ) ) ) ) ,  ( (  from_dash_hex1000 ) ( ( "60" ) ) ) ) ) ) ) ) );
+        return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( ( Key_540_Ctrl ) ( (  letter2257 ) ) ) ) ) ) );
     }
-    if ( ( !  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 27 ) ) ) ) ) {
-        if ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  ch2257 ) ) ) ) , (  from_dash_integral38 ( 127 ) ) ) == 2 ) ) {
-            return ( (  read_dash_key1103 ) ( ) );
+    if ( ( !  eq43 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 27 ) ) ) ) ) {
+        if ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  ch2254 ) ) ) ) , (  from_dash_integral38 ( 127 ) ) ) == 2 ) ) {
+            return ( (  read_dash_key1104 ) ( ) );
         } else {
-            return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( ( Key_540_Char ) ( ( * (  ch2257 ) ) ) ) ) ) ) );
+            return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( ( Key_540_Char ) ( ( * (  ch2254 ) ) ) ) ) ) ) );
         }
     }
-    char  temp1105 = ( (  undefined127 ) ( ) );
-    char *  ch22261 = ( &temp1105 );
-    struct Maybe_49  dref2262 = ( (  read_dash_byte1081 ) ( (  from_dash_integral29 ( 50 ) ) ) );
-    if ( dref2262.tag == Maybe_49_None_t ) {
+    char  temp1106 = ( (  undefined127 ) ( ) );
+    char *  ch22258 = ( &temp1106 );
+    struct Maybe_49  dref2259 = ( (  read_dash_byte1082 ) ( (  from_dash_integral29 ( 50 ) ) ) );
+    if ( dref2259.tag == Maybe_49_None_t ) {
         return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Escape_t } ) ) ) ) );
     }
-    else if ( dref2262.tag == Maybe_49_Just_t ) {
-        (*  ch22261 ) = ( dref2262 .stuff .Maybe_49_Just_s .field0 );
+    else if ( dref2259.tag == Maybe_49_Just_t ) {
+        (*  ch22258 ) = ( dref2259 .stuff .Maybe_49_Just_s .field0 );
     }
-    if ( (  eq47 ( ( * (  ch22261 ) ) , ( (  from_dash_charlike1 ) ( ( "[" ) ) ) ) ) ) {
-        struct Array_180  temp1106 = ( ( (  zeroed238 ) ( ) ) );
-        struct Array_180 *  seq2264 = ( &temp1106 );
-        int32_t  slen2265 = (  from_dash_integral29 ( 0 ) );
-        while ( (  cmp74 ( (  slen2265 ) , (  from_dash_integral29 ( 31 ) ) ) == 0 ) ) {
-            char  temp1107 = ( (  undefined127 ) ( ) );
-            char *  sc2266 = ( &temp1107 );
-            struct Maybe_49  dref2267 = ( (  read_dash_byte1081 ) ( (  from_dash_integral29 ( 50 ) ) ) );
-            if ( dref2267.tag == Maybe_49_None_t ) {
+    if ( (  eq47 ( ( * (  ch22258 ) ) , ( (  from_dash_charlike1 ) ( ( "[" ) ) ) ) ) ) {
+        struct Array_180  temp1107 = ( ( (  zeroed238 ) ( ) ) );
+        struct Array_180 *  seq2261 = ( &temp1107 );
+        int32_t  slen2262 = (  from_dash_integral29 ( 0 ) );
+        while ( (  cmp74 ( (  slen2262 ) , (  from_dash_integral29 ( 31 ) ) ) == 0 ) ) {
+            char  temp1108 = ( (  undefined127 ) ( ) );
+            char *  sc2263 = ( &temp1108 );
+            struct Maybe_49  dref2264 = ( (  read_dash_byte1082 ) ( (  from_dash_integral29 ( 50 ) ) ) );
+            if ( dref2264.tag == Maybe_49_None_t ) {
                 break;
             }
-            else if ( dref2267.tag == Maybe_49_Just_t ) {
-                (*  sc2266 ) = ( dref2267 .stuff .Maybe_49_Just_s .field0 );
+            else if ( dref2264.tag == Maybe_49_Just_t ) {
+                (*  sc2263 ) = ( dref2264 .stuff .Maybe_49_Just_s .field0 );
             }
-            ( (  set947 ) ( (  seq2264 ) ,  ( (  i32_dash_size267 ) ( (  slen2265 ) ) ) ,  ( * (  sc2266 ) ) ) );
-            slen2265 = (  op_dash_add81 ( (  slen2265 ) , (  from_dash_integral29 ( 1 ) ) ) );
-            if ( ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  sc2266 ) ) ) ) , (  from_dash_integral38 ( 64 ) ) ) != 0 ) && (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  sc2266 ) ) ) ) , (  from_dash_integral38 ( 126 ) ) ) != 2 ) ) ) {
+            ( (  set947 ) ( (  seq2261 ) ,  ( (  i32_dash_size267 ) ( (  slen2262 ) ) ) ,  ( * (  sc2263 ) ) ) );
+            slen2262 = (  op_dash_add81 ( (  slen2262 ) , (  from_dash_integral29 ( 1 ) ) ) );
+            if ( ( (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  sc2263 ) ) ) ) , (  from_dash_integral38 ( 64 ) ) ) != 0 ) && (  cmp76 ( ( (  char_dash_u8893 ) ( ( * (  sc2263 ) ) ) ) , (  from_dash_integral38 ( 126 ) ) ) != 2 ) ) ) {
                 break;
             }
         }
-        return ( (  parse_dash_csi1100 ) ( ( (struct DynStr_130) { .f_contents = ( (  subslice283 ) ( ( (  as_dash_slice948 ) ( (  seq2264 ) ) ) ,  (  from_dash_integral11 ( 0 ) ) ,  ( (  i32_dash_size267 ) ( (  slen2265 ) ) ) ) ) } ) ) );
+        return ( (  parse_dash_csi1101 ) ( ( (struct DynStr_130) { .f_contents = ( (  subslice283 ) ( ( (  as_dash_slice948 ) ( (  seq2261 ) ) ) ,  (  from_dash_integral11 ( 0 ) ) ,  ( (  i32_dash_size267 ) ( (  slen2262 ) ) ) ) ) } ) ) );
     }
-    if ( (  eq47 ( ( * (  ch22261 ) ) , ( (  from_dash_charlike1 ) ( ( "O" ) ) ) ) ) ) {
-        char  temp1108 = ( (  undefined127 ) ( ) );
-        char *  sc2269 = ( &temp1108 );
-        struct Maybe_49  dref2270 = ( (  read_dash_byte1081 ) ( (  from_dash_integral29 ( 50 ) ) ) );
-        if ( dref2270.tag == Maybe_49_None_t ) {
+    if ( (  eq47 ( ( * (  ch22258 ) ) , ( (  from_dash_charlike1 ) ( ( "O" ) ) ) ) ) ) {
+        char  temp1109 = ( (  undefined127 ) ( ) );
+        char *  sc2266 = ( &temp1109 );
+        struct Maybe_49  dref2267 = ( (  read_dash_byte1082 ) ( (  from_dash_integral29 ( 50 ) ) ) );
+        if ( dref2267.tag == Maybe_49_None_t ) {
             return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Escape_t } ) ) ) ) );
         }
-        else if ( dref2270.tag == Maybe_49_Just_t ) {
-            (*  sc2269 ) = ( dref2270 .stuff .Maybe_49_Just_s .field0 );
+        else if ( dref2267.tag == Maybe_49_Just_t ) {
+            (*  sc2266 ) = ( dref2267 .stuff .Maybe_49_Just_s .field0 );
         }
-        struct Maybe_1099  dref2272 = ( (  parse_dash_ss31098 ) ( ( * (  sc2269 ) ) ) );
-        if ( dref2272.tag == Maybe_1099_None_t ) {
+        struct Maybe_1100  dref2269 = ( (  parse_dash_ss31099 ) ( ( * (  sc2266 ) ) ) );
+        if ( dref2269.tag == Maybe_1100_None_t ) {
             return ( (struct Maybe_538) { .tag = Maybe_538_None_t } );
         }
-        else if ( dref2272.tag == Maybe_1099_Just_t ) {
-            return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( dref2272 .stuff .Maybe_1099_Just_s .field0 ) ) ) ) );
+        else if ( dref2269.tag == Maybe_1100_Just_t ) {
+            return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( dref2269 .stuff .Maybe_1100_Just_s .field0 ) ) ) ) );
         }
     }
     return ( ( Maybe_538_Just ) ( ( ( InputEvent_539_Key ) ( ( (struct Key_540) { .tag = Key_540_Escape_t } ) ) ) ) );
 }
 
-struct env1109 {
+struct env1110 {
     ;
     ;
     bool *  should_dash_resize2206;
     ;
 };
 
-static  bool   update_dash_dimensions1109 (   struct env1109 env ,    struct Tui_635 *  tui2276 ) {
+static  bool   update_dash_dimensions1110 (   struct env1110 env ,    struct Tui_635 *  tui2273 ) {
     if ( ( ! ( * ( env.should_dash_resize2206 ) ) ) ) {
         return ( false );
     }
     (* env.should_dash_resize2206 ) = ( false );
-    struct Tuple2_1009  dim2277 = ( (  get_dash_dimensions1008 ) ( ) );
-    uint32_t  w2278 = ( (  fst1050 ) ( (  dim2277 ) ) );
-    uint32_t  h2279 = ( (  snd1051 ) ( (  dim2277 ) ) );
-    (*  tui2276 ) .f_width = (  w2278 );
-    (*  tui2276 ) .f_height = (  h2279 );
+    struct Tuple2_1009  dim2274 = ( (  get_dash_dimensions1008 ) ( ) );
+    uint32_t  w2275 = ( (  fst1050 ) ( (  dim2274 ) ) );
+    uint32_t  h2276 = ( (  snd1051 ) ( (  dim2274 ) ) );
+    (*  tui2273 ) .f_width = (  w2275 );
+    (*  tui2273 ) .f_height = (  h2276 );
     return ( true );
 }
 
-static  struct Cell_52   lam1111 (    struct Cell_52  dref2297 ) {
+static  struct Cell_52   lam1112 (    struct Cell_52  dref2294 ) {
     return ( (struct Cell_52) { .f_c = ( (  from_dash_charlike1 ) ( ( " " ) ) ) , .f_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) } );
 }
 
-static  struct Cell_52   lam1112 (    struct Cell_52  dref2299 ) {
+static  struct Cell_52   lam1113 (    struct Cell_52  dref2296 ) {
     return ( (struct Cell_52) { .f_c = ( (  from_dash_charlike1 ) ( ( " " ) ) ) , .f_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) } );
 }
 
-static  struct Screen_634   mk_dash_screen1110 (    struct Tui_635 *  tui2293 ,    enum CAllocator_4  al2295 ) {
-    struct Slice_570  cur2296 = ( (  allocate938 ) ( (  al2295 ) ,  ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( ( ( * (  tui2293 ) ) .f_width ) , ( ( * (  tui2293 ) ) .f_height ) ) ) ) ) ) );
-    ( (  map933 ) ( (  cur2296 ) ,  (  lam1111 ) ) );
-    struct Slice_570  prev2298 = ( (  allocate938 ) ( (  al2295 ) ,  ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( ( ( * (  tui2293 ) ) .f_width ) , ( ( * (  tui2293 ) ) .f_height ) ) ) ) ) ) );
-    ( (  map932 ) ( (  prev2298 ) ,  (  lam1112 ) ) );
-    return ( (struct Screen_634) { .f_current = (  cur2296 ) , .f_previous = (  prev2298 ) , .f_al = (  al2295 ) , .f_tui = (  tui2293 ) , .f_requires_dash_full_dash_redraw = ( false ) , .f_default_dash_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_default_dash_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) } );
+static  struct Screen_634   mk_dash_screen1111 (    struct Tui_635 *  tui2290 ,    enum CAllocator_4  al2292 ) {
+    struct Slice_570  cur2293 = ( (  allocate938 ) ( (  al2292 ) ,  ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( ( ( * (  tui2290 ) ) .f_width ) , ( ( * (  tui2290 ) ) .f_height ) ) ) ) ) ) );
+    ( (  map933 ) ( (  cur2293 ) ,  (  lam1112 ) ) );
+    struct Slice_570  prev2295 = ( (  allocate938 ) ( (  al2292 ) ,  ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( ( ( * (  tui2290 ) ) .f_width ) , ( ( * (  tui2290 ) ) .f_height ) ) ) ) ) ) );
+    ( (  map932 ) ( (  prev2295 ) ,  (  lam1113 ) ) );
+    return ( (struct Screen_634) { .f_current = (  cur2293 ) , .f_previous = (  prev2295 ) , .f_al = (  al2292 ) , .f_tui = (  tui2290 ) , .f_requires_dash_full_dash_redraw = ( false ) , .f_default_dash_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_default_dash_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) } );
 }
 
-static  enum Unit_13   free_dash_screen1113 (    struct Screen_634 *  screen2302 ) {
-    enum CAllocator_4  al2303 = ( ( * (  screen2302 ) ) .f_al );
-    ( (  free943 ) ( (  al2303 ) ,  ( ( * (  screen2302 ) ) .f_current ) ) );
-    ( (  free943 ) ( (  al2303 ) ,  ( ( * (  screen2302 ) ) .f_previous ) ) );
+static  enum Unit_13   free_dash_screen1114 (    struct Screen_634 *  screen2299 ) {
+    enum CAllocator_4  al2300 = ( ( * (  screen2299 ) ) .f_al );
+    ( (  free943 ) ( (  al2300 ) ,  ( ( * (  screen2299 ) ) .f_current ) ) );
+    ( (  free943 ) ( (  al2300 ) ,  ( ( * (  screen2299 ) ) .f_previous ) ) );
     return ( Unit_13_Unit );
 }
 
-static  struct Cell_52   lam1115 (    struct Cell_52  dref2307 ) {
+static  struct Cell_52   lam1116 (    struct Cell_52  dref2304 ) {
     return ( (struct Cell_52) { .f_c = ( (  from_dash_charlike1 ) ( ( " " ) ) ) , .f_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) } );
 }
 
-static  enum Unit_13   clear_dash_screen1114 (    struct Screen_634 *  screen2306 ) {
-    ( (  map934 ) ( ( ( * (  screen2306 ) ) .f_current ) ,  (  lam1115 ) ) );
+static  enum Unit_13   clear_dash_screen1115 (    struct Screen_634 *  screen2303 ) {
+    ( (  map934 ) ( ( ( * (  screen2303 ) ) .f_current ) ,  (  lam1116 ) ) );
     return ( Unit_13_Unit );
 }
 
-struct RenderState_1117 {
+struct RenderState_1118 {
     uint32_t  f_x;
     uint32_t  f_y;
     struct Color_53  f_fg;
@@ -8073,456 +8090,456 @@ struct RenderState_1117 {
     uint32_t  f_changes;
 };
 
-static  enum Unit_13   emit_dash_cell1116 (    struct RenderState_1117 *  rs2311 ,    struct Cell_52 *  c2313 ,    uint32_t  x2315 ,    uint32_t  y2317 ) {
-    if ( ( ( !  eq42 ( (  x2315 ) , ( ( * (  rs2311 ) ) .f_x ) ) ) || ( !  eq42 ( (  y2317 ) , ( ( * (  rs2311 ) ) .f_y ) ) ) ) ) {
-        ( (  move_dash_cursor_dash_to1006 ) ( (  x2315 ) ,  (  y2317 ) ) );
-        (*  rs2311 ) .f_x = (  x2315 );
-        (*  rs2311 ) .f_y = (  y2317 );
+static  enum Unit_13   emit_dash_cell1117 (    struct RenderState_1118 *  rs2308 ,    struct Cell_52 *  c2310 ,    uint32_t  x2312 ,    uint32_t  y2314 ) {
+    if ( ( ( !  eq42 ( (  x2312 ) , ( ( * (  rs2308 ) ) .f_x ) ) ) || ( !  eq42 ( (  y2314 ) , ( ( * (  rs2308 ) ) .f_y ) ) ) ) ) {
+        ( (  move_dash_cursor_dash_to1006 ) ( (  x2312 ) ,  (  y2314 ) ) );
+        (*  rs2308 ) .f_x = (  x2312 );
+        (*  rs2308 ) .f_y = (  y2314 );
     }
-    char  char2318 = ( ( * (  c2313 ) ) .f_c );
-    struct Color_53  bg2319 = ( ( * (  c2313 ) ) .f_bg );
-    if ( ( ( (  eq47 ( (  char2318 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) || (  eq47 ( (  char2318 ) , ( (  from_dash_charlike1 ) ( ( "\r" ) ) ) ) ) ) || (  eq47 ( (  char2318 ) , ( (  from_dash_charlike1 ) ( ( "\n" ) ) ) ) ) ) ) {
-        char2318 = ( (  from_dash_charlike1 ) ( ( " " ) ) );
-        bg2319 = ( ( Color_53_Color8 ) ( ( Color8_54_Red8 ) ) );
+    char  char2315 = ( ( * (  c2310 ) ) .f_c );
+    struct Color_53  bg2316 = ( ( * (  c2310 ) ) .f_bg );
+    if ( ( ( (  eq47 ( (  char2315 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) || (  eq47 ( (  char2315 ) , ( (  from_dash_charlike1 ) ( ( "\r" ) ) ) ) ) ) || (  eq47 ( (  char2315 ) , ( (  from_dash_charlike1 ) ( ( "\n" ) ) ) ) ) ) ) {
+        char2315 = ( (  from_dash_charlike1 ) ( ( " " ) ) );
+        bg2316 = ( ( Color_53_Color8 ) ( ( Color8_54_Red8 ) ) );
     }
-    if ( ( !  eq58 ( ( ( * (  rs2311 ) ) .f_fg ) , ( ( * (  c2313 ) ) .f_fg ) ) ) ) {
-        ( (  set_dash_fg1024 ) ( ( ( * (  c2313 ) ) .f_fg ) ) );
-        (*  rs2311 ) .f_fg = ( ( * (  c2313 ) ) .f_fg );
+    if ( ( !  eq58 ( ( ( * (  rs2308 ) ) .f_fg ) , ( ( * (  c2310 ) ) .f_fg ) ) ) ) {
+        ( (  set_dash_fg1024 ) ( ( ( * (  c2310 ) ) .f_fg ) ) );
+        (*  rs2308 ) .f_fg = ( ( * (  c2310 ) ) .f_fg );
     }
-    if ( ( !  eq58 ( ( ( * (  rs2311 ) ) .f_bg ) , (  bg2319 ) ) ) ) {
-        ( (  set_dash_bg1025 ) ( (  bg2319 ) ) );
-        (*  rs2311 ) .f_bg = (  bg2319 );
+    if ( ( !  eq58 ( ( ( * (  rs2308 ) ) .f_bg ) , (  bg2316 ) ) ) ) {
+        ( (  set_dash_bg1025 ) ( (  bg2316 ) ) );
+        (*  rs2308 ) .f_bg = (  bg2316 );
     }
-    ( (  print_dash_str28 ) ( (  char2318 ) ) );
-    (*  rs2311 ) .f_x = (  op_dash_add86 ( ( ( * (  rs2311 ) ) .f_x ) , (  from_dash_integral36 ( 1 ) ) ) );
+    ( (  print_dash_str28 ) ( (  char2315 ) ) );
+    (*  rs2308 ) .f_x = (  op_dash_add86 ( ( ( * (  rs2308 ) ) .f_x ) , (  from_dash_integral36 ( 1 ) ) ) );
     return ( Unit_13_Unit );
 }
 
-static  uint32_t   render_dash_screen1118 (    struct Screen_634 *  screen2322 ) {
-    int32_t  w2323 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2322 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  h2324 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2322 ) ) .f_tui ) ) .f_height ) ) );
-    struct RenderState_1117  temp1119 = ( (struct RenderState_1117) { .f_x = (  from_dash_integral36 ( 0 ) ) , .f_y = (  from_dash_integral36 ( 0 ) ) , .f_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_changes = (  from_dash_integral36 ( 0 ) ) } );
-    struct RenderState_1117 *  rs2325 = ( &temp1119 );
+static  uint32_t   render_dash_screen1119 (    struct Screen_634 *  screen2319 ) {
+    int32_t  w2320 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2319 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  h2321 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2319 ) ) .f_tui ) ) .f_height ) ) );
+    struct RenderState_1118  temp1120 = ( (struct RenderState_1118) { .f_x = (  from_dash_integral36 ( 0 ) ) , .f_y = (  from_dash_integral36 ( 0 ) ) , .f_fg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_bg = ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) , .f_changes = (  from_dash_integral36 ( 0 ) ) } );
+    struct RenderState_1118 *  rs2322 = ( &temp1120 );
     ( (  move_dash_cursor_dash_to1006 ) ( (  from_dash_integral36 ( 0 ) ) ,  (  from_dash_integral36 ( 0 ) ) ) );
-    struct RangeIter_382  temp1120 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  h2324 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+    struct RangeIter_382  temp1121 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  h2321 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
     while (true) {
-        struct Maybe_333  __cond1121 =  next383 (&temp1120);
-        if (  __cond1121 .tag == 0 ) {
+        struct Maybe_333  __cond1122 =  next383 (&temp1121);
+        if (  __cond1122 .tag == 0 ) {
             break;
         }
-        int32_t  y2327 =  __cond1121 .stuff .Maybe_333_Just_s .field0;
-        struct RangeIter_382  temp1122 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  w2323 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+        int32_t  y2324 =  __cond1122 .stuff .Maybe_333_Just_s .field0;
+        struct RangeIter_382  temp1123 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  w2320 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
         while (true) {
-            struct Maybe_333  __cond1123 =  next383 (&temp1122);
-            if (  __cond1123 .tag == 0 ) {
+            struct Maybe_333  __cond1124 =  next383 (&temp1123);
+            if (  __cond1124 .tag == 0 ) {
                 break;
             }
-            int32_t  x2329 =  __cond1123 .stuff .Maybe_333_Just_s .field0;
-            size_t  i2330 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2327 ) , (  w2323 ) ) ) , (  x2329 ) ) ) ) );
-            struct Cell_52 *  cur2331 = ( (  get_dash_ptr917 ) ( ( ( * (  screen2322 ) ) .f_current ) ,  (  i2330 ) ) );
-            struct Cell_52 *  prev2332 = ( (  get_dash_ptr917 ) ( ( ( * (  screen2322 ) ) .f_previous ) ,  (  i2330 ) ) );
-            if ( ( ( !  eq51 ( (  cur2331 ) , (  prev2332 ) ) ) || ( ( * (  screen2322 ) ) .f_requires_dash_full_dash_redraw ) ) ) {
-                (*  rs2325 ) .f_changes = (  op_dash_add86 ( ( ( * (  rs2325 ) ) .f_changes ) , (  from_dash_integral36 ( 1 ) ) ) );
-                ( (  emit_dash_cell1116 ) ( (  rs2325 ) ,  (  cur2331 ) ,  ( (  i32_dash_u32265 ) ( (  x2329 ) ) ) ,  ( (  i32_dash_u32265 ) ( (  y2327 ) ) ) ) );
-                (*  prev2332 ) = ( * (  cur2331 ) );
+            int32_t  x2326 =  __cond1124 .stuff .Maybe_333_Just_s .field0;
+            size_t  i2327 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2324 ) , (  w2320 ) ) ) , (  x2326 ) ) ) ) );
+            struct Cell_52 *  cur2328 = ( (  get_dash_ptr917 ) ( ( ( * (  screen2319 ) ) .f_current ) ,  (  i2327 ) ) );
+            struct Cell_52 *  prev2329 = ( (  get_dash_ptr917 ) ( ( ( * (  screen2319 ) ) .f_previous ) ,  (  i2327 ) ) );
+            if ( ( ( !  eq51 ( (  cur2328 ) , (  prev2329 ) ) ) || ( ( * (  screen2319 ) ) .f_requires_dash_full_dash_redraw ) ) ) {
+                (*  rs2322 ) .f_changes = (  op_dash_add86 ( ( ( * (  rs2322 ) ) .f_changes ) , (  from_dash_integral36 ( 1 ) ) ) );
+                ( (  emit_dash_cell1117 ) ( (  rs2322 ) ,  (  cur2328 ) ,  ( (  i32_dash_u32265 ) ( (  x2326 ) ) ) ,  ( (  i32_dash_u32265 ) ( (  y2324 ) ) ) ) );
+                (*  prev2329 ) = ( * (  cur2328 ) );
             }
         }
     }
-    (*  screen2322 ) .f_requires_dash_full_dash_redraw = ( false );
+    (*  screen2319 ) .f_requires_dash_full_dash_redraw = ( false );
     ( (  reset_dash_colors1018 ) ( ) );
-    ( (  flush_dash_stdout1082 ) ( ) );
-    return ( ( * (  rs2325 ) ) .f_changes );
+    ( (  flush_dash_stdout1083 ) ( ) );
+    return ( ( * (  rs2322 ) ) .f_changes );
 }
 
-struct funenv1109 {
-    bool  (*fun) (  struct env1109  ,    struct Tui_635 *  );
-    struct env1109 env;
+struct funenv1110 {
+    bool  (*fun) (  struct env1110  ,    struct Tui_635 *  );
+    struct env1110 env;
 };
 
-struct env1124 {
+struct env1125 {
     ;
     ;
     ;
-    struct env1109 envinst1109;
     ;
     ;
+    struct env1110 envinst1110;
 };
 
-static  bool   resize_dash_screen_dash_if_dash_needed1124 (   struct env1124 env ,    struct Screen_634 *  screen2335 ) {
-    struct Tui_635 *  tui2336 = ( ( * (  screen2335 ) ) .f_tui );
-    struct funenv1109  temp1125 = ( (struct funenv1109){ .fun = update_dash_dimensions1109, .env =  env.envinst1109  } );
-    if ( ( ! ( temp1125.fun ( temp1125.env ,  (  tui2336 ) ) ) ) ) {
+static  bool   resize_dash_screen_dash_if_dash_needed1125 (   struct env1125 env ,    struct Screen_634 *  screen2332 ) {
+    struct Tui_635 *  tui2333 = ( ( * (  screen2332 ) ) .f_tui );
+    struct funenv1110  temp1126 = ( (struct funenv1110){ .fun = update_dash_dimensions1110, .env =  env.envinst1110  } );
+    if ( ( ! ( temp1126.fun ( temp1126.env ,  (  tui2333 ) ) ) ) ) {
         return ( false );
     }
-    (*  screen2335 ) .f_requires_dash_full_dash_redraw = ( true );
-    uint32_t  w2337 = ( ( * ( ( * (  screen2335 ) ) .f_tui ) ) .f_width );
-    uint32_t  h2338 = ( ( * ( ( * (  screen2335 ) ) .f_tui ) ) .f_height );
-    size_t  nusz2339 = ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( (  w2337 ) , (  h2338 ) ) ) ) );
-    if ( (  cmp9 ( (  nusz2339 ) , ( ( ( * (  screen2335 ) ) .f_current ) .f_count ) ) != 2 ) ) {
+    (*  screen2332 ) .f_requires_dash_full_dash_redraw = ( true );
+    uint32_t  w2334 = ( ( * ( ( * (  screen2332 ) ) .f_tui ) ) .f_width );
+    uint32_t  h2335 = ( ( * ( ( * (  screen2332 ) ) .f_tui ) ) .f_height );
+    size_t  nusz2336 = ( (  u32_dash_size271 ) ( (  op_dash_mul88 ( (  w2334 ) , (  h2335 ) ) ) ) );
+    if ( (  cmp9 ( (  nusz2336 ) , ( ( ( * (  screen2332 ) ) .f_current ) .f_count ) ) != 2 ) ) {
         return ( true );
     }
-    struct Screen_634  nuscreen2340 = ( (  mk_dash_screen1110 ) ( (  tui2336 ) ,  ( ( * (  screen2335 ) ) .f_al ) ) );
-    (*  screen2335 ) .f_current = ( (  nuscreen2340 ) .f_current );
-    (*  screen2335 ) .f_previous = ( (  nuscreen2340 ) .f_previous );
+    struct Screen_634  nuscreen2337 = ( (  mk_dash_screen1111 ) ( (  tui2333 ) ,  ( ( * (  screen2332 ) ) .f_al ) ) );
+    (*  screen2332 ) .f_current = ( (  nuscreen2337 ) .f_current );
+    (*  screen2332 ) .f_previous = ( (  nuscreen2337 ) .f_previous );
     return ( true );
 }
 
-static  enum Unit_13   set_dash_screen_dash_fg1126 (    struct Screen_634 *  screen2343 ,    struct Color_53  c2345 ) {
-    (*  screen2343 ) .f_default_dash_fg = (  c2345 );
+static  enum Unit_13   set_dash_screen_dash_fg1127 (    struct Screen_634 *  screen2340 ,    struct Color_53  c2342 ) {
+    (*  screen2340 ) .f_default_dash_fg = (  c2342 );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   set_dash_screen_dash_bg1127 (    struct Screen_634 *  screen2348 ,    struct Color_53  c2350 ) {
-    (*  screen2348 ) .f_default_dash_bg = (  c2350 );
+static  enum Unit_13   set_dash_screen_dash_bg1128 (    struct Screen_634 *  screen2345 ,    struct Color_53  c2347 ) {
+    (*  screen2345 ) .f_default_dash_bg = (  c2347 );
     return ( Unit_13_Unit );
 }
 
-static  struct Maybe_913   get_dash_cell_dash_ptr1128 (    struct Screen_634 *  screen2357 ,    int32_t  x2359 ,    int32_t  y2361 ) {
-    int32_t  w2362 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2357 ) ) .f_tui ) ) .f_width ) ) );
-    if ( ( (  cmp74 ( (  x2359 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) || (  cmp74 ( (  x2359 ) , (  w2362 ) ) != 0 ) ) ) {
+static  struct Maybe_913   get_dash_cell_dash_ptr1129 (    struct Screen_634 *  screen2354 ,    int32_t  x2356 ,    int32_t  y2358 ) {
+    int32_t  w2359 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2354 ) ) .f_tui ) ) .f_width ) ) );
+    if ( ( (  cmp74 ( (  x2356 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) || (  cmp74 ( (  x2356 ) , (  w2359 ) ) != 0 ) ) ) {
         return ( (struct Maybe_913) { .tag = Maybe_913_None_t } );
     }
-    if ( ( (  cmp74 ( (  y2361 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) || (  cmp74 ( (  y2361 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2357 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) ) {
+    if ( ( (  cmp74 ( (  y2358 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) || (  cmp74 ( (  y2358 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2354 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) ) {
         return ( (struct Maybe_913) { .tag = Maybe_913_None_t } );
     }
-    size_t  i2363 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2361 ) , (  w2362 ) ) ) , (  x2359 ) ) ) ) );
-    return ( ( Maybe_913_Just ) ( ( (  get_dash_ptr917 ) ( ( ( * (  screen2357 ) ) .f_current ) ,  (  i2363 ) ) ) ) );
+    size_t  i2360 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2358 ) , (  w2359 ) ) ) , (  x2356 ) ) ) ) );
+    return ( ( Maybe_913_Just ) ( ( (  get_dash_ptr917 ) ( ( ( * (  screen2354 ) ) .f_current ) ,  (  i2360 ) ) ) ) );
 }
 
-static  enum Unit_13   fill_dash_default1129 (    struct Screen_634 *  screen2366 ) {
-    struct RangeIter_382  temp1130 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2366 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+static  enum Unit_13   fill_dash_default1130 (    struct Screen_634 *  screen2363 ) {
+    struct RangeIter_382  temp1131 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2363 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
     while (true) {
-        struct Maybe_333  __cond1131 =  next383 (&temp1130);
-        if (  __cond1131 .tag == 0 ) {
+        struct Maybe_333  __cond1132 =  next383 (&temp1131);
+        if (  __cond1132 .tag == 0 ) {
             break;
         }
-        int32_t  y2368 =  __cond1131 .stuff .Maybe_333_Just_s .field0;
-        struct RangeIter_382  temp1132 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2366 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+        int32_t  y2365 =  __cond1132 .stuff .Maybe_333_Just_s .field0;
+        struct RangeIter_382  temp1133 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2363 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
         while (true) {
-            struct Maybe_333  __cond1133 =  next383 (&temp1132);
-            if (  __cond1133 .tag == 0 ) {
+            struct Maybe_333  __cond1134 =  next383 (&temp1133);
+            if (  __cond1134 .tag == 0 ) {
                 break;
             }
-            int32_t  x2370 =  __cond1133 .stuff .Maybe_333_Just_s .field0;
-            struct Cell_52 *  cell2371 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1128 ) ( (  screen2366 ) ,  (  x2370 ) ,  (  y2368 ) ) ) ,  ( "no cell??" ) ) );
-            (*  cell2371 ) .f_bg = ( ( * (  screen2366 ) ) .f_default_dash_bg );
+            int32_t  x2367 =  __cond1134 .stuff .Maybe_333_Just_s .field0;
+            struct Cell_52 *  cell2368 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1129 ) ( (  screen2363 ) ,  (  x2367 ) ,  (  y2365 ) ) ) ,  ( "no cell??" ) ) );
+            (*  cell2368 ) .f_bg = ( ( * (  screen2363 ) ) .f_default_dash_bg );
         }
     }
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   put_dash_char1134 (    struct Screen_634 *  screen2374 ,    char  c2376 ,    int32_t  x2378 ,    int32_t  y2380 ) {
-    int32_t  w2381 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2374 ) ) .f_tui ) ) .f_width ) ) );
-    if ( ( (  cmp74 ( (  x2378 ) , (  w2381 ) ) != 0 ) || (  cmp74 ( (  y2380 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2374 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) ) {
+static  enum Unit_13   put_dash_char1135 (    struct Screen_634 *  screen2371 ,    char  c2373 ,    int32_t  x2375 ,    int32_t  y2377 ) {
+    int32_t  w2378 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2371 ) ) .f_tui ) ) .f_width ) ) );
+    if ( ( (  cmp74 ( (  x2375 ) , (  w2378 ) ) != 0 ) || (  cmp74 ( (  y2377 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2371 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) ) {
         return ( Unit_13_Unit );
     }
-    size_t  i2382 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2380 ) , (  w2381 ) ) ) , (  x2378 ) ) ) ) );
-    struct Color_53  fg2383 = ( ( * (  screen2374 ) ) .f_default_dash_fg );
-    struct Color_53  bg2384 = ( ( * (  screen2374 ) ) .f_default_dash_bg );
-    char  c2385 = (  c2376 );
-    ( (  set925 ) ( ( ( * (  screen2374 ) ) .f_current ) ,  (  i2382 ) ,  ( (struct Cell_52) { .f_c = (  c2385 ) , .f_fg = (  fg2383 ) , .f_bg = (  bg2384 ) } ) ) );
+    size_t  i2379 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2377 ) , (  w2378 ) ) ) , (  x2375 ) ) ) ) );
+    struct Color_53  fg2380 = ( ( * (  screen2371 ) ) .f_default_dash_fg );
+    struct Color_53  bg2381 = ( ( * (  screen2371 ) ) .f_default_dash_bg );
+    char  c2382 = (  c2373 );
+    ( (  set925 ) ( ( ( * (  screen2371 ) ) .f_current ) ,  (  i2379 ) ,  ( (struct Cell_52) { .f_c = (  c2382 ) , .f_fg = (  fg2380 ) , .f_bg = (  bg2381 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam633 (   struct env633 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam633 (   struct env633 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1135 (    struct Screen_634 *  screen2388 ,    int32_t  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1136 (    struct Screen_634 *  screen2385 ,    int32_t  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env633 envinst633 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each632 ) ( ( (  zip481 ) ( ( (  chars773 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv633){ .fun = lam633, .env = envinst633 } ) ) );
+    ( (  for_dash_each632 ) ( ( (  zip482 ) ( ( (  chars773 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv633){ .fun = lam633, .env = envinst633 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam640 (   struct env640 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam640 (   struct env640 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1136 (    struct Screen_634 *  screen2388 ,    struct StrConcat_779  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1137 (    struct Screen_634 *  screen2385 ,    struct StrConcat_779  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env640 envinst640 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each639 ) ( ( (  zip485 ) ( ( (  chars879 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv640){ .fun = lam640, .env = envinst640 } ) ) );
+    ( (  for_dash_each639 ) ( ( (  zip485 ) ( ( (  chars879 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv640){ .fun = lam640, .env = envinst640 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam644 (   struct env644 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam644 (   struct env644 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1137 (    struct Screen_634 *  screen2388 ,    struct StrConcat_795  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1138 (    struct Screen_634 *  screen2385 ,    struct StrConcat_795  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env644 envinst644 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each643 ) ( ( (  zip487 ) ( ( (  chars880 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv644){ .fun = lam644, .env = envinst644 } ) ) );
+    ( (  for_dash_each643 ) ( ( (  zip487 ) ( ( (  chars880 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv644){ .fun = lam644, .env = envinst644 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam648 (   struct env648 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam648 (   struct env648 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1138 (    struct Screen_634 *  screen2388 ,    struct StrConcat_797  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1139 (    struct Screen_634 *  screen2385 ,    struct StrConcat_797  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env648 envinst648 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each647 ) ( ( (  zip489 ) ( ( (  chars881 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv648){ .fun = lam648, .env = envinst648 } ) ) );
+    ( (  for_dash_each647 ) ( ( (  zip489 ) ( ( (  chars881 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv648){ .fun = lam648, .env = envinst648 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam652 (   struct env652 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam652 (   struct env652 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1139 (    struct Screen_634 *  screen2388 ,    struct StrConcat_823  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1140 (    struct Screen_634 *  screen2385 ,    struct StrConcat_823  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env652 envinst652 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each651 ) ( ( (  zip491 ) ( ( (  chars882 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv652){ .fun = lam652, .env = envinst652 } ) ) );
+    ( (  for_dash_each651 ) ( ( (  zip491 ) ( ( (  chars882 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv652){ .fun = lam652, .env = envinst652 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam656 (   struct env656 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam656 (   struct env656 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1140 (    struct Screen_634 *  screen2388 ,    struct StrConcat_17  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1141 (    struct Screen_634 *  screen2385 ,    struct StrConcat_17  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env656 envinst656 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each655 ) ( ( (  zip493 ) ( ( (  chars883 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv656){ .fun = lam656, .env = envinst656 } ) ) );
+    ( (  for_dash_each655 ) ( ( (  zip493 ) ( ( (  chars883 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv656){ .fun = lam656, .env = envinst656 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam660 (   struct env660 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam660 (   struct env660 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1141 (    struct Screen_634 *  screen2388 ,    struct StrConcat_825  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1142 (    struct Screen_634 *  screen2385 ,    struct StrConcat_825  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env660 envinst660 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each659 ) ( ( (  zip495 ) ( ( (  chars828 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv660){ .fun = lam660, .env = envinst660 } ) ) );
+    ( (  for_dash_each659 ) ( ( (  zip495 ) ( ( (  chars828 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv660){ .fun = lam660, .env = envinst660 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   lam664 (   struct env664 env ,    struct Tuple2_358  dref2401 ) {
-    ( (  set925 ) ( ( ( * ( env.screen2388 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2396 ) , ( (  i32_dash_size267 ) ( ( dref2401 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2401 .field0 ) , .f_fg = ( env.fg2399 ) , .f_bg = ( env.bg2400 ) } ) ) );
+static  enum Unit_13   lam664 (   struct env664 env ,    struct Tuple2_358  dref2398 ) {
+    ( (  set925 ) ( ( ( * ( env.screen2385 ) ) .f_current ) ,  (  op_dash_add92 ( ( env.i2393 ) , ( (  i32_dash_size267 ) ( ( dref2398 .field1 ) ) ) ) ) ,  ( (struct Cell_52) { .f_c = ( dref2398 .field0 ) , .f_fg = ( env.fg2396 ) , .f_bg = ( env.bg2397 ) } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str1142 (    struct Screen_634 *  screen2388 ,    struct StrConcat_832  s2390 ,    int32_t  x2392 ,    int32_t  y2394 ) {
-    if ( (  cmp74 ( (  y2394 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
+static  enum Unit_13   draw_dash_str1143 (    struct Screen_634 *  screen2385 ,    struct StrConcat_832  s2387 ,    int32_t  x2389 ,    int32_t  y2391 ) {
+    if ( (  cmp74 ( (  y2391 ) , ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_height ) ) ) ) != 0 ) ) {
         return ( Unit_13_Unit );
     }
-    int32_t  w2395 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2388 ) ) .f_tui ) ) .f_width ) ) );
-    size_t  i2396 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2394 ) , (  w2395 ) ) ) , (  x2392 ) ) ) ) );
-    int32_t  x2397 = ( (  min765 ) ( (  x2392 ) ,  (  w2395 ) ) );
-    size_t  max_dash_len2398 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2395 ) , (  x2397 ) ) ) ) );
-    struct Color_53  fg2399 = ( ( * (  screen2388 ) ) .f_default_dash_fg );
-    struct Color_53  bg2400 = ( ( * (  screen2388 ) ) .f_default_dash_bg );
+    int32_t  w2392 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2385 ) ) .f_tui ) ) .f_width ) ) );
+    size_t  i2393 = ( (  i32_dash_size267 ) ( (  op_dash_add81 ( (  op_dash_mul83 ( (  y2391 ) , (  w2392 ) ) ) , (  x2389 ) ) ) ) );
+    int32_t  x2394 = ( (  min765 ) ( (  x2389 ) ,  (  w2392 ) ) );
+    size_t  max_dash_len2395 = ( (  i32_dash_size267 ) ( (  op_dash_sub82 ( (  w2392 ) , (  x2394 ) ) ) ) );
+    struct Color_53  fg2396 = ( ( * (  screen2385 ) ) .f_default_dash_fg );
+    struct Color_53  bg2397 = ( ( * (  screen2385 ) ) .f_default_dash_bg );
     struct env664 envinst664 = {
-        .bg2400 =  bg2400 ,
-        .screen2388 =  screen2388 ,
-        .fg2399 =  fg2399 ,
-        .i2396 =  i2396 ,
+        .i2393 =  i2393 ,
+        .bg2397 =  bg2397 ,
+        .screen2385 =  screen2385 ,
+        .fg2396 =  fg2396 ,
     };
-    ( (  for_dash_each663 ) ( ( (  zip497 ) ( ( (  chars884 ) ( (  s2390 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv664){ .fun = lam664, .env = envinst664 } ) ) );
+    ( (  for_dash_each663 ) ( ( (  zip497 ) ( ( (  chars884 ) ( (  s2387 ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) ,  ( (struct funenv664){ .fun = lam664, .env = envinst664 } ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1143 (    struct Screen_634 *  screen2406 ,    int32_t  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count731 ) ( ( (  chars773 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1135 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1144 (    struct Screen_634 *  screen2403 ,    int32_t  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count731 ) ( ( (  chars773 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1136 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1144 (    struct Screen_634 *  screen2406 ,    struct StrConcat_779  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count733 ) ( ( (  chars879 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1136 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1145 (    struct Screen_634 *  screen2403 ,    struct StrConcat_779  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count733 ) ( ( (  chars879 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1137 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1145 (    struct Screen_634 *  screen2406 ,    struct StrConcat_795  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count735 ) ( ( (  chars880 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1137 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1146 (    struct Screen_634 *  screen2403 ,    struct StrConcat_795  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count735 ) ( ( (  chars880 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1138 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1146 (    struct Screen_634 *  screen2406 ,    struct StrConcat_797  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count737 ) ( ( (  chars881 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1138 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1147 (    struct Screen_634 *  screen2403 ,    struct StrConcat_797  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count737 ) ( ( (  chars881 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1139 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1147 (    struct Screen_634 *  screen2406 ,    struct StrConcat_823  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count739 ) ( ( (  chars882 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1139 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1148 (    struct Screen_634 *  screen2403 ,    struct StrConcat_823  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count739 ) ( ( (  chars882 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1140 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1148 (    struct Screen_634 *  screen2406 ,    struct StrConcat_17  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count741 ) ( ( (  chars883 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1140 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1149 (    struct Screen_634 *  screen2403 ,    struct StrConcat_17  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count741 ) ( ( (  chars883 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1141 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1149 (    struct Screen_634 *  screen2406 ,    struct StrConcat_825  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count743 ) ( ( (  chars828 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1141 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1150 (    struct Screen_634 *  screen2403 ,    struct StrConcat_825  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count743 ) ( ( (  chars828 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1142 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   draw_dash_str_dash_right1150 (    struct Screen_634 *  screen2406 ,    struct StrConcat_832  s2408 ,    int32_t  x2410 ,    int32_t  y2412 ) {
-    int32_t  slen2413 = ( (  size_dash_i32269 ) ( ( (  count745 ) ( ( (  chars884 ) ( (  s2408 ) ) ) ) ) ) );
-    int32_t  w2414 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2406 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  x2415 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2414 ) , (  x2410 ) ) ) , (  slen2413 ) ) );
-    ( (  draw_dash_str1142 ) ( (  screen2406 ) ,  (  s2408 ) ,  (  x2415 ) ,  (  y2412 ) ) );
+static  enum Unit_13   draw_dash_str_dash_right1151 (    struct Screen_634 *  screen2403 ,    struct StrConcat_832  s2405 ,    int32_t  x2407 ,    int32_t  y2409 ) {
+    int32_t  slen2410 = ( (  size_dash_i32269 ) ( ( (  count745 ) ( ( (  chars884 ) ( (  s2405 ) ) ) ) ) ) );
+    int32_t  w2411 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2403 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  x2412 = (  op_dash_sub82 ( (  op_dash_sub82 ( (  w2411 ) , (  x2407 ) ) ) , (  slen2410 ) ) );
+    ( (  draw_dash_str1143 ) ( (  screen2403 ) ,  (  s2405 ) ,  (  x2412 ) ,  (  y2409 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  struct Maybe_320   try_dash_read_dash_contents1151 (    const char*  filename2576 ,    enum CAllocator_4  al2578 ) {
-    FILE *  file2579 = ( ( fopen ) ( (  filename2576 ) ,  ( (  from_dash_charlike0 ) ( ( "r" ) ) ) ) );
-    if ( ( (  is_dash_ptr_dash_null261 ) ( (  file2579 ) ) ) ) {
+static  struct Maybe_320   try_dash_read_dash_contents1152 (    const char*  filename2573 ,    enum CAllocator_4  al2575 ) {
+    FILE *  file2576 = ( ( fopen ) ( (  filename2573 ) ,  ( (  from_dash_charlike0 ) ( ( "r" ) ) ) ) );
+    if ( ( (  is_dash_ptr_dash_null261 ) ( (  file2576 ) ) ) ) {
         return ( (struct Maybe_320) { .tag = Maybe_320_None_t } );
     }
-    ( ( fseek ) ( (  file2579 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  seek_dash_end107 ) ( ) ) ) );
-    int32_t  file_dash_size2580 = ( ( ftell ) ( (  file2579 ) ) );
-    ( ( fseek ) ( (  file2579 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  seek_dash_set106 ) ( ) ) ) );
-    struct Slice_5  file_dash_buf2581 = ( ( (  allocate937 ) ( (  al2578 ) ,  (  op_dash_add92 ( ( (  i32_dash_size267 ) ( (  file_dash_size2580 ) ) ) , (  from_dash_integral11 ( 1 ) ) ) ) ) ) );
-    ( ( fread ) ( ( (  file_dash_buf2581 ) .f_ptr ) ,  (  from_dash_integral29 ( 1 ) ) ,  (  file_dash_size2580 ) ,  (  file2579 ) ) );
-    ( (  set924 ) ( (  file_dash_buf2581 ) ,  ( (  i32_dash_size267 ) ( (  file_dash_size2580 ) ) ) ,  ( (  nullchar325 ) ( ) ) ) );
-    ( ( fclose ) ( (  file2579 ) ) );
-    struct DynStr_130  str2582 = ( (struct DynStr_130) { .f_contents = (  file_dash_buf2581 ) } );
-    return ( ( Maybe_320_Just ) ( (  str2582 ) ) );
+    ( ( fseek ) ( (  file2576 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  seek_dash_end107 ) ( ) ) ) );
+    int32_t  file_dash_size2577 = ( ( ftell ) ( (  file2576 ) ) );
+    ( ( fseek ) ( (  file2576 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  seek_dash_set106 ) ( ) ) ) );
+    struct Slice_5  file_dash_buf2578 = ( ( (  allocate937 ) ( (  al2575 ) ,  (  op_dash_add92 ( ( (  i32_dash_size267 ) ( (  file_dash_size2577 ) ) ) , (  from_dash_integral11 ( 1 ) ) ) ) ) ) );
+    ( ( fread ) ( ( (  file_dash_buf2578 ) .f_ptr ) ,  (  from_dash_integral29 ( 1 ) ) ,  (  file_dash_size2577 ) ,  (  file2576 ) ) );
+    ( (  set924 ) ( (  file_dash_buf2578 ) ,  ( (  i32_dash_size267 ) ( (  file_dash_size2577 ) ) ) ,  ( (  nullchar325 ) ( ) ) ) );
+    ( ( fclose ) ( (  file2576 ) ) );
+    struct DynStr_130  str2579 = ( (struct DynStr_130) { .f_contents = (  file_dash_buf2578 ) } );
+    return ( ( Maybe_320_Just ) ( (  str2579 ) ) );
 }
 
-static  struct DynStr_130   read_dash_contents1152 (    const char*  filename2585 ,    enum CAllocator_4  al2587 ) {
-    return ( (  or_dash_fail907 ) ( ( (  try_dash_read_dash_contents1151 ) ( (  filename2585 ) ,  (  al2587 ) ) ) ,  ( ( StrConcat_837_StrConcat ) ( ( ( StrConcat_838_StrConcat ) ( ( "could not open file " ) ,  (  filename2585 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "!" ) ) ) ) ) ) );
+static  struct DynStr_130   read_dash_contents1153 (    const char*  filename2582 ,    enum CAllocator_4  al2584 ) {
+    return ( (  or_dash_fail907 ) ( ( (  try_dash_read_dash_contents1152 ) ( (  filename2582 ) ,  (  al2584 ) ) ) ,  ( ( StrConcat_837_StrConcat ) ( ( ( StrConcat_838_StrConcat ) ( ( "could not open file " ) ,  (  filename2582 ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "!" ) ) ) ) ) ) );
 }
 
-static  bool   try_dash_write_dash_contents1153 (    const char*  filename2590 ,    struct DynStr_130  contents2592 ) {
-    FILE *  file2593 = ( ( fopen ) ( (  filename2590 ) ,  ( (  from_dash_charlike0 ) ( ( "w" ) ) ) ) );
-    if ( ( (  is_dash_ptr_dash_null261 ) ( (  file2593 ) ) ) ) {
+static  bool   try_dash_write_dash_contents1154 (    const char*  filename2587 ,    struct DynStr_130  contents2589 ) {
+    FILE *  file2590 = ( ( fopen ) ( (  filename2587 ) ,  ( (  from_dash_charlike0 ) ( ( "w" ) ) ) ) );
+    if ( ( (  is_dash_ptr_dash_null261 ) ( (  file2590 ) ) ) ) {
         return ( false );
     }
-    struct SliceIter_278  it2594 = ( (  chars793 ) ( (  contents2592 ) ) );
+    struct SliceIter_278  it2591 = ( (  chars793 ) ( (  contents2589 ) ) );
     while ( ( true ) ) {
-        struct Maybe_49  dref2595 = ( (  next335 ) ( ( & (  it2594 ) ) ) );
-        if ( dref2595.tag == Maybe_49_None_t ) {
-            ( ( fclose ) ( (  file2593 ) ) );
+        struct Maybe_49  dref2592 = ( (  next335 ) ( ( & (  it2591 ) ) ) );
+        if ( dref2592.tag == Maybe_49_None_t ) {
+            ( ( fclose ) ( (  file2590 ) ) );
             return ( true );
         }
-        else if ( dref2595.tag == Maybe_49_Just_t ) {
-            int32_t  chars_dash_written2597 = ( ( fprintf ) ( (  file2593 ) ,  ( "%c" ) ,  ( dref2595 .stuff .Maybe_49_Just_s .field0 ) ) );
-            if ( (  cmp74 ( (  chars_dash_written2597 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) ) {
+        else if ( dref2592.tag == Maybe_49_Just_t ) {
+            int32_t  chars_dash_written2594 = ( ( fprintf ) ( (  file2590 ) ,  ( "%c" ) ,  ( dref2592 .stuff .Maybe_49_Just_s .field0 ) ) );
+            if ( (  cmp74 ( (  chars_dash_written2594 ) , (  from_dash_integral29 ( 0 ) ) ) == 0 ) ) {
                 return ( false );
             }
         }
@@ -8530,284 +8547,284 @@ static  bool   try_dash_write_dash_contents1153 (    const char*  filename2590 ,
     return ( (  unreachable897 ) ( ) );
 }
 
-static  enum Unit_13   write_dash_contents1154 (    const char*  filename2600 ,    struct DynStr_130  contents2602 ) {
-    if ( ( ! ( (  try_dash_write_dash_contents1153 ) ( (  filename2600 ) ,  (  contents2602 ) ) ) ) ) {
-        ( (  panic903 ) ( ( ( StrConcat_838_StrConcat ) ( ( "could not write to file " ) ,  (  filename2600 ) ) ) ) );
+static  enum Unit_13   write_dash_contents1155 (    const char*  filename2597 ,    struct DynStr_130  contents2599 ) {
+    if ( ( ! ( (  try_dash_write_dash_contents1154 ) ( (  filename2597 ) ,  (  contents2599 ) ) ) ) ) {
+        ( (  panic903 ) ( ( ( StrConcat_838_StrConcat ) ( ( "could not write to file " ) ,  (  filename2597 ) ) ) ) );
     }
     return ( Unit_13_Unit );
 }
 
-static  struct Slice_919   get1155 (  ) {
+static  struct Slice_919   get1156 (  ) {
     return ( (struct Slice_919) { .f_ptr = ( (  offset_dash_ptr151 ) ( ( _global_argv ) ,  (  from_dash_integral35 ( 1 ) ) ) ) , .f_count = (  op_dash_sub93 ( ( _global_argc ) , (  from_dash_integral11 ( 1 ) ) ) ) } );
 }
 
-static  int32_t   char_dash_len317 (   struct env317 env ,    char  c2419 ) {
-    if ( (  eq47 ( (  c2419 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) ) {
-        return ( env.tab_dash_size2416 );
+static  int32_t   char_dash_len317 (   struct env317 env ,    char  c2416 ) {
+    if ( (  eq47 ( (  c2416 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) ) {
+        return ( env.tab_dash_size2413 );
     } else {
         return (  from_dash_integral29 ( 1 ) );
     }
 }
 
-static  bool   eq1156 (    struct Cursor_1057  l2423 ,    struct Cursor_1057  r2425 ) {
-    return ( (  eq41 ( ( (  l2423 ) .f_x ) , ( (  r2425 ) .f_x ) ) ) && (  eq41 ( ( (  l2423 ) .f_y ) , ( (  r2425 ) .f_y ) ) ) );
+static  bool   eq1157 (    struct Cursor_1057  l2420 ,    struct Cursor_1057  r2422 ) {
+    return ( (  eq41 ( ( (  l2420 ) .f_x ) , ( (  r2422 ) .f_x ) ) ) && (  eq41 ( ( (  l2420 ) .f_y ) , ( (  r2422 ) .f_y ) ) ) );
 }
 
-static  int32_t   from_dash_visual1157 (    struct Visual_1058  dref2428 ) {
-    return ( dref2428 .field0 );
+static  int32_t   from_dash_visual1158 (    struct Visual_1058  dref2425 ) {
+    return ( dref2425 .field0 );
 }
 
-static  struct List_3 *   get_dash_row1158 (    struct Editor_1056 *  ed2447 ,    int32_t  y2449 ) {
-    return ( (  get_dash_ptr958 ) ( ( & ( ( * (  ed2447 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  y2449 ) ) ) ) );
+static  struct List_3 *   get_dash_row1159 (    struct Editor_1056 *  ed2444 ,    int32_t  y2446 ) {
+    return ( (  get_dash_ptr958 ) ( ( & ( ( * (  ed2444 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  y2446 ) ) ) ) );
 }
 
-static  struct List_3 *   cursor_dash_row1159 (    struct Editor_1056 *  ed2452 ) {
-    return ( (  get_dash_ptr958 ) ( ( & ( ( * (  ed2452 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2452 ) ) .f_cursor ) .f_y ) ) ) ) );
+static  struct List_3 *   cursor_dash_row1160 (    struct Editor_1056 *  ed2449 ) {
+    return ( (  get_dash_ptr958 ) ( ( & ( ( * (  ed2449 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2449 ) ) .f_cursor ) .f_y ) ) ) ) );
 }
 
-static  struct TakeWhile_502   indent_dash_on_dash_row1160 (    struct Editor_1056 *  ed2455 ,    int32_t  y2457 ) {
-    return ( (  take_dash_while522 ) ( ( (  get_dash_row1158 ) ( (  ed2455 ) ,  (  y2457 ) ) ) ,  (  is_dash_whitespace949 ) ) );
+static  struct TakeWhile_502   indent_dash_on_dash_row1161 (    struct Editor_1056 *  ed2452 ,    int32_t  y2454 ) {
+    return ( (  take_dash_while522 ) ( ( (  get_dash_row1159 ) ( (  ed2452 ) ,  (  y2454 ) ) ) ,  (  is_dash_whitespace949 ) ) );
 }
 
-static  struct Maybe_49   char_dash_at_dash_cursor1161 (    struct Editor_1056 *  ed2460 ) {
-    return ( (  try_dash_get960 ) ( ( (  cursor_dash_row1159 ) ( (  ed2460 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2460 ) ) .f_cursor ) .f_x ) ) ) ) );
-}
-
-struct env1162 {
-    ;
-    ;
-    ;
-    struct env317 envinst317;
-    ;
-    ;
-};
-
-static  struct Visual_1058   x_dash_to_dash_visual_dash_x1162 (   struct env1162 env ,    struct Editor_1056 *  ed2463 ,    int32_t  x2465 ,    int32_t  y2467 ) {
-    return ( ( Visual_1058_Visual ) ( ( (  sum747 ) ( ( (  map341 ) ( ( (  take378 ) ( ( (  get_dash_row1158 ) ( (  ed2463 ) ,  (  y2467 ) ) ) ,  ( (  i32_dash_size267 ) ( (  x2465 ) ) ) ) ) ,  ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } ) ) ) ) ) ) );
+static  struct Maybe_49   char_dash_at_dash_cursor1162 (    struct Editor_1056 *  ed2457 ) {
+    return ( (  try_dash_get960 ) ( ( (  cursor_dash_row1160 ) ( (  ed2457 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2457 ) ) .f_cursor ) .f_x ) ) ) ) );
 }
 
 struct env1163 {
     ;
     ;
+    struct env317 envinst317;
+    ;
+    ;
+    ;
+};
+
+static  struct Visual_1058   x_dash_to_dash_visual_dash_x1163 (   struct env1163 env ,    struct Editor_1056 *  ed2460 ,    int32_t  x2462 ,    int32_t  y2464 ) {
+    return ( ( Visual_1058_Visual ) ( ( (  sum747 ) ( ( (  map341 ) ( ( (  take378 ) ( ( (  get_dash_row1159 ) ( (  ed2460 ) ,  (  y2464 ) ) ) ,  ( (  i32_dash_size267 ) ( (  x2462 ) ) ) ) ) ,  ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } ) ) ) ) ) ) );
+}
+
+struct env1164 {
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
     ;
     struct env317 envinst317;
     ;
     ;
     ;
-    ;
-    ;
-    ;
-    ;
-    ;
 };
 
-static  int32_t   visual_dash_x_dash_to_dash_x1163 (   struct env1163 env ,    struct Editor_1056 *  ed2470 ,    struct Visual_1058  dref2471 ,    int32_t  y2474 ) {
-    int32_t  sum_dash_x2475 = (  from_dash_integral29 ( 0 ) );
-    struct List_3 *  chars2476 = ( (  get_dash_row1158 ) ( (  ed2470 ) ,  (  y2474 ) ) );
-    struct RangeIter_382  temp1164 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( * (  chars2476 ) ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+static  int32_t   visual_dash_x_dash_to_dash_x1164 (   struct env1164 env ,    struct Editor_1056 *  ed2467 ,    struct Visual_1058  dref2468 ,    int32_t  y2471 ) {
+    int32_t  sum_dash_x2472 = (  from_dash_integral29 ( 0 ) );
+    struct List_3 *  chars2473 = ( (  get_dash_row1159 ) ( (  ed2467 ) ,  (  y2471 ) ) );
+    struct RangeIter_382  temp1165 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( * (  chars2473 ) ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
     while (true) {
-        struct Maybe_333  __cond1165 =  next383 (&temp1164);
-        if (  __cond1165 .tag == 0 ) {
+        struct Maybe_333  __cond1166 =  next383 (&temp1165);
+        if (  __cond1166 .tag == 0 ) {
             break;
         }
-        int32_t  x2478 =  __cond1165 .stuff .Maybe_333_Just_s .field0;
-        struct funenv317  temp1166 = ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } );
-        sum_dash_x2475 = (  op_dash_add81 ( (  sum_dash_x2475 ) , ( temp1166.fun ( temp1166.env ,  (  elem_dash_get2 ( (  chars2476 ) , ( (  i32_dash_size267 ) ( (  x2478 ) ) ) ) ) ) ) ) );
-        if ( (  cmp74 ( ( dref2471 .field0 ) , (  sum_dash_x2475 ) ) == 0 ) ) {
-            return (  x2478 );
+        int32_t  x2475 =  __cond1166 .stuff .Maybe_333_Just_s .field0;
+        struct funenv317  temp1167 = ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } );
+        sum_dash_x2472 = (  op_dash_add81 ( (  sum_dash_x2472 ) , ( temp1167.fun ( temp1167.env ,  (  elem_dash_get2 ( (  chars2473 ) , ( (  i32_dash_size267 ) ( (  x2475 ) ) ) ) ) ) ) ) );
+        if ( (  cmp74 ( ( dref2468 .field0 ) , (  sum_dash_x2472 ) ) == 0 ) ) {
+            return (  x2475 );
         }
     }
-    return ( (  size_dash_i32269 ) ( ( ( * (  chars2476 ) ) .f_count ) ) );
+    return ( (  size_dash_i32269 ) ( ( ( * (  chars2473 ) ) .f_count ) ) );
 }
 
-struct funenv1162 {
-    struct Visual_1058  (*fun) (  struct env1162  ,    struct Editor_1056 *  ,    int32_t  ,    int32_t  );
-    struct env1162 env;
+struct funenv1164 {
+    int32_t  (*fun) (  struct env1164  ,    struct Editor_1056 *  ,    struct Visual_1058  ,    int32_t  );
+    struct env1164 env;
 };
 
 struct funenv1163 {
-    int32_t  (*fun) (  struct env1163  ,    struct Editor_1056 *  ,    struct Visual_1058  ,    int32_t  );
+    struct Visual_1058  (*fun) (  struct env1163  ,    struct Editor_1056 *  ,    int32_t  ,    int32_t  );
     struct env1163 env;
 };
 
-struct env1167 {
+struct env1168 {
+    ;
+    ;
+    ;
+    struct env1164 envinst1164;
     ;
     ;
     ;
     ;
     ;
     ;
-    ;
-    ;
-    struct env1162 envinst1162;
     ;
     struct env1163 envinst1163;
-    ;
 };
 
-struct Dims_1168 {
+struct Dims_1169 {
     int32_t  f_cols;
     int32_t  f_rows;
 };
 
-static  enum Unit_13   move_dash_to1167 (   struct env1167 env ,    struct Editor_1056 *  ed2482 ,    int32_t  x2484 ,    int32_t  y2486 ,    struct Dims_1168  dim2488 ) {
-    struct Cursor_1057  cur2489 = ( ( * (  ed2482 ) ) .f_cursor );
-    bool  should_dash_change_dash_goal_dash_x2490 = ( !  eq41 ( ( (  cur2489 ) .f_x ) , (  x2484 ) ) );
-    int32_t  y2491 = ( (  clamp767 ) ( (  y2486 ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2482 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
-    int32_t  funny_dash_space2492 = (  from_dash_integral29 ( 5 ) );
-    if ( (  cmp74 ( (  y2491 ) , (  op_dash_add81 ( ( ( * (  ed2482 ) ) .f_screen_dash_top ) , (  funny_dash_space2492 ) ) ) ) == 0 ) ) {
-        (*  ed2482 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  y2491 ) , (  funny_dash_space2492 ) ) ) ) );
+static  enum Unit_13   move_dash_to1168 (   struct env1168 env ,    struct Editor_1056 *  ed2479 ,    int32_t  x2481 ,    int32_t  y2483 ,    struct Dims_1169  dim2485 ) {
+    struct Cursor_1057  cur2486 = ( ( * (  ed2479 ) ) .f_cursor );
+    bool  should_dash_change_dash_goal_dash_x2487 = ( !  eq41 ( ( (  cur2486 ) .f_x ) , (  x2481 ) ) );
+    int32_t  y2488 = ( (  clamp767 ) ( (  y2483 ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2479 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
+    int32_t  funny_dash_space2489 = (  from_dash_integral29 ( 5 ) );
+    if ( (  cmp74 ( (  y2488 ) , (  op_dash_add81 ( ( ( * (  ed2479 ) ) .f_screen_dash_top ) , (  funny_dash_space2489 ) ) ) ) == 0 ) ) {
+        (*  ed2479 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  y2488 ) , (  funny_dash_space2489 ) ) ) ) );
     } else {
-        if ( (  cmp74 ( (  y2491 ) , (  op_dash_sub82 ( (  op_dash_sub82 ( (  op_dash_add81 ( ( ( * (  ed2482 ) ) .f_screen_dash_top ) , ( (  dim2488 ) .f_rows ) ) ) , (  funny_dash_space2492 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 2 ) ) {
-            int32_t  onscreen_dash_y2493 = (  op_dash_add81 ( (  op_dash_sub82 ( (  op_dash_add81 ( (  y2491 ) , (  funny_dash_space2492 ) ) ) , ( (  dim2488 ) .f_rows ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
-            (*  ed2482 ) .f_screen_dash_top = (  onscreen_dash_y2493 );
+        if ( (  cmp74 ( (  y2488 ) , (  op_dash_sub82 ( (  op_dash_sub82 ( (  op_dash_add81 ( ( ( * (  ed2479 ) ) .f_screen_dash_top ) , ( (  dim2485 ) .f_rows ) ) ) , (  funny_dash_space2489 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 2 ) ) {
+            int32_t  onscreen_dash_y2490 = (  op_dash_add81 ( (  op_dash_sub82 ( (  op_dash_add81 ( (  y2488 ) , (  funny_dash_space2489 ) ) ) , ( (  dim2485 ) .f_rows ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
+            (*  ed2479 ) .f_screen_dash_top = (  onscreen_dash_y2490 );
         } else {
         }
     }
-    struct List_3 *  row2494 = ( (  get_dash_row1158 ) ( (  ed2482 ) ,  (  y2491 ) ) );
-    if ( (  should_dash_change_dash_goal_dash_x2490 ) ) {
-        int32_t  x2495 = ( (  clamp767 ) ( (  x2484 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  row2494 ) ) ) ) ) ) );
-        struct funenv1162  temp1169 = ( (struct funenv1162){ .fun = x_dash_to_dash_visual_dash_x1162, .env =  env.envinst1162  } );
-        (*  ed2482 ) .f_goal_dash_x = ( temp1169.fun ( temp1169.env ,  (  ed2482 ) ,  (  x2495 ) ,  (  y2491 ) ) );
+    struct List_3 *  row2491 = ( (  get_dash_row1159 ) ( (  ed2479 ) ,  (  y2488 ) ) );
+    if ( (  should_dash_change_dash_goal_dash_x2487 ) ) {
+        int32_t  x2492 = ( (  clamp767 ) ( (  x2481 ) ,  (  from_dash_integral29 ( 0 ) ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  row2491 ) ) ) ) ) ) );
+        struct funenv1163  temp1170 = ( (struct funenv1163){ .fun = x_dash_to_dash_visual_dash_x1163, .env =  env.envinst1163  } );
+        (*  ed2479 ) .f_goal_dash_x = ( temp1170.fun ( temp1170.env ,  (  ed2479 ) ,  (  x2492 ) ,  (  y2488 ) ) );
     }
-    struct Visual_1058  vx2496 = ( ( * (  ed2482 ) ) .f_goal_dash_x );
-    struct funenv1163  temp1170 = ( (struct funenv1163){ .fun = visual_dash_x_dash_to_dash_x1163, .env =  env.envinst1163  } );
-    int32_t  x2497 = ( temp1170.fun ( temp1170.env ,  (  ed2482 ) ,  (  vx2496 ) ,  (  y2491 ) ) );
-    int32_t  funny_dash_space2498 = (  from_dash_integral29 ( 5 ) );
-    if ( (  cmp74 ( (  x2497 ) , (  op_dash_add81 ( ( ( * (  ed2482 ) ) .f_screen_dash_left ) , (  funny_dash_space2498 ) ) ) ) == 0 ) ) {
-        (*  ed2482 ) .f_screen_dash_left = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  x2497 ) , (  funny_dash_space2498 ) ) ) ) );
+    struct Visual_1058  vx2493 = ( ( * (  ed2479 ) ) .f_goal_dash_x );
+    struct funenv1164  temp1171 = ( (struct funenv1164){ .fun = visual_dash_x_dash_to_dash_x1164, .env =  env.envinst1164  } );
+    int32_t  x2494 = ( temp1171.fun ( temp1171.env ,  (  ed2479 ) ,  (  vx2493 ) ,  (  y2488 ) ) );
+    int32_t  funny_dash_space2495 = (  from_dash_integral29 ( 5 ) );
+    if ( (  cmp74 ( (  x2494 ) , (  op_dash_add81 ( ( ( * (  ed2479 ) ) .f_screen_dash_left ) , (  funny_dash_space2495 ) ) ) ) == 0 ) ) {
+        (*  ed2479 ) .f_screen_dash_left = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  x2494 ) , (  funny_dash_space2495 ) ) ) ) );
     } else {
-        if ( (  cmp74 ( (  x2497 ) , (  op_dash_sub82 ( (  op_dash_sub82 ( (  op_dash_add81 ( ( ( * (  ed2482 ) ) .f_screen_dash_left ) , ( (  dim2488 ) .f_cols ) ) ) , (  funny_dash_space2498 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 2 ) ) {
-            int32_t  onscreen_dash_x2499 = (  op_dash_add81 ( (  op_dash_sub82 ( (  op_dash_add81 ( (  x2497 ) , (  funny_dash_space2498 ) ) ) , ( (  dim2488 ) .f_cols ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
-            (*  ed2482 ) .f_screen_dash_left = (  onscreen_dash_x2499 );
+        if ( (  cmp74 ( (  x2494 ) , (  op_dash_sub82 ( (  op_dash_sub82 ( (  op_dash_add81 ( ( ( * (  ed2479 ) ) .f_screen_dash_left ) , ( (  dim2485 ) .f_cols ) ) ) , (  funny_dash_space2495 ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 2 ) ) {
+            int32_t  onscreen_dash_x2496 = (  op_dash_add81 ( (  op_dash_sub82 ( (  op_dash_add81 ( (  x2494 ) , (  funny_dash_space2495 ) ) ) , ( (  dim2485 ) .f_cols ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
+            (*  ed2479 ) .f_screen_dash_left = (  onscreen_dash_x2496 );
         } else {
         }
     }
-    (*  ed2482 ) .f_cursor = ( (struct Cursor_1057) { .f_x = (  x2497 ) , .f_y = (  y2491 ) } );
+    (*  ed2479 ) .f_cursor = ( (struct Cursor_1057) { .f_x = (  x2494 ) , .f_y = (  y2488 ) } );
     return ( Unit_13_Unit );
 }
 
-struct funenv1167 {
-    enum Unit_13  (*fun) (  struct env1167  ,    struct Editor_1056 *  ,    int32_t  ,    int32_t  ,    struct Dims_1168  );
-    struct env1167 env;
+struct funenv1168 {
+    enum Unit_13  (*fun) (  struct env1168  ,    struct Editor_1056 *  ,    int32_t  ,    int32_t  ,    struct Dims_1169  );
+    struct env1168 env;
 };
 
-struct env1171 {
-    struct env1167 envinst1167;
+struct env1172 {
+    struct env1168 envinst1168;
 };
 
-static  enum Unit_13   move_dash_to_dash_col1171 (   struct env1171 env ,    struct Editor_1056 *  ed2502 ,    int32_t  x2504 ,    struct Dims_1168  dim2506 ) {
-    struct funenv1167  temp1172 = ( (struct funenv1167){ .fun = move_dash_to1167, .env =  env.envinst1167  } );
-    ( temp1172.fun ( temp1172.env ,  (  ed2502 ) ,  (  x2504 ) ,  ( ( ( * (  ed2502 ) ) .f_cursor ) .f_y ) ,  (  dim2506 ) ) );
+static  enum Unit_13   move_dash_to_dash_col1172 (   struct env1172 env ,    struct Editor_1056 *  ed2499 ,    int32_t  x2501 ,    struct Dims_1169  dim2503 ) {
+    struct funenv1168  temp1173 = ( (struct funenv1168){ .fun = move_dash_to1168, .env =  env.envinst1168  } );
+    ( temp1173.fun ( temp1173.env ,  (  ed2499 ) ,  (  x2501 ) ,  ( ( ( * (  ed2499 ) ) .f_cursor ) .f_y ) ,  (  dim2503 ) ) );
     return ( Unit_13_Unit );
 }
 
-struct env1173 {
-    struct env1167 envinst1167;
+struct env1174 {
+    struct env1168 envinst1168;
 };
 
-static  enum Unit_13   move_dash_to_dash_row1173 (   struct env1173 env ,    struct Editor_1056 *  ed2509 ,    int32_t  y2511 ,    struct Dims_1168  dim2513 ) {
-    struct funenv1167  temp1174 = ( (struct funenv1167){ .fun = move_dash_to1167, .env =  env.envinst1167  } );
-    ( temp1174.fun ( temp1174.env ,  (  ed2509 ) ,  ( ( ( * (  ed2509 ) ) .f_cursor ) .f_x ) ,  (  y2511 ) ,  (  dim2513 ) ) );
+static  enum Unit_13   move_dash_to_dash_row1174 (   struct env1174 env ,    struct Editor_1056 *  ed2506 ,    int32_t  y2508 ,    struct Dims_1169  dim2510 ) {
+    struct funenv1168  temp1175 = ( (struct funenv1168){ .fun = move_dash_to1168, .env =  env.envinst1168  } );
+    ( temp1175.fun ( temp1175.env ,  (  ed2506 ) ,  ( ( ( * (  ed2506 ) ) .f_cursor ) .f_x ) ,  (  y2508 ) ,  (  dim2510 ) ) );
     return ( Unit_13_Unit );
 }
 
-struct funenv1173 {
-    enum Unit_13  (*fun) (  struct env1173  ,    struct Editor_1056 *  ,    int32_t  ,    struct Dims_1168  );
-    struct env1173 env;
+struct funenv1172 {
+    enum Unit_13  (*fun) (  struct env1172  ,    struct Editor_1056 *  ,    int32_t  ,    struct Dims_1169  );
+    struct env1172 env;
 };
 
-struct funenv1171 {
-    enum Unit_13  (*fun) (  struct env1171  ,    struct Editor_1056 *  ,    int32_t  ,    struct Dims_1168  );
-    struct env1171 env;
+struct funenv1174 {
+    enum Unit_13  (*fun) (  struct env1174  ,    struct Editor_1056 *  ,    int32_t  ,    struct Dims_1169  );
+    struct env1174 env;
 };
 
-struct env1175 {
-    ;
-    struct env1173 envinst1173;
+struct env1176 {
     ;
     ;
     ;
+    struct env1172 envinst1172;
     ;
-    struct env1171 envinst1171;
+    ;
+    struct env1174 envinst1174;
     ;
     ;
 };
 
-static  bool   move_dash_left1175 (   struct env1175 env ,    struct Editor_1056 *  ed2516 ,    struct Dims_1168  dim2518 ) {
-    struct Cursor_1057  cur2519 = ( ( * (  ed2516 ) ) .f_cursor );
-    if ( (  eq41 ( ( ( ( * (  ed2516 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 0 ) ) ) ) ) {
-        if ( (  cmp74 ( ( ( ( * (  ed2516 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 0 ) ) ) == 2 ) ) {
-            struct funenv1173  temp1176 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  env.envinst1173  } );
-            ( temp1176.fun ( temp1176.env ,  (  ed2516 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2516 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dim2518 ) ) );
-            struct funenv1171  temp1177 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  env.envinst1171  } );
-            ( temp1177.fun ( temp1177.env ,  (  ed2516 ) ,  ( (  size_dash_i32269 ) ( ( ( * ( (  cursor_dash_row1159 ) ( (  ed2516 ) ) ) ) .f_count ) ) ) ,  (  dim2518 ) ) );
+static  bool   move_dash_left1176 (   struct env1176 env ,    struct Editor_1056 *  ed2513 ,    struct Dims_1169  dim2515 ) {
+    struct Cursor_1057  cur2516 = ( ( * (  ed2513 ) ) .f_cursor );
+    if ( (  eq41 ( ( ( ( * (  ed2513 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 0 ) ) ) ) ) {
+        if ( (  cmp74 ( ( ( ( * (  ed2513 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 0 ) ) ) == 2 ) ) {
+            struct funenv1174  temp1177 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  env.envinst1174  } );
+            ( temp1177.fun ( temp1177.env ,  (  ed2513 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2513 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dim2515 ) ) );
+            struct funenv1172  temp1178 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  env.envinst1172  } );
+            ( temp1178.fun ( temp1178.env ,  (  ed2513 ) ,  ( (  size_dash_i32269 ) ( ( ( * ( (  cursor_dash_row1160 ) ( (  ed2513 ) ) ) ) .f_count ) ) ) ,  (  dim2515 ) ) );
         }
     } else {
-        struct funenv1171  temp1178 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  env.envinst1171  } );
-        ( temp1178.fun ( temp1178.env ,  (  ed2516 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2516 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dim2518 ) ) );
+        struct funenv1172  temp1179 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  env.envinst1172  } );
+        ( temp1179.fun ( temp1179.env ,  (  ed2513 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2513 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dim2515 ) ) );
     }
-    return ( !  eq1156 ( ( ( * (  ed2516 ) ) .f_cursor ) , (  cur2519 ) ) );
+    return ( !  eq1157 ( ( ( * (  ed2513 ) ) .f_cursor ) , (  cur2516 ) ) );
 }
 
-struct env1179 {
-    ;
-    struct env1167 envinst1167;
+struct env1180 {
     ;
     ;
     ;
+    struct env1172 envinst1172;
     ;
     ;
-    struct env1171 envinst1171;
+    ;
+    struct env1168 envinst1168;
     ;
     ;
 };
 
-static  bool   move_dash_right1179 (   struct env1179 env ,    struct Editor_1056 *  ed2522 ,    struct Dims_1168  dims2524 ) {
-    struct Cursor_1057  cur2525 = ( ( * (  ed2522 ) ) .f_cursor );
-    int32_t  row_dash_len2526 = ( (  size_dash_i32269 ) ( ( ( * ( (  cursor_dash_row1159 ) ( (  ed2522 ) ) ) ) .f_count ) ) );
-    if ( (  eq41 ( ( ( ( * (  ed2522 ) ) .f_cursor ) .f_x ) , (  row_dash_len2526 ) ) ) ) {
-        if ( (  cmp74 ( ( ( ( * (  ed2522 ) ) .f_cursor ) .f_y ) , (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2522 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 0 ) ) {
-            struct funenv1167  temp1180 = ( (struct funenv1167){ .fun = move_dash_to1167, .env =  env.envinst1167  } );
-            ( temp1180.fun ( temp1180.env ,  (  ed2522 ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_add81 ( ( ( ( * (  ed2522 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dims2524 ) ) );
+static  bool   move_dash_right1180 (   struct env1180 env ,    struct Editor_1056 *  ed2519 ,    struct Dims_1169  dims2521 ) {
+    struct Cursor_1057  cur2522 = ( ( * (  ed2519 ) ) .f_cursor );
+    int32_t  row_dash_len2523 = ( (  size_dash_i32269 ) ( ( ( * ( (  cursor_dash_row1160 ) ( (  ed2519 ) ) ) ) .f_count ) ) );
+    if ( (  eq41 ( ( ( ( * (  ed2519 ) ) .f_cursor ) .f_x ) , (  row_dash_len2523 ) ) ) ) {
+        if ( (  cmp74 ( ( ( ( * (  ed2519 ) ) .f_cursor ) .f_y ) , (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2519 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) == 0 ) ) {
+            struct funenv1168  temp1181 = ( (struct funenv1168){ .fun = move_dash_to1168, .env =  env.envinst1168  } );
+            ( temp1181.fun ( temp1181.env ,  (  ed2519 ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_add81 ( ( ( ( * (  ed2519 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dims2521 ) ) );
         }
     } else {
-        struct funenv1171  temp1181 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  env.envinst1171  } );
-        ( temp1181.fun ( temp1181.env ,  (  ed2522 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2522 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dims2524 ) ) );
+        struct funenv1172  temp1182 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  env.envinst1172  } );
+        ( temp1182.fun ( temp1182.env ,  (  ed2519 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2519 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  dims2521 ) ) );
     }
-    return ( !  eq1156 ( ( ( * (  ed2522 ) ) .f_cursor ) , (  cur2525 ) ) );
+    return ( !  eq1157 ( ( ( * (  ed2519 ) ) .f_cursor ) , (  cur2522 ) ) );
 }
 
-struct env1182 {
+struct env1183 {
     ;
+    struct env1172 envinst1172;
     ;
-    struct env1171 envinst1171;
     ;
 };
 
-static  enum Unit_13   move_dash_to_dash_start_dash_of_dash_line_dash_indented1182 (   struct env1182 env ,    struct Editor_1056 *  ed2529 ,    struct Dims_1168  dims2531 ) {
-    int32_t  off2532 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( ( (  indent_dash_on_dash_row1160 ) ( (  ed2529 ) ,  ( ( ( * (  ed2529 ) ) .f_cursor ) .f_y ) ) ) ) ) ) );
-    struct funenv1171  temp1183 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  env.envinst1171  } );
-    ( temp1183.fun ( temp1183.env ,  (  ed2529 ) ,  (  off2532 ) ,  (  dims2531 ) ) );
+static  enum Unit_13   move_dash_to_dash_start_dash_of_dash_line_dash_indented1183 (   struct env1183 env ,    struct Editor_1056 *  ed2526 ,    struct Dims_1169  dims2528 ) {
+    int32_t  off2529 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( ( (  indent_dash_on_dash_row1161 ) ( (  ed2526 ) ,  ( ( ( * (  ed2526 ) ) .f_cursor ) .f_y ) ) ) ) ) ) );
+    struct funenv1172  temp1184 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  env.envinst1172  } );
+    ( temp1184.fun ( temp1184.env ,  (  ed2526 ) ,  (  off2529 ) ,  (  dims2528 ) ) );
     return ( Unit_13_Unit );
 }
 
-struct env1184 {
+struct env1185 {
     ;
     ;
-    struct env1171 envinst1171;
+    struct env1172 envinst1172;
     ;
 };
 
-static  enum Unit_13   move_dash_to_dash_end_dash_of_dash_line1184 (   struct env1184 env ,    struct Editor_1056 *  ed2535 ,    struct Dims_1168  dims2537 ) {
-    struct List_3 *  currow2538 = ( (  cursor_dash_row1159 ) ( (  ed2535 ) ) );
-    struct funenv1171  temp1185 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  env.envinst1171  } );
-    ( temp1185.fun ( temp1185.env ,  (  ed2535 ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  currow2538 ) ) ) ) ) ,  (  dims2537 ) ) );
+static  enum Unit_13   move_dash_to_dash_end_dash_of_dash_line1185 (   struct env1185 env ,    struct Editor_1056 *  ed2532 ,    struct Dims_1169  dims2534 ) {
+    struct List_3 *  currow2535 = ( (  cursor_dash_row1160 ) ( (  ed2532 ) ) );
+    struct funenv1172  temp1186 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  env.envinst1172  } );
+    ( temp1186.fun ( temp1186.env ,  (  ed2532 ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  currow2535 ) ) ) ) ) ,  (  dims2534 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  bool   cursor_dash_is_dash_at_dash_line_dash_end1186 (    struct Editor_1056 *  ed2544 ) {
-    return (  eq41 ( ( ( ( * (  ed2544 ) ) .f_cursor ) .f_x ) , ( (  size_dash_i32269 ) ( ( (  size998 ) ( ( (  cursor_dash_row1159 ) ( (  ed2544 ) ) ) ) ) ) ) ) );
+static  bool   cursor_dash_is_dash_at_dash_line_dash_end1187 (    struct Editor_1056 *  ed2541 ) {
+    return (  eq41 ( ( ( ( * (  ed2541 ) ) .f_cursor ) .f_x ) , ( (  size_dash_i32269 ) ( ( (  size998 ) ( ( (  cursor_dash_row1160 ) ( (  ed2541 ) ) ) ) ) ) ) ) );
 }
 
 struct funenv983 {
@@ -8820,8 +8837,7 @@ struct funenv977 {
     struct env977 env;
 };
 
-struct env1187 {
-    ;
+struct env1188 {
     ;
     ;
     ;
@@ -8837,23 +8853,24 @@ struct env1187 {
     ;
     struct env976 envinst976;
     struct env977 envinst977;
+    ;
 };
 
-static  enum Unit_13   delete_dash_at_dash_current1187 (   struct env1187 env ,    struct Editor_1056 *  ed2547 ) {
-    struct List_3 *  row2548 = ( (  cursor_dash_row1159 ) ( (  ed2547 ) ) );
-    if ( (  cmp9 ( ( (  i32_dash_size267 ) ( ( ( ( * (  ed2547 ) ) .f_cursor ) .f_x ) ) ) , ( ( * (  row2548 ) ) .f_count ) ) == 0 ) ) {
-        struct funenv976  temp1188 = ( (struct funenv976){ .fun = remove976, .env =  env.envinst976  } );
-        ( temp1188.fun ( temp1188.env ,  ( (  cursor_dash_row1159 ) ( (  ed2547 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2547 ) ) .f_cursor ) .f_x ) ) ) ) );
+static  enum Unit_13   delete_dash_at_dash_current1188 (   struct env1188 env ,    struct Editor_1056 *  ed2544 ) {
+    struct List_3 *  row2545 = ( (  cursor_dash_row1160 ) ( (  ed2544 ) ) );
+    if ( (  cmp9 ( ( (  i32_dash_size267 ) ( ( ( ( * (  ed2544 ) ) .f_cursor ) .f_x ) ) ) , ( ( * (  row2545 ) ) .f_count ) ) == 0 ) ) {
+        struct funenv976  temp1189 = ( (struct funenv976){ .fun = remove976, .env =  env.envinst976  } );
+        ( temp1189.fun ( temp1189.env ,  ( (  cursor_dash_row1160 ) ( (  ed2544 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2544 ) ) .f_cursor ) .f_x ) ) ) ) );
     } else {
-        if ( (  cmp74 ( (  op_dash_add81 ( ( ( ( * (  ed2547 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) , ( (  size_dash_i32269 ) ( ( ( ( * (  ed2547 ) ) .f_current_dash_file ) .f_count ) ) ) ) == 0 ) ) {
-            struct List_3 *  cur_dash_row2549 = ( (  cursor_dash_row1159 ) ( (  ed2547 ) ) );
-            int32_t  next_dash_row_dash_id2550 = (  op_dash_add81 ( ( ( ( * (  ed2547 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) );
-            struct List_3 *  next_dash_row2551 = ( (  get_dash_row1158 ) ( (  ed2547 ) ,  (  next_dash_row_dash_id2550 ) ) );
-            struct funenv983  temp1189 = ( (struct funenv983){ .fun = add_dash_all983, .env =  env.envinst983  } );
-            ( temp1189.fun ( temp1189.env ,  (  cur_dash_row2549 ) ,  (  next_dash_row2551 ) ) );
-            ( (  free966 ) ( (  next_dash_row2551 ) ) );
-            struct funenv977  temp1190 = ( (struct funenv977){ .fun = remove977, .env =  env.envinst977  } );
-            ( temp1190.fun ( temp1190.env ,  ( & ( ( * (  ed2547 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  next_dash_row_dash_id2550 ) ) ) ) );
+        if ( (  cmp74 ( (  op_dash_add81 ( ( ( ( * (  ed2544 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) , ( (  size_dash_i32269 ) ( ( ( ( * (  ed2544 ) ) .f_current_dash_file ) .f_count ) ) ) ) == 0 ) ) {
+            struct List_3 *  cur_dash_row2546 = ( (  cursor_dash_row1160 ) ( (  ed2544 ) ) );
+            int32_t  next_dash_row_dash_id2547 = (  op_dash_add81 ( ( ( ( * (  ed2544 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) );
+            struct List_3 *  next_dash_row2548 = ( (  get_dash_row1159 ) ( (  ed2544 ) ,  (  next_dash_row_dash_id2547 ) ) );
+            struct funenv983  temp1190 = ( (struct funenv983){ .fun = add_dash_all983, .env =  env.envinst983  } );
+            ( temp1190.fun ( temp1190.env ,  (  cur_dash_row2546 ) ,  (  next_dash_row2548 ) ) );
+            ( (  free966 ) ( (  next_dash_row2548 ) ) );
+            struct funenv977  temp1191 = ( (struct funenv977){ .fun = remove977, .env =  env.envinst977  } );
+            ( temp1191.fun ( temp1191.env ,  ( & ( ( * (  ed2544 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  next_dash_row_dash_id2547 ) ) ) ) );
         }
     }
     return ( Unit_13_Unit );
@@ -8869,7 +8886,7 @@ struct funenv985 {
     struct env985 env;
 };
 
-struct env1191 {
+struct env1192 {
     ;
     ;
     ;
@@ -8883,20 +8900,20 @@ struct env1191 {
     struct env985 envinst985;
 };
 
-static  enum Unit_13   insert_dash_empty_dash_row_dash_at1191 (   struct env1191 env ,    struct Editor_1056 *  ed2554 ,    int32_t  y2556 ,    enum CAllocator_4  al2558 ) {
-    struct List_3  temp1192 = ( (  mk965 ) ( (  al2558 ) ) );
-    struct List_3 *  nurow2559 = ( &temp1192 );
-    struct TakeWhile_502  rowws2560 = ( (  indent_dash_on_dash_row1160 ) ( (  ed2554 ) ,  ( ( ( * (  ed2554 ) ) .f_cursor ) .f_y ) ) );
-    int32_t  offchars2561 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( (  rowws2560 ) ) ) ) );
-    struct funenv985  temp1193 = ( (struct funenv985){ .fun = add_dash_all985, .env =  env.envinst985  } );
-    ( temp1193.fun ( temp1193.env ,  (  nurow2559 ) ,  (  rowws2560 ) ) );
-    struct funenv970  temp1194 = ( (struct funenv970){ .fun = insert970, .env =  env.envinst970  } );
-    ( temp1194.fun ( temp1194.env ,  ( & ( ( * (  ed2554 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  y2556 ) ) ) ,  ( * (  nurow2559 ) ) ) );
+static  enum Unit_13   insert_dash_empty_dash_row_dash_at1192 (   struct env1192 env ,    struct Editor_1056 *  ed2551 ,    int32_t  y2553 ,    enum CAllocator_4  al2555 ) {
+    struct List_3  temp1193 = ( (  mk965 ) ( (  al2555 ) ) );
+    struct List_3 *  nurow2556 = ( &temp1193 );
+    struct TakeWhile_502  rowws2557 = ( (  indent_dash_on_dash_row1161 ) ( (  ed2551 ) ,  ( ( ( * (  ed2551 ) ) .f_cursor ) .f_y ) ) );
+    int32_t  offchars2558 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( (  rowws2557 ) ) ) ) );
+    struct funenv985  temp1194 = ( (struct funenv985){ .fun = add_dash_all985, .env =  env.envinst985  } );
+    ( temp1194.fun ( temp1194.env ,  (  nurow2556 ) ,  (  rowws2557 ) ) );
+    struct funenv970  temp1195 = ( (struct funenv970){ .fun = insert970, .env =  env.envinst970  } );
+    ( temp1195.fun ( temp1195.env ,  ( & ( ( * (  ed2551 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( (  y2553 ) ) ) ,  ( * (  nurow2556 ) ) ) );
     return ( Unit_13_Unit );
 }
 
-static  bool   is_dash_word_dash_char1195 (    char  c2564 ) {
-    return ( (  is_dash_not_dash_whitespace950 ) ( (  c2564 ) ) );
+static  bool   is_dash_word_dash_char1196 (    char  c2561 ) {
+    return ( (  is_dash_not_dash_whitespace950 ) ( (  c2561 ) ) );
 }
 
 struct funenv992 {
@@ -8904,7 +8921,7 @@ struct funenv992 {
     struct env992 env;
 };
 
-struct env1196 {
+struct env1197 {
     ;
     ;
     struct env307 envinst307;
@@ -8916,115 +8933,113 @@ struct env1196 {
     ;
 };
 
-static  struct List_3   lam306 (   struct env306 env ,    struct DynStr_130  line2604 ) {
-    struct funenv307  temp1198 = ( (struct funenv307){ .fun = to_dash_list307, .env =  env.envinst307  } );
-    return ( temp1198.fun ( temp1198.env ,  (  line2604 ) ,  ( env.al2573 ) ) );
+static  struct List_3   lam306 (   struct env306 env ,    struct DynStr_130  line2601 ) {
+    struct funenv307  temp1199 = ( (struct funenv307){ .fun = to_dash_list307, .env =  env.envinst307  } );
+    return ( temp1199.fun ( temp1199.env ,  (  line2601 ) ,  ( env.al2570 ) ) );
 }
 
-static  struct List_373   load_dash_file1196 (   struct env1196 env ,    const char*  filename2571 ,    enum CAllocator_4  al2573 ) {
-    struct funenv992  temp1197 = ( (struct funenv992){ .fun = to_dash_list992, .env =  env.envinst992  } );
+static  struct List_373   load_dash_file1197 (   struct env1197 env ,    const char*  filename2568 ,    enum CAllocator_4  al2570 ) {
+    struct funenv992  temp1198 = ( (struct funenv992){ .fun = to_dash_list992, .env =  env.envinst992  } );
     struct env306 envinst306 = {
+        .al2570 =  al2570 ,
         .envinst307 = env.envinst307 ,
-        .al2573 =  al2573 ,
     };
-    return ( temp1197.fun ( temp1197.env ,  ( (  map337 ) ( ( (  lines951 ) ( ( (  read_dash_contents1152 ) ( (  filename2571 ) ,  (  al2573 ) ) ) ) ) ,  ( (struct funenv306){ .fun = lam306, .env = envinst306 } ) ) ) ,  (  al2573 ) ) );
+    return ( temp1198.fun ( temp1198.env ,  ( (  map337 ) ( ( (  lines951 ) ( ( (  read_dash_contents1153 ) ( (  filename2568 ) ,  (  al2570 ) ) ) ) ) ,  ( (struct funenv306){ .fun = lam306, .env = envinst306 } ) ) ) ,  (  al2570 ) ) );
 }
 
-struct env1199 {
+struct env1200 {
     ;
     ;
-    struct env619 envinst619;
-    ;
-    ;
-    ;
-    enum CAllocator_4  al2568;
+    struct env625 envinst625;
     ;
     ;
     ;
+    ;
+    ;
+    ;
+    enum CAllocator_4  al2565;
     ;
     ;
 };
 
-static  enum Unit_13   lam618 (   struct env618 env ,    char  c2614 ) {
-    struct funenv619  temp1203 = ( (struct funenv619){ .fun = write_dash_char619, .env =  env.envinst619  } );
-    return ( temp1203.fun ( temp1203.env ,  ( env.sb2610 ) ,  (  c2614 ) ) );
+static  enum Unit_13   lam624 (   struct env624 env ,    char  c2611 ) {
+    struct funenv625  temp1204 = ( (struct funenv625){ .fun = write_dash_char625, .env =  env.envinst625  } );
+    return ( temp1204.fun ( temp1204.env ,  ( env.sb2607 ) ,  (  c2611 ) ) );
 }
 
-static  enum Unit_13   save_dash_file1199 (   struct env1199 env ,    struct List_373  cf2607 ,    const char*  filename2609 ) {
-    struct StrBuilder_564  temp1200 = ( (  mk1036 ) ( ( env.al2568 ) ) );
-    struct StrBuilder_564 *  sb2610 = ( &temp1200 );
-    struct SliceIter_350  temp1201 =  into_dash_iter374 ( (  cf2607 ) );
+static  enum Unit_13   save_dash_file1200 (   struct env1200 env ,    struct List_373  cf2604 ,    const char*  filename2606 ) {
+    struct StrBuilder_564  temp1201 = ( (  mk1036 ) ( ( env.al2565 ) ) );
+    struct StrBuilder_564 *  sb2607 = ( &temp1201 );
+    struct SliceIter_350  temp1202 =  into_dash_iter374 ( (  cf2604 ) );
     while (true) {
-        struct Maybe_319  __cond1202 =  next365 (&temp1201);
-        if (  __cond1202 .tag == 0 ) {
+        struct Maybe_319  __cond1203 =  next365 (&temp1202);
+        if (  __cond1203 .tag == 0 ) {
             break;
         }
-        struct List_3  row2612 =  __cond1202 .stuff .Maybe_319_Just_s .field0;
-        struct env618 envinst618 = {
-            .envinst619 = env.envinst619 ,
-            .sb2610 =  sb2610 ,
+        struct List_3  row2609 =  __cond1203 .stuff .Maybe_319_Just_s .field0;
+        struct env624 envinst624 = {
+            .envinst625 = env.envinst625 ,
+            .sb2607 =  sb2607 ,
         };
-        ( (  for_dash_each617 ) ( (  row2612 ) ,  ( (struct funenv618){ .fun = lam618, .env = envinst618 } ) ) );
-        struct funenv619  temp1204 = ( (struct funenv619){ .fun = write_dash_char619, .env =  env.envinst619  } );
-        ( temp1204.fun ( temp1204.env ,  (  sb2610 ) ,  ( (  from_dash_charlike1 ) ( ( "\n" ) ) ) ) );
+        ( (  for_dash_each623 ) ( (  row2609 ) ,  ( (struct funenv624){ .fun = lam624, .env = envinst624 } ) ) );
+        struct funenv625  temp1205 = ( (struct funenv625){ .fun = write_dash_char625, .env =  env.envinst625  } );
+        ( temp1205.fun ( temp1205.env ,  (  sb2607 ) ,  ( (  from_dash_charlike1 ) ( ( "\n" ) ) ) ) );
     }
-    ( (  write_dash_contents1154 ) ( (  filename2609 ) ,  ( (  as_dash_str786 ) ( (  sb2610 ) ) ) ) );
-    ( (  free1037 ) ( (  sb2610 ) ) );
+    ( (  write_dash_contents1155 ) ( (  filename2606 ) ,  ( (  as_dash_str786 ) ( (  sb2607 ) ) ) ) );
+    ( (  free1037 ) ( (  sb2607 ) ) );
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   free_dash_file1205 (    struct List_373  cf2617 ) {
-    ( (  for_dash_each622 ) ( ( (  addresses997 ) ( (  cf2617 ) ) ) ,  (  free966 ) ) );
-    ( (  free967 ) ( ( & (  cf2617 ) ) ) );
+static  enum Unit_13   free_dash_file1206 (    struct List_373  cf2614 ) {
+    ( (  for_dash_each609 ) ( ( (  addresses997 ) ( (  cf2614 ) ) ) ,  (  free966 ) ) );
+    ( (  free967 ) ( ( & (  cf2614 ) ) ) );
     return ( Unit_13_Unit );
 }
 
-struct env1206 {
-    int32_t  pad2618;
+struct env1207 {
+    int32_t  pad2615;
     ;
     ;
     ;
     ;
 };
 
-struct anon_1207 {
+struct anon_1208 {
     int32_t  f_max_dash_digits;
     int32_t  f_total_dash_offset;
 };
 
-static struct anon_1207   left_dash_offset1206 (   struct env1206 env ,    struct Editor_1056 *  ed2621 ) {
-    int32_t  max_dash_digits2622 = ( (  max766 ) ( ( (  count_dash_digits770 ) ( ( ( ( * (  ed2621 ) ) .f_current_dash_file ) .f_count ) ) ) ,  (  from_dash_integral29 ( 3 ) ) ) );
-    return ( (struct anon_1207) { .f_max_dash_digits = (  max_dash_digits2622 ) , .f_total_dash_offset = (  op_dash_add81 ( (  op_dash_add81 ( ( env.pad2618 ) , (  max_dash_digits2622 ) ) ) , ( env.pad2618 ) ) ) } );
+static struct anon_1208   left_dash_offset1207 (   struct env1207 env ,    struct Editor_1056 *  ed2618 ) {
+    int32_t  max_dash_digits2619 = ( (  max766 ) ( ( (  count_dash_digits770 ) ( ( ( ( * (  ed2618 ) ) .f_current_dash_file ) .f_count ) ) ) ,  (  from_dash_integral29 ( 3 ) ) ) );
+    return ( (struct anon_1208) { .f_max_dash_digits = (  max_dash_digits2619 ) , .f_total_dash_offset = (  op_dash_add81 ( (  op_dash_add81 ( ( env.pad2615 ) , (  max_dash_digits2619 ) ) ) , ( env.pad2615 ) ) ) } );
 }
 
-struct funenv1206 {
-    struct anon_1207  (*fun) (  struct env1206  ,    struct Editor_1056 *  );
-    struct env1206 env;
+struct funenv1207 {
+    struct anon_1208  (*fun) (  struct env1207  ,    struct Editor_1056 *  );
+    struct env1207 env;
 };
 
-struct env1208 {
-    struct env1206 envinst1206;
+struct env1209 {
+    struct env1207 envinst1207;
     ;
     ;
 };
 
-static  struct Dims_1168   screen_dash_dims1208 (   struct env1208 env ,    struct Editor_1056 *  ed2625 ,    struct Tui_635 *  tui2627 ) {
-    struct funenv1206  temp1209 = ( (struct funenv1206){ .fun = left_dash_offset1206, .env =  env.envinst1206  } );
-    return ( (struct Dims_1168) { .f_cols = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * (  tui2627 ) ) .f_width ) ) ) , ( ( temp1209.fun ( temp1209.env ,  (  ed2625 ) ) ) .f_total_dash_offset ) ) ) , .f_rows = ( (  u32_dash_i32273 ) ( ( ( * (  tui2627 ) ) .f_height ) ) ) } );
+static  struct Dims_1169   screen_dash_dims1209 (   struct env1209 env ,    struct Editor_1056 *  ed2622 ,    struct Tui_635 *  tui2624 ) {
+    struct funenv1207  temp1210 = ( (struct funenv1207){ .fun = left_dash_offset1207, .env =  env.envinst1207  } );
+    return ( (struct Dims_1169) { .f_cols = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * (  tui2624 ) ) .f_width ) ) ) , ( ( temp1210.fun ( temp1210.env ,  (  ed2622 ) ) ) .f_total_dash_offset ) ) ) , .f_rows = ( (  u32_dash_i32273 ) ( ( ( * (  tui2624 ) ) .f_height ) ) ) } );
 }
 
-struct env1210 {
+struct env1211 {
     ;
-    ;
-    ;
-    ;
-    ;
+    int32_t  pad2615;
     ;
     ;
     ;
     struct env317 envinst317;
     ;
-    struct env1162 envinst1162;
+    ;
+    struct env1163 envinst1163;
     ;
     ;
     ;
@@ -9034,13 +9049,15 @@ struct env1210 {
     ;
     ;
     ;
-    int32_t  pad2618;
+    ;
+    ;
+    ;
+    struct env1207 envinst1207;
     ;
     ;
     ;
     ;
     ;
-    struct env1206 envinst1206;
     ;
     ;
     ;
@@ -9052,142 +9069,142 @@ struct env1210 {
     ;
 };
 
-static  enum Unit_13   render_dash_editor1210 (   struct env1210 env ,    struct Screen_634 *  screen2630 ,    struct Editor_1056 *  ed2632 ) {
-    int32_t  w2633 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2630 ) ) .f_tui ) ) .f_width ) ) );
-    int32_t  h2634 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2630 ) ) .f_tui ) ) .f_height ) ) );
-    int32_t  from_dash_y2635 = ( ( * (  ed2632 ) ) .f_screen_dash_top );
-    int32_t  from_dash_x2636 = ( ( * (  ed2632 ) ) .f_screen_dash_left );
-    int32_t  x2637 = (  from_dash_integral29 ( 0 ) );
-    int32_t  y2638 = (  from_dash_integral29 ( 0 ) );
-    ( (  assert905 ) ( (  cmp9 ( ( ( ( * (  ed2632 ) ) .f_current_dash_file ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ,  ( "number of lines in file is somehow 0 ???" ) ) );
-    struct funenv1206  temp1211 = ( (struct funenv1206){ .fun = left_dash_offset1206, .env =  env.envinst1206  } );
-    struct anon_1207  offstuff2639 = ( temp1211.fun ( temp1211.env ,  (  ed2632 ) ) );
-    int32_t  max_dash_digits2640 = ( (  offstuff2639 ) .f_max_dash_digits );
-    int32_t  left_dash_off2641 = ( (  offstuff2639 ) .f_total_dash_offset );
-    struct Zip_387  temp1212 =  into_dash_iter386 ( ( (  zip484 ) ( ( (  drop372 ) ( ( ( * (  ed2632 ) ) .f_current_dash_file ) ,  ( (  i32_dash_size267 ) ( (  from_dash_y2635 ) ) ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) );
+static  enum Unit_13   render_dash_editor1211 (   struct env1211 env ,    struct Screen_634 *  screen2627 ,    struct Editor_1056 *  ed2629 ) {
+    int32_t  w2630 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2627 ) ) .f_tui ) ) .f_width ) ) );
+    int32_t  h2631 = ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2627 ) ) .f_tui ) ) .f_height ) ) );
+    int32_t  from_dash_y2632 = ( ( * (  ed2629 ) ) .f_screen_dash_top );
+    int32_t  from_dash_x2633 = ( ( * (  ed2629 ) ) .f_screen_dash_left );
+    int32_t  x2634 = (  from_dash_integral29 ( 0 ) );
+    int32_t  y2635 = (  from_dash_integral29 ( 0 ) );
+    ( (  assert905 ) ( (  cmp9 ( ( ( ( * (  ed2629 ) ) .f_current_dash_file ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ,  ( "number of lines in file is somehow 0 ???" ) ) );
+    struct funenv1207  temp1212 = ( (struct funenv1207){ .fun = left_dash_offset1207, .env =  env.envinst1207  } );
+    struct anon_1208  offstuff2636 = ( temp1212.fun ( temp1212.env ,  (  ed2629 ) ) );
+    int32_t  max_dash_digits2637 = ( (  offstuff2636 ) .f_max_dash_digits );
+    int32_t  left_dash_off2638 = ( (  offstuff2636 ) .f_total_dash_offset );
+    struct Zip_387  temp1213 =  into_dash_iter386 ( ( (  zip481 ) ( ( (  drop372 ) ( ( ( * (  ed2629 ) ) .f_current_dash_file ) ,  ( (  i32_dash_size267 ) ( (  from_dash_y2632 ) ) ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) );
     while (true) {
-        struct Maybe_362  __cond1213 =  next429 (&temp1212);
-        if (  __cond1213 .tag == 0 ) {
+        struct Maybe_362  __cond1214 =  next436 (&temp1213);
+        if (  __cond1214 .tag == 0 ) {
             break;
         }
-        struct Tuple2_363  dref2642 =  __cond1213 .stuff .Maybe_362_Just_s .field0;
-        int32_t  row_dash_num2645 = (  op_dash_add81 ( (  op_dash_add81 ( ( dref2642 .field1 ) , ( ( * (  ed2632 ) ) .f_screen_dash_top ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
-        struct RangeIter_382  temp1214 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( env.pad2618 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+        struct Tuple2_363  dref2639 =  __cond1214 .stuff .Maybe_362_Just_s .field0;
+        int32_t  row_dash_num2642 = (  op_dash_add81 ( (  op_dash_add81 ( ( dref2639 .field1 ) , ( ( * (  ed2629 ) ) .f_screen_dash_top ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
+        struct RangeIter_382  temp1215 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( env.pad2615 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
         while (true) {
-            struct Maybe_333  __cond1215 =  next383 (&temp1214);
-            if (  __cond1215 .tag == 0 ) {
+            struct Maybe_333  __cond1216 =  next383 (&temp1215);
+            if (  __cond1216 .tag == 0 ) {
                 break;
             }
-            int32_t  xx2647 =  __cond1215 .stuff .Maybe_333_Just_s .field0;
-            ( (  put_dash_char1134 ) ( (  screen2630 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  xx2647 ) ,  (  y2638 ) ) );
+            int32_t  xx2644 =  __cond1216 .stuff .Maybe_333_Just_s .field0;
+            ( (  put_dash_char1135 ) ( (  screen2627 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  xx2644 ) ,  (  y2635 ) ) );
         }
-        ( (  draw_dash_str_dash_right1143 ) ( (  screen2630 ) ,  (  row_dash_num2645 ) ,  (  op_dash_sub82 ( (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2630 ) ) .f_tui ) ) .f_width ) ) ) , (  max_dash_digits2640 ) ) ) , ( env.pad2618 ) ) ) ,  ( dref2642 .field1 ) ) );
-        struct RangeIter_382  temp1216 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( env.pad2618 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+        ( (  draw_dash_str_dash_right1144 ) ( (  screen2627 ) ,  (  row_dash_num2642 ) ,  (  op_dash_sub82 ( (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2627 ) ) .f_tui ) ) .f_width ) ) ) , (  max_dash_digits2637 ) ) ) , ( env.pad2615 ) ) ) ,  ( dref2639 .field1 ) ) );
+        struct RangeIter_382  temp1217 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( env.pad2615 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
         while (true) {
-            struct Maybe_333  __cond1217 =  next383 (&temp1216);
-            if (  __cond1217 .tag == 0 ) {
+            struct Maybe_333  __cond1218 =  next383 (&temp1217);
+            if (  __cond1218 .tag == 0 ) {
                 break;
             }
-            int32_t  xx2649 =  __cond1217 .stuff .Maybe_333_Just_s .field0;
-            ( (  put_dash_char1134 ) ( (  screen2630 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  op_dash_add81 ( (  xx2649 ) , ( env.pad2618 ) ) ) , (  max_dash_digits2640 ) ) ) ,  (  y2638 ) ) );
+            int32_t  xx2646 =  __cond1218 .stuff .Maybe_333_Just_s .field0;
+            ( (  put_dash_char1135 ) ( (  screen2627 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  op_dash_add81 ( (  xx2646 ) , ( env.pad2615 ) ) ) , (  max_dash_digits2637 ) ) ) ,  (  y2635 ) ) );
         }
-        if ( (  eq41 ( ( ( ( * (  ed2632 ) ) .f_cursor ) .f_y ) , (  op_dash_sub82 ( (  row_dash_num2645 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) ) {
-            struct Color_53  fg2650 = ( ( * (  screen2630 ) ) .f_default_dash_fg );
-            struct Color_53  bg2651 = ( ( * (  screen2630 ) ) .f_default_dash_bg );
-            struct RangeIter_382  temp1218 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  max_dash_digits2640 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+        if ( (  eq41 ( ( ( ( * (  ed2629 ) ) .f_cursor ) .f_y ) , (  op_dash_sub82 ( (  row_dash_num2642 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) ) {
+            struct Color_53  fg2647 = ( ( * (  screen2627 ) ) .f_default_dash_fg );
+            struct Color_53  bg2648 = ( ( * (  screen2627 ) ) .f_default_dash_bg );
+            struct RangeIter_382  temp1219 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  max_dash_digits2637 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
             while (true) {
-                struct Maybe_333  __cond1219 =  next383 (&temp1218);
-                if (  __cond1219 .tag == 0 ) {
+                struct Maybe_333  __cond1220 =  next383 (&temp1219);
+                if (  __cond1220 .tag == 0 ) {
                     break;
                 }
-                int32_t  xxx2653 =  __cond1219 .stuff .Maybe_333_Just_s .field0;
-                struct Cell_52 *  cp2654 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1128 ) ( (  screen2630 ) ,  (  op_dash_add81 ( (  xxx2653 ) , ( env.pad2618 ) ) ) ,  (  y2638 ) ) ) ,  ( "screen index somehow landed outside of screen" ) ) );
-                (*  cp2654 ) .f_fg = (  bg2651 );
-                (*  cp2654 ) .f_bg = (  fg2650 );
+                int32_t  xxx2650 =  __cond1220 .stuff .Maybe_333_Just_s .field0;
+                struct Cell_52 *  cp2651 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1129 ) ( (  screen2627 ) ,  (  op_dash_add81 ( (  xxx2650 ) , ( env.pad2615 ) ) ) ,  (  y2635 ) ) ) ,  ( "screen index somehow landed outside of screen" ) ) );
+                (*  cp2651 ) .f_fg = (  bg2648 );
+                (*  cp2651 ) .f_bg = (  fg2647 );
             }
         }
-        struct Zip_389  temp1220 =  into_dash_iter388 ( ( (  zip483 ) ( ( (  drop377 ) ( ( dref2642 .field0 ) ,  ( (  i32_dash_size267 ) ( (  from_dash_x2636 ) ) ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) );
+        struct Zip_389  temp1221 =  into_dash_iter388 ( ( (  zip484 ) ( ( (  drop377 ) ( ( dref2639 .field0 ) ,  ( (  i32_dash_size267 ) ( (  from_dash_x2633 ) ) ) ) ) ,  ( (  from384 ) ( (  from_dash_integral29 ( 0 ) ) ) ) ) ) );
         while (true) {
-            struct Maybe_357  __cond1221 =  next430 (&temp1220);
-            if (  __cond1221 .tag == 0 ) {
+            struct Maybe_357  __cond1222 =  next437 (&temp1221);
+            if (  __cond1222 .tag == 0 ) {
                 break;
             }
-            struct Tuple2_358  dref2655 =  __cond1221 .stuff .Maybe_357_Just_s .field0;
-            if ( (  eq47 ( ( dref2655 .field0 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) ) {
-                ( (  put_dash_char1134 ) ( (  screen2630 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  left_dash_off2641 ) , (  x2637 ) ) ) ,  (  y2638 ) ) );
-                x2637 = (  op_dash_add81 ( (  x2637 ) , (  from_dash_integral29 ( 1 ) ) ) );
-                ( (  put_dash_char1134 ) ( (  screen2630 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  left_dash_off2641 ) , (  x2637 ) ) ) ,  (  y2638 ) ) );
+            struct Tuple2_358  dref2652 =  __cond1222 .stuff .Maybe_357_Just_s .field0;
+            if ( (  eq47 ( ( dref2652 .field0 ) , ( (  from_dash_charlike1 ) ( ( "\t" ) ) ) ) ) ) {
+                ( (  put_dash_char1135 ) ( (  screen2627 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  left_dash_off2638 ) , (  x2634 ) ) ) ,  (  y2635 ) ) );
+                x2634 = (  op_dash_add81 ( (  x2634 ) , (  from_dash_integral29 ( 1 ) ) ) );
+                ( (  put_dash_char1135 ) ( (  screen2627 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  op_dash_add81 ( (  left_dash_off2638 ) , (  x2634 ) ) ) ,  (  y2635 ) ) );
             } else {
-                ( (  put_dash_char1134 ) ( (  screen2630 ) ,  ( dref2655 .field0 ) ,  (  op_dash_add81 ( (  left_dash_off2641 ) , (  x2637 ) ) ) ,  (  y2638 ) ) );
+                ( (  put_dash_char1135 ) ( (  screen2627 ) ,  ( dref2652 .field0 ) ,  (  op_dash_add81 ( (  left_dash_off2638 ) , (  x2634 ) ) ) ,  (  y2635 ) ) );
             }
-            x2637 = (  op_dash_add81 ( (  x2637 ) , (  from_dash_integral29 ( 1 ) ) ) );
-            if ( (  cmp74 ( (  x2637 ) , (  w2633 ) ) != 0 ) ) {
+            x2634 = (  op_dash_add81 ( (  x2634 ) , (  from_dash_integral29 ( 1 ) ) ) );
+            if ( (  cmp74 ( (  x2634 ) , (  w2630 ) ) != 0 ) ) {
                 break;
             }
         }
-        y2638 = (  op_dash_add81 ( (  y2638 ) , (  from_dash_integral29 ( 1 ) ) ) );
-        x2637 = (  from_dash_integral29 ( 0 ) );
-        if ( (  cmp74 ( (  y2638 ) , (  h2634 ) ) != 0 ) ) {
+        y2635 = (  op_dash_add81 ( (  y2635 ) , (  from_dash_integral29 ( 1 ) ) ) );
+        x2634 = (  from_dash_integral29 ( 0 ) );
+        if ( (  cmp74 ( (  y2635 ) , (  h2631 ) ) != 0 ) ) {
             break;
         }
     }
-    struct Cursor_1057  cur2658 = ( ( * (  ed2632 ) ) .f_cursor );
-    struct funenv1162  temp1222 = ( (struct funenv1162){ .fun = x_dash_to_dash_visual_dash_x1162, .env =  env.envinst1162  } );
-    int32_t  vx2659 = ( (  from_dash_visual1157 ) ( ( temp1222.fun ( temp1222.env ,  (  ed2632 ) ,  ( (  cur2658 ) .f_x ) ,  ( (  cur2658 ) .f_y ) ) ) ) );
-    int32_t  len2660 = ( (  maybe1067 ) ( ( (  try_dash_get960 ) ( ( (  cursor_dash_row1159 ) ( (  ed2632 ) ) ) ,  ( (  i32_dash_size267 ) ( ( (  cur2658 ) .f_x ) ) ) ) ) ,  ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } ) ,  (  from_dash_integral29 ( 1 ) ) ) );
-    struct RangeIter_382  temp1223 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  len2660 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
+    struct Cursor_1057  cur2655 = ( ( * (  ed2629 ) ) .f_cursor );
+    struct funenv1163  temp1223 = ( (struct funenv1163){ .fun = x_dash_to_dash_visual_dash_x1163, .env =  env.envinst1163  } );
+    int32_t  vx2656 = ( (  from_dash_visual1158 ) ( ( temp1223.fun ( temp1223.env ,  (  ed2629 ) ,  ( (  cur2655 ) .f_x ) ,  ( (  cur2655 ) .f_y ) ) ) ) );
+    int32_t  len2657 = ( (  maybe1068 ) ( ( (  try_dash_get960 ) ( ( (  cursor_dash_row1160 ) ( (  ed2629 ) ) ) ,  ( (  i32_dash_size267 ) ( ( (  cur2655 ) .f_x ) ) ) ) ) ,  ( (struct funenv317){ .fun = char_dash_len317, .env =  env.envinst317  } ) ,  (  from_dash_integral29 ( 1 ) ) ) );
+    struct RangeIter_382  temp1224 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  len2657 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) ) );
     while (true) {
-        struct Maybe_333  __cond1224 =  next383 (&temp1223);
-        if (  __cond1224 .tag == 0 ) {
+        struct Maybe_333  __cond1225 =  next383 (&temp1224);
+        if (  __cond1225 .tag == 0 ) {
             break;
         }
-        int32_t  x2662 =  __cond1224 .stuff .Maybe_333_Just_s .field0;
-        struct Cell_52 *  cursor_dash_cell2663 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1128 ) ( (  screen2630 ) ,  (  op_dash_add81 ( (  op_dash_add81 ( (  op_dash_sub82 ( (  left_dash_off2641 ) , ( ( * (  ed2632 ) ) .f_screen_dash_left ) ) ) , (  vx2659 ) ) ) , (  x2662 ) ) ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2632 ) ) .f_cursor ) .f_y ) , (  from_dash_y2635 ) ) ) ) ) ,  ( "cursor out of screen" ) ) );
-        (*  cursor_dash_cell2663 ) .f_fg = ( ( Color_53_Color8 ) ( ( Color8_54_Black8 ) ) );
-        (*  cursor_dash_cell2663 ) .f_bg = ( ( Color_53_Color8 ) ( ( Color8_54_White8 ) ) );
+        int32_t  x2659 =  __cond1225 .stuff .Maybe_333_Just_s .field0;
+        struct Cell_52 *  cursor_dash_cell2660 = ( (  or_dash_fail912 ) ( ( (  get_dash_cell_dash_ptr1129 ) ( (  screen2627 ) ,  (  op_dash_add81 ( (  op_dash_add81 ( (  op_dash_sub82 ( (  left_dash_off2638 ) , ( ( * (  ed2629 ) ) .f_screen_dash_left ) ) ) , (  vx2656 ) ) ) , (  x2659 ) ) ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2629 ) ) .f_cursor ) .f_y ) , (  from_dash_y2632 ) ) ) ) ) ,  ( "cursor out of screen" ) ) );
+        (*  cursor_dash_cell2660 ) .f_fg = ( ( Color_53_Color8 ) ( ( Color8_54_Black8 ) ) );
+        (*  cursor_dash_cell2660 ) .f_bg = ( ( Color_53_Color8 ) ( ( Color8_54_White8 ) ) );
     }
     return ( Unit_13_Unit );
 }
 
-static  enum Unit_13   update_dash_animation1225 (    struct Maybe_1053 *  dref2665 ,    struct Screen_634 *  screen2668 ) {
-    struct Maybe_1053  dref2669 = ( (* dref2665 ) );
-    if ( dref2669.tag == Maybe_1053_None_t ) {
+static  enum Unit_13   update_dash_animation1226 (    struct Maybe_1053 *  dref2662 ,    struct Screen_634 *  screen2665 ) {
+    struct Maybe_1053  dref2666 = ( (* dref2662 ) );
+    if ( dref2666.tag == Maybe_1053_None_t ) {
         return ( Unit_13_Unit );
     }
-    else if ( dref2669.tag == Maybe_1053_Just_t ) {
-        struct Duration_1072  diff2671 = ( (  diff1073 ) ( ( (  now1069 ) ( ) ) ,  ( dref2669 .stuff .Maybe_1053_Just_s .field0 ) ) );
-        struct Duration_1072  limit2672 = ( (  duration_dash_from_dash_ns1074 ) ( (  from_dash_integral35 ( 50000000 ) ) ) );
-        if ( (  cmp1071 ( (  diff2671 ) , (  limit2672 ) ) == 2 ) ) {
-            (* dref2665 ) = ( (struct Maybe_1053) { .tag = Maybe_1053_None_t } );
+    else if ( dref2666.tag == Maybe_1053_Just_t ) {
+        struct Duration_1073  diff2668 = ( (  diff1074 ) ( ( (  now1070 ) ( ) ) ,  ( dref2666 .stuff .Maybe_1053_Just_s .field0 ) ) );
+        struct Duration_1073  limit2669 = ( (  duration_dash_from_dash_ns1075 ) ( (  from_dash_integral35 ( 50000000 ) ) ) );
+        if ( (  cmp1072 ( (  diff2668 ) , (  limit2669 ) ) == 2 ) ) {
+            (* dref2662 ) = ( (struct Maybe_1053) { .tag = Maybe_1053_None_t } );
             return ( Unit_13_Unit );
         }
-        int64_t  x_dash_fill2673 = (  op_dash_div79 ( ( (  u32_dash_i64272 ) ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral35 ( 2 ) ) ) );
-        int64_t  y_dash_fill2674 = (  op_dash_div79 ( ( (  u32_dash_i64272 ) ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral35 ( 2 ) ) ) );
-        int32_t  x_dash_progress2675 = ( (  i64_dash_i32268 ) ( (  op_dash_div79 ( (  op_dash_mul32 ( ( (  duration_dash_to_dash_ns1075 ) ( (  diff2671 ) ) ) , (  x_dash_fill2673 ) ) ) , ( (  duration_dash_to_dash_ns1075 ) ( (  limit2672 ) ) ) ) ) ) );
-        int32_t  y_dash_progress2676 = ( (  i64_dash_i32268 ) ( (  op_dash_div79 ( (  op_dash_mul32 ( ( (  duration_dash_to_dash_ns1075 ) ( (  diff2671 ) ) ) , (  y_dash_fill2674 ) ) ) , ( (  duration_dash_to_dash_ns1075 ) ( (  limit2672 ) ) ) ) ) ) );
-        uint32_t  center_dash_x2677 = (  op_dash_add86 ( (  op_dash_div89 ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_width ) , (  from_dash_integral36 ( 2 ) ) ) ) , (  from_dash_integral36 ( 1 ) ) ) );
-        uint32_t  center_dash_y2678 = (  op_dash_add86 ( (  op_dash_div89 ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_height ) , (  from_dash_integral36 ( 2 ) ) ) ) , (  from_dash_integral36 ( 1 ) ) ) );
-        ( (  set_dash_screen_dash_bg1127 ) ( (  screen2668 ) ,  ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) ) );
-        int32_t  x_dash_off2679 = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( (  x_dash_fill2673 ) ) ) , (  x_dash_progress2675 ) ) );
-        int32_t  y_dash_off2680 = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( (  y_dash_fill2674 ) ) ) , (  y_dash_progress2676 ) ) );
-        int32_t  h2681 = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
-        int32_t  w2682 = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2668 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
-        struct RangeIter_382  temp1226 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  h2681 ) ) ) );
+        int64_t  x_dash_fill2670 = (  op_dash_div79 ( ( (  u32_dash_i64272 ) ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral35 ( 2 ) ) ) );
+        int64_t  y_dash_fill2671 = (  op_dash_div79 ( ( (  u32_dash_i64272 ) ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral35 ( 2 ) ) ) );
+        int32_t  x_dash_progress2672 = ( (  i64_dash_i32268 ) ( (  op_dash_div79 ( (  op_dash_mul32 ( ( (  duration_dash_to_dash_ns1076 ) ( (  diff2668 ) ) ) , (  x_dash_fill2670 ) ) ) , ( (  duration_dash_to_dash_ns1076 ) ( (  limit2669 ) ) ) ) ) ) );
+        int32_t  y_dash_progress2673 = ( (  i64_dash_i32268 ) ( (  op_dash_div79 ( (  op_dash_mul32 ( ( (  duration_dash_to_dash_ns1076 ) ( (  diff2668 ) ) ) , (  y_dash_fill2671 ) ) ) , ( (  duration_dash_to_dash_ns1076 ) ( (  limit2669 ) ) ) ) ) ) );
+        uint32_t  center_dash_x2674 = (  op_dash_add86 ( (  op_dash_div89 ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_width ) , (  from_dash_integral36 ( 2 ) ) ) ) , (  from_dash_integral36 ( 1 ) ) ) );
+        uint32_t  center_dash_y2675 = (  op_dash_add86 ( (  op_dash_div89 ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_height ) , (  from_dash_integral36 ( 2 ) ) ) ) , (  from_dash_integral36 ( 1 ) ) ) );
+        ( (  set_dash_screen_dash_bg1128 ) ( (  screen2665 ) ,  ( (struct Color_53) { .tag = Color_53_ColorDefault_t } ) ) );
+        int32_t  x_dash_off2676 = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( (  x_dash_fill2670 ) ) ) , (  x_dash_progress2672 ) ) );
+        int32_t  y_dash_off2677 = (  op_dash_sub82 ( ( (  i64_dash_i32268 ) ( (  y_dash_fill2671 ) ) ) , (  y_dash_progress2673 ) ) );
+        int32_t  h2678 = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_height ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
+        int32_t  w2679 = (  op_dash_sub82 ( ( (  u32_dash_i32273 ) ( ( ( * ( ( * (  screen2665 ) ) .f_tui ) ) .f_width ) ) ) , (  from_dash_integral29 ( 1 ) ) ) );
+        struct RangeIter_382  temp1227 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  h2678 ) ) ) );
         while (true) {
-            struct Maybe_333  __cond1227 =  next383 (&temp1226);
-            if (  __cond1227 .tag == 0 ) {
+            struct Maybe_333  __cond1228 =  next383 (&temp1227);
+            if (  __cond1228 .tag == 0 ) {
                 break;
             }
-            int32_t  screen_dash_y2684 =  __cond1227 .stuff .Maybe_333_Just_s .field0;
-            struct RangeIter_382  temp1228 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  w2682 ) ) ) );
+            int32_t  screen_dash_y2681 =  __cond1228 .stuff .Maybe_333_Just_s .field0;
+            struct RangeIter_382  temp1229 =  into_dash_iter381 ( ( (  to379 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  w2679 ) ) ) );
             while (true) {
-                struct Maybe_333  __cond1229 =  next383 (&temp1228);
-                if (  __cond1229 .tag == 0 ) {
+                struct Maybe_333  __cond1230 =  next383 (&temp1229);
+                if (  __cond1230 .tag == 0 ) {
                     break;
                 }
-                int32_t  screen_dash_x2686 =  __cond1229 .stuff .Maybe_333_Just_s .field0;
-                if ( ( ( ( (  cmp74 ( (  screen_dash_x2686 ) , (  x_dash_off2679 ) ) != 2 ) || (  cmp74 ( (  screen_dash_x2686 ) , (  op_dash_sub82 ( (  w2682 ) , (  x_dash_off2679 ) ) ) ) != 0 ) ) || (  cmp74 ( (  screen_dash_y2684 ) , (  y_dash_off2680 ) ) != 2 ) ) || (  cmp74 ( (  screen_dash_y2684 ) , (  op_dash_sub82 ( (  h2681 ) , (  y_dash_off2680 ) ) ) ) != 0 ) ) ) {
-                    ( (  put_dash_char1134 ) ( (  screen2668 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  screen_dash_x2686 ) ,  (  screen_dash_y2684 ) ) );
+                int32_t  screen_dash_x2683 =  __cond1230 .stuff .Maybe_333_Just_s .field0;
+                if ( ( ( ( (  cmp74 ( (  screen_dash_x2683 ) , (  x_dash_off2676 ) ) != 2 ) || (  cmp74 ( (  screen_dash_x2683 ) , (  op_dash_sub82 ( (  w2679 ) , (  x_dash_off2676 ) ) ) ) != 0 ) ) || (  cmp74 ( (  screen_dash_y2681 ) , (  y_dash_off2677 ) ) != 2 ) ) || (  cmp74 ( (  screen_dash_y2681 ) , (  op_dash_sub82 ( (  h2678 ) , (  y_dash_off2677 ) ) ) ) != 0 ) ) ) {
+                    ( (  put_dash_char1135 ) ( (  screen2665 ) ,  ( (  from_dash_charlike1 ) ( ( " " ) ) ) ,  (  screen_dash_x2683 ) ,  (  screen_dash_y2681 ) ) );
                 }
             }
         }
@@ -9195,46 +9212,46 @@ static  enum Unit_13   update_dash_animation1225 (    struct Maybe_1053 *  dref2
     return ( Unit_13_Unit );
 }
 
-struct funenv1199 {
-    enum Unit_13  (*fun) (  struct env1199  ,    struct List_373  ,    const char*  );
-    struct env1199 env;
-};
-
-struct funenv1196 {
-    struct List_373  (*fun) (  struct env1196  ,    const char*  ,    enum CAllocator_4  );
-    struct env1196 env;
+struct funenv1197 {
+    struct List_373  (*fun) (  struct env1197  ,    const char*  ,    enum CAllocator_4  );
+    struct env1197 env;
 };
 
 struct funenv1042 {
-    const char*  (*fun) (  struct env1042  ,    struct TakeWhile_507  ,    enum CAllocator_4  );
+    const char*  (*fun) (  struct env1042  ,    struct TakeWhile_511  ,    enum CAllocator_4  );
     struct env1042 env;
 };
 
 struct funenv1046 {
-    const char*  (*fun) (  struct env1046  ,    struct TakeWhile_511  ,    enum CAllocator_4  );
+    const char*  (*fun) (  struct env1046  ,    struct TakeWhile_507  ,    enum CAllocator_4  );
     struct env1046 env;
 };
 
-struct env1230 {
+struct funenv1200 {
+    enum Unit_13  (*fun) (  struct env1200  ,    struct List_373  ,    const char*  );
+    struct env1200 env;
+};
+
+struct env1231 {
     ;
     ;
     ;
     ;
     ;
     ;
-    struct env1199 envinst1199;
     ;
     ;
     ;
+    struct env1197 envinst1197;
+    ;
+    ;
+    struct env1174 envinst1174;
     ;
     ;
     ;
-    ;
-    struct env1196 envinst1196;
     struct env1042 envinst1042;
     struct env1046 envinst1046;
     ;
-    struct env1173 envinst1173;
     ;
     ;
     ;
@@ -9248,71 +9265,77 @@ struct env1230 {
     ;
     ;
     ;
-    ;
+    struct env1200 envinst1200;
     ;
 };
 
-static  bool   lam1231 (    char  c2700 ) {
-    return ( ! ( (  is_dash_whitespace949 ) ( (  c2700 ) ) ) );
+static  bool   lam1232 (    char  c2697 ) {
+    return ( ! ( (  is_dash_whitespace949 ) ( (  c2697 ) ) ) );
 }
 
-static  bool   lam1235 (    char  c2708 ) {
-    return ( ! ( (  is_dash_whitespace949 ) ( (  c2708 ) ) ) );
+static  bool   lam1236 (    char  c2705 ) {
+    return ( ! ( (  is_dash_whitespace949 ) ( (  c2705 ) ) ) );
 }
 
-static  enum Unit_13   run_dash_cmd1230 (   struct env1230 env ,    struct Editor_1056 *  ed2689 ,    struct DynStr_130  s2691 ,    struct Dims_1168  dim2693 ,    enum CAllocator_4  al2695 ) {
-    struct DropWhile_505  s2696 = ( (  drop_dash_while529 ) ( (  s2691 ) ,  (  is_dash_whitespace949 ) ) );
-    struct TakeWhile_504  cmd2697 = ( (  take_dash_while526 ) ( (  s2696 ) ,  (  is_dash_not_dash_whitespace950 ) ) );
-    struct DropWhile_508  rest2698 = ( (  drop_dash_while532 ) ( ( (  drop_dash_while531 ) ( (  s2696 ) ,  (  is_dash_not_dash_whitespace950 ) ) ) ,  (  is_dash_whitespace949 ) ) );
-    if ( ( (  eq889 ) ( (  cmd2697 ) ,  ( (  from_dash_charlike1 ) ( ( "w" ) ) ) ) ) ) {
-        struct TakeWhile_507  filename2701 = ( (  take_dash_while525 ) ( (  rest2698 ) ,  (  lam1231 ) ) );
-        const char*  temp1232;
-        const char*  alfname2702 = (  temp1232 );
-        if ( ( (  null756 ) ( (  filename2701 ) ) ) ) {
-            struct Maybe_264  dref2703 = ( ( * (  ed2689 ) ) .f_filename );
-            if ( dref2703.tag == Maybe_264_None_t ) {
+static  enum Unit_13   run_dash_cmd1231 (   struct env1231 env ,    struct Editor_1056 *  ed2686 ,    struct DynStr_130  s2688 ,    struct Dims_1169  dim2690 ,    enum CAllocator_4  al2692 ) {
+    struct DropWhile_505  s2693 = ( (  drop_dash_while529 ) ( (  s2688 ) ,  (  is_dash_whitespace949 ) ) );
+    struct TakeWhile_504  cmd2694 = ( (  take_dash_while526 ) ( (  s2693 ) ,  (  is_dash_not_dash_whitespace950 ) ) );
+    struct DropWhile_508  rest2695 = ( (  drop_dash_while532 ) ( ( (  drop_dash_while531 ) ( (  s2693 ) ,  (  is_dash_not_dash_whitespace950 ) ) ) ,  (  is_dash_whitespace949 ) ) );
+    if ( ( (  eq889 ) ( (  cmd2694 ) ,  ( (  from_dash_charlike1 ) ( ( "w" ) ) ) ) ) ) {
+        struct TakeWhile_507  filename2698 = ( (  take_dash_while525 ) ( (  rest2695 ) ,  (  lam1232 ) ) );
+        const char*  temp1233;
+        const char*  alfname2699 = (  temp1233 );
+        if ( ( (  null756 ) ( (  filename2698 ) ) ) ) {
+            struct Maybe_264  dref2700 = ( ( * (  ed2686 ) ) .f_filename );
+            if ( dref2700.tag == Maybe_264_None_t ) {
                 return ( Unit_13_Unit );
             }
-            else if ( dref2703.tag == Maybe_264_Just_t ) {
-                alfname2702 = ( dref2703 .stuff .Maybe_264_Just_s .field0 );
+            else if ( dref2700.tag == Maybe_264_Just_t ) {
+                alfname2699 = ( dref2700 .stuff .Maybe_264_Just_s .field0 );
             }
         } else {
-            struct Maybe_264  dref2705 = ( ( * (  ed2689 ) ) .f_filename );
-            if ( dref2705.tag == Maybe_264_None_t ) {
+            struct Maybe_264  dref2702 = ( ( * (  ed2686 ) ) .f_filename );
+            if ( dref2702.tag == Maybe_264_None_t ) {
             }
-            else if ( dref2705.tag == Maybe_264_Just_t ) {
-                ( (  free941 ) ( (  al2695 ) ,  ( (struct Slice_942) { .f_ptr = ( (  cast186 ) ( ( dref2705 .stuff .Maybe_264_Just_s .field0 ) ) ) , .f_count = (  from_dash_integral11 ( 0 ) ) } ) ) );
+            else if ( dref2702.tag == Maybe_264_Just_t ) {
+                ( (  free941 ) ( (  al2692 ) ,  ( (struct Slice_942) { .f_ptr = ( (  cast186 ) ( ( dref2702 .stuff .Maybe_264_Just_s .field0 ) ) ) , .f_count = (  from_dash_integral11 ( 0 ) ) } ) ) );
             }
-            struct funenv1042  temp1233 = ( (struct funenv1042){ .fun = mk_dash_const_dash_str1042, .env =  env.envinst1042  } );
-            alfname2702 = ( temp1233.fun ( temp1233.env ,  (  filename2701 ) ,  (  al2695 ) ) );
+            struct funenv1046  temp1234 = ( (struct funenv1046){ .fun = mk_dash_const_dash_str1046, .env =  env.envinst1046  } );
+            alfname2699 = ( temp1234.fun ( temp1234.env ,  (  filename2698 ) ,  (  al2692 ) ) );
         }
-        struct funenv1199  temp1234 = ( (struct funenv1199){ .fun = save_dash_file1199, .env =  env.envinst1199  } );
-        ( temp1234.fun ( temp1234.env ,  ( ( * (  ed2689 ) ) .f_current_dash_file ) ,  (  alfname2702 ) ) );
-        (*  ed2689 ) .f_filename = ( ( Maybe_264_Just ) ( (  alfname2702 ) ) );
+        struct funenv1200  temp1235 = ( (struct funenv1200){ .fun = save_dash_file1200, .env =  env.envinst1200  } );
+        ( temp1235.fun ( temp1235.env ,  ( ( * (  ed2686 ) ) .f_current_dash_file ) ,  (  alfname2699 ) ) );
+        (*  ed2686 ) .f_filename = ( ( Maybe_264_Just ) ( (  alfname2699 ) ) );
     } else {
-        if ( ( (  eq889 ) ( (  cmd2697 ) ,  ( (  from_dash_charlike1 ) ( ( "q" ) ) ) ) ) ) {
-            (*  ed2689 ) .f_running = ( false );
+        if ( ( (  eq889 ) ( (  cmd2694 ) ,  ( (  from_dash_charlike1 ) ( ( "q" ) ) ) ) ) ) {
+            (*  ed2686 ) .f_running = ( false );
         } else {
-            if ( ( (  eq889 ) ( (  cmd2697 ) ,  ( (  from_dash_charlike1 ) ( ( "o" ) ) ) ) ) ) {
-                struct TakeWhile_511  filename2709 = ( (  take_dash_while523 ) ( (  rest2698 ) ,  (  lam1235 ) ) );
-                struct funenv1046  temp1236 = ( (struct funenv1046){ .fun = mk_dash_const_dash_str1046, .env =  env.envinst1046  } );
-                const char*  alfname2710 = ( temp1236.fun ( temp1236.env ,  (  filename2709 ) ,  (  al2695 ) ) );
-                struct List_373  og2711 = ( ( * (  ed2689 ) ) .f_current_dash_file );
-                struct funenv1196  temp1237 = ( (struct funenv1196){ .fun = load_dash_file1196, .env =  env.envinst1196  } );
-                (*  ed2689 ) .f_current_dash_file = ( temp1237.fun ( temp1237.env ,  (  alfname2710 ) ,  (  al2695 ) ) );
-                (*  ed2689 ) .f_cursor = ( (struct Cursor_1057) { .f_x = (  from_dash_integral29 ( 0 ) ) , .f_y = (  from_dash_integral29 ( 0 ) ) } );
-                (*  ed2689 ) .f_goal_dash_x = ( ( Visual_1058_Visual ) ( (  from_dash_integral29 ( 0 ) ) ) );
-                (*  ed2689 ) .f_screen_dash_top = (  from_dash_integral29 ( 0 ) );
-                ( (  free_dash_file1205 ) ( (  og2711 ) ) );
-                ( (  free941 ) ( (  al2695 ) ,  ( (struct Slice_942) { .f_ptr = ( (  cast186 ) ( (  alfname2710 ) ) ) , .f_count = (  from_dash_integral11 ( 0 ) ) } ) ) );
-            } else {
-                struct Maybe_699  dref2712 = ( (  parse_dash_int956 ) ( (  cmd2697 ) ) );
-                if ( dref2712.tag == Maybe_699_Just_t ) {
-                    int32_t  newline2714 = ( (  clamp767 ) ( ( (  i64_dash_i32268 ) ( (  op_dash_sub78 ( ( dref2712 .stuff .Maybe_699_Just_s .field0 ) , (  from_dash_integral35 ( 1 ) ) ) ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2689 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
-                    struct funenv1173  temp1238 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  env.envinst1173  } );
-                    ( temp1238.fun ( temp1238.env ,  (  ed2689 ) ,  (  newline2714 ) ,  (  dim2693 ) ) );
+            if ( ( (  eq889 ) ( (  cmd2694 ) ,  ( (  from_dash_charlike1 ) ( ( "o" ) ) ) ) ) ) {
+                struct TakeWhile_511  filename2706 = ( (  take_dash_while523 ) ( (  rest2695 ) ,  (  lam1236 ) ) );
+                struct funenv1042  temp1237 = ( (struct funenv1042){ .fun = mk_dash_const_dash_str1042, .env =  env.envinst1042  } );
+                const char*  alfname2707 = ( temp1237.fun ( temp1237.env ,  (  filename2706 ) ,  (  al2692 ) ) );
+                struct List_373  og2708 = ( ( * (  ed2686 ) ) .f_current_dash_file );
+                struct funenv1197  temp1238 = ( (struct funenv1197){ .fun = load_dash_file1197, .env =  env.envinst1197  } );
+                (*  ed2686 ) .f_current_dash_file = ( temp1238.fun ( temp1238.env ,  (  alfname2707 ) ,  (  al2692 ) ) );
+                struct Maybe_264  dref2709 = ( ( * (  ed2686 ) ) .f_filename );
+                if ( dref2709.tag == Maybe_264_None_t ) {
                 }
-                else if ( dref2712.tag == Maybe_699_None_t ) {
+                else if ( dref2709.tag == Maybe_264_Just_t ) {
+                    ( (  free941 ) ( (  al2692 ) ,  ( (struct Slice_942) { .f_ptr = ( (  cast186 ) ( ( dref2709 .stuff .Maybe_264_Just_s .field0 ) ) ) , .f_count = (  from_dash_integral11 ( 0 ) ) } ) ) );
+                }
+                (*  ed2686 ) .f_filename = ( ( Maybe_264_Just ) ( (  alfname2707 ) ) );
+                (*  ed2686 ) .f_cursor = ( (struct Cursor_1057) { .f_x = (  from_dash_integral29 ( 0 ) ) , .f_y = (  from_dash_integral29 ( 0 ) ) } );
+                (*  ed2686 ) .f_goal_dash_x = ( ( Visual_1058_Visual ) ( (  from_dash_integral29 ( 0 ) ) ) );
+                (*  ed2686 ) .f_screen_dash_top = (  from_dash_integral29 ( 0 ) );
+                ( (  free_dash_file1206 ) ( (  og2708 ) ) );
+            } else {
+                struct Maybe_701  dref2711 = ( (  parse_dash_int956 ) ( (  cmd2694 ) ) );
+                if ( dref2711.tag == Maybe_701_Just_t ) {
+                    int32_t  newline2713 = ( (  clamp767 ) ( ( (  i64_dash_i32268 ) ( (  op_dash_sub78 ( ( dref2711 .stuff .Maybe_701_Just_s .field0 ) , (  from_dash_integral35 ( 1 ) ) ) ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( (  size_dash_i32269 ) ( ( ( ( * (  ed2686 ) ) .f_current_dash_file ) .f_count ) ) ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
+                    struct funenv1174  temp1239 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  env.envinst1174  } );
+                    ( temp1239.fun ( temp1239.env ,  (  ed2686 ) ,  (  newline2713 ) ,  (  dim2690 ) ) );
+                }
+                else if ( dref2711.tag == Maybe_701_None_t ) {
                     return ( Unit_13_Unit );
                 }
             }
@@ -9326,68 +9349,68 @@ struct funenv1038 {
     struct env1038 env;
 };
 
-struct funenv1086 {
-    struct Tui_635  (*fun) (  struct env1086  );
-    struct env1086 env;
+struct funenv1087 {
+    struct Tui_635  (*fun) (  struct env1087  );
+    struct env1087 env;
 };
 
-struct funenv1208 {
-    struct Dims_1168  (*fun) (  struct env1208  ,    struct Editor_1056 *  ,    struct Tui_635 *  );
-    struct env1208 env;
+struct funenv1209 {
+    struct Dims_1169  (*fun) (  struct env1209  ,    struct Editor_1056 *  ,    struct Tui_635 *  );
+    struct env1209 env;
 };
 
-struct funenv1175 {
-    bool  (*fun) (  struct env1175  ,    struct Editor_1056 *  ,    struct Dims_1168  );
-    struct env1175 env;
+struct funenv1176 {
+    bool  (*fun) (  struct env1176  ,    struct Editor_1056 *  ,    struct Dims_1169  );
+    struct env1176 env;
 };
 
-struct funenv1179 {
-    bool  (*fun) (  struct env1179  ,    struct Editor_1056 *  ,    struct Dims_1168  );
-    struct env1179 env;
+struct funenv1180 {
+    bool  (*fun) (  struct env1180  ,    struct Editor_1056 *  ,    struct Dims_1169  );
+    struct env1180 env;
 };
 
-struct funenv1187 {
-    enum Unit_13  (*fun) (  struct env1187  ,    struct Editor_1056 *  );
-    struct env1187 env;
+struct funenv1188 {
+    enum Unit_13  (*fun) (  struct env1188  ,    struct Editor_1056 *  );
+    struct env1188 env;
 };
 
-struct funenv1182 {
-    enum Unit_13  (*fun) (  struct env1182  ,    struct Editor_1056 *  ,    struct Dims_1168  );
-    struct env1182 env;
+struct funenv1183 {
+    enum Unit_13  (*fun) (  struct env1183  ,    struct Editor_1056 *  ,    struct Dims_1169  );
+    struct env1183 env;
 };
 
-struct funenv1184 {
-    enum Unit_13  (*fun) (  struct env1184  ,    struct Editor_1056 *  ,    struct Dims_1168  );
-    struct env1184 env;
+struct funenv1185 {
+    enum Unit_13  (*fun) (  struct env1185  ,    struct Editor_1056 *  ,    struct Dims_1169  );
+    struct env1185 env;
 };
 
-struct funenv1191 {
-    enum Unit_13  (*fun) (  struct env1191  ,    struct Editor_1056 *  ,    int32_t  ,    enum CAllocator_4  );
-    struct env1191 env;
+struct funenv1192 {
+    enum Unit_13  (*fun) (  struct env1192  ,    struct Editor_1056 *  ,    int32_t  ,    enum CAllocator_4  );
+    struct env1192 env;
 };
 
-static  bool   lam1273 (    char  c2739 ) {
-    return ( (  is_dash_word_dash_char1195 ) ( (  c2739 ) ) );
+static  bool   lam1274 (    char  c2738 ) {
+    return ( (  is_dash_word_dash_char1196 ) ( (  c2738 ) ) );
 }
 
-static  bool   lam1275 (    char  c2741 ) {
-    return ( ! ( (  is_dash_word_dash_char1195 ) ( (  c2741 ) ) ) );
+static  bool   lam1276 (    char  c2740 ) {
+    return ( ! ( (  is_dash_word_dash_char1196 ) ( (  c2740 ) ) ) );
 }
 
-static  bool   lam1281 (    char  c2745 ) {
-    return ( ! ( (  is_dash_word_dash_char1195 ) ( (  c2745 ) ) ) );
+static  bool   lam1282 (    char  c2744 ) {
+    return ( ! ( (  is_dash_word_dash_char1196 ) ( (  c2744 ) ) ) );
 }
 
-static  bool   lam1283 (    char  c2747 ) {
-    return ( (  is_dash_word_dash_char1195 ) ( (  c2747 ) ) );
+static  bool   lam1284 (    char  c2746 ) {
+    return ( (  is_dash_word_dash_char1196 ) ( (  c2746 ) ) );
 }
 
-static  bool   lam1289 (    char  c2751 ) {
-    return ( ! ( (  is_dash_word_dash_char1195 ) ( (  c2751 ) ) ) );
+static  bool   lam1290 (    char  c2750 ) {
+    return ( ! ( (  is_dash_word_dash_char1196 ) ( (  c2750 ) ) ) );
 }
 
-static  bool   lam1291 (    char  c2753 ) {
-    return ( (  is_dash_word_dash_char1195 ) ( (  c2753 ) ) );
+static  bool   lam1292 (    char  c2752 ) {
+    return ( (  is_dash_word_dash_char1196 ) ( (  c2752 ) ) );
 }
 
 struct funenv973 {
@@ -9405,27 +9428,27 @@ struct funenv987 {
     struct env987 env;
 };
 
-struct funenv1230 {
-    enum Unit_13  (*fun) (  struct env1230  ,    struct Editor_1056 *  ,    struct DynStr_130  ,    struct Dims_1168  ,    enum CAllocator_4  );
-    struct env1230 env;
+struct funenv1231 {
+    enum Unit_13  (*fun) (  struct env1231  ,    struct Editor_1056 *  ,    struct DynStr_130  ,    struct Dims_1169  ,    enum CAllocator_4  );
+    struct env1231 env;
 };
 
-struct funenv1124 {
-    bool  (*fun) (  struct env1124  ,    struct Screen_634 *  );
-    struct env1124 env;
+struct funenv1125 {
+    bool  (*fun) (  struct env1125  ,    struct Screen_634 *  );
+    struct env1125 env;
 };
 
-struct funenv1210 {
-    enum Unit_13  (*fun) (  struct env1210  ,    struct Screen_634 *  ,    struct Editor_1056 *  );
-    struct env1210 env;
+struct funenv1211 {
+    enum Unit_13  (*fun) (  struct env1211  ,    struct Screen_634 *  ,    struct Editor_1056 *  );
+    struct env1211 env;
 };
 
-static  struct Maybe_49   lam1055 (   struct env1055 env ,    struct List_3  l2777 ) {
-    return ( (  try_dash_get960 ) ( ( & (  l2777 ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * ( env.ed2720 ) ) .f_cursor ) .f_x ) ) ) ) );
+static  struct Maybe_49   lam1055 (   struct env1055 env ,    struct List_3  l2776 ) {
+    return ( (  try_dash_get960 ) ( ( & (  l2776 ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * ( env.ed2719 ) ) .f_cursor ) .f_x ) ) ) ) );
 }
 
-static  struct Tuple2_358   lam1320 (    char  c2779 ) {
-    return ( ( Tuple2_358_Tuple2 ) ( (  c2779 ) ,  ( (  char_dash_i32892 ) ( (  c2779 ) ) ) ) );
+static  struct Tuple2_358   lam1321 (    char  c2778 ) {
+    return ( ( Tuple2_358_Tuple2 ) ( (  c2778 ) ,  ( (  char_dash_i32892 ) ( (  c2778 ) ) ) ) );
 }
 
 int main(int argc, const char **argv) {
@@ -9494,422 +9517,422 @@ int main(int argc, const char **argv) {
     struct env1030 envinst1030 = {
         .envinst309 = envinst309 ,
     };
-    struct env619 envinst619 = {
+    struct env625 envinst625 = {
         .envinst309 = envinst309 ,
     };
     struct env1033 envinst1033 = {
         .envinst978 = envinst978 ,
     };
     struct env1038 envinst1038 = {
-        .envinst619 = envinst619 ,
+        .envinst625 = envinst625 ,
         .envinst1026 = envinst1026 ,
     };
     struct env1042 envinst1042 = {
-        .envinst619 = envinst619 ,
+        .envinst625 = envinst625 ,
         .envinst1028 = envinst1028 ,
     };
     struct env1046 envinst1046 = {
-        .envinst619 = envinst619 ,
+        .envinst625 = envinst625 ,
         .envinst1030 = envinst1030 ,
     };
-    bool  temp1085 = ( false );
-    bool *  should_dash_resize2206 = ( &temp1085 );
-    struct env1086 envinst1086 = {
+    bool  temp1086 = ( false );
+    bool *  should_dash_resize2206 = ( &temp1086 );
+    struct env1087 envinst1087 = {
         .should_dash_resize2206 =  should_dash_resize2206 ,
     };
-    struct env1109 envinst1109 = {
+    struct env1110 envinst1110 = {
         .should_dash_resize2206 =  should_dash_resize2206 ,
     };
-    struct env1124 envinst1124 = {
-        .envinst1109 = envinst1109 ,
+    struct env1125 envinst1125 = {
+        .envinst1110 = envinst1110 ,
     };
-    int32_t  tab_dash_size2416 = (  from_dash_integral29 ( 2 ) );
+    int32_t  tab_dash_size2413 = (  from_dash_integral29 ( 2 ) );
     struct env317 envinst317 = {
-        .tab_dash_size2416 =  tab_dash_size2416 ,
-    };
-    struct env1162 envinst1162 = {
-        .envinst317 = envinst317 ,
+        .tab_dash_size2413 =  tab_dash_size2413 ,
     };
     struct env1163 envinst1163 = {
         .envinst317 = envinst317 ,
     };
-    struct env1167 envinst1167 = {
-        .envinst1162 = envinst1162 ,
+    struct env1164 envinst1164 = {
+        .envinst317 = envinst317 ,
+    };
+    struct env1168 envinst1168 = {
+        .envinst1164 = envinst1164 ,
         .envinst1163 = envinst1163 ,
     };
-    struct env1171 envinst1171 = {
-        .envinst1167 = envinst1167 ,
+    struct env1172 envinst1172 = {
+        .envinst1168 = envinst1168 ,
     };
-    struct env1173 envinst1173 = {
-        .envinst1167 = envinst1167 ,
+    struct env1174 envinst1174 = {
+        .envinst1168 = envinst1168 ,
     };
-    struct env1175 envinst1175 = {
-        .envinst1173 = envinst1173 ,
-        .envinst1171 = envinst1171 ,
+    struct env1176 envinst1176 = {
+        .envinst1172 = envinst1172 ,
+        .envinst1174 = envinst1174 ,
     };
-    struct env1179 envinst1179 = {
-        .envinst1167 = envinst1167 ,
-        .envinst1171 = envinst1171 ,
+    struct env1180 envinst1180 = {
+        .envinst1172 = envinst1172 ,
+        .envinst1168 = envinst1168 ,
     };
-    struct env1182 envinst1182 = {
-        .envinst1171 = envinst1171 ,
+    struct env1183 envinst1183 = {
+        .envinst1172 = envinst1172 ,
     };
-    struct env1184 envinst1184 = {
-        .envinst1171 = envinst1171 ,
+    struct env1185 envinst1185 = {
+        .envinst1172 = envinst1172 ,
     };
-    struct env1187 envinst1187 = {
+    struct env1188 envinst1188 = {
         .envinst983 = envinst983 ,
         .envinst976 = envinst976 ,
         .envinst977 = envinst977 ,
     };
-    struct env1191 envinst1191 = {
+    struct env1192 envinst1192 = {
         .envinst970 = envinst970 ,
         .envinst985 = envinst985 ,
     };
-    enum CAllocator_4  al2568 = ( (  idc935 ) ( ) );
-    struct env1196 envinst1196 = {
+    enum CAllocator_4  al2565 = ( (  idc935 ) ( ) );
+    struct env1197 envinst1197 = {
         .envinst307 = envinst307 ,
         .envinst992 = envinst992 ,
     };
-    struct env1199 envinst1199 = {
-        .envinst619 = envinst619 ,
-        .al2568 =  al2568 ,
+    struct env1200 envinst1200 = {
+        .envinst625 = envinst625 ,
+        .al2565 =  al2565 ,
     };
-    int32_t  pad2618 = (  from_dash_integral29 ( 2 ) );
-    struct env1206 envinst1206 = {
-        .pad2618 =  pad2618 ,
+    int32_t  pad2615 = (  from_dash_integral29 ( 2 ) );
+    struct env1207 envinst1207 = {
+        .pad2615 =  pad2615 ,
     };
-    struct env1208 envinst1208 = {
-        .envinst1206 = envinst1206 ,
+    struct env1209 envinst1209 = {
+        .envinst1207 = envinst1207 ,
     };
-    struct env1210 envinst1210 = {
+    struct env1211 envinst1211 = {
+        .pad2615 =  pad2615 ,
         .envinst317 = envinst317 ,
-        .envinst1162 = envinst1162 ,
-        .pad2618 =  pad2618 ,
-        .envinst1206 = envinst1206 ,
+        .envinst1163 = envinst1163 ,
+        .envinst1207 = envinst1207 ,
     };
-    struct env1230 envinst1230 = {
-        .envinst1199 = envinst1199 ,
-        .envinst1196 = envinst1196 ,
+    struct env1231 envinst1231 = {
+        .envinst1197 = envinst1197 ,
+        .envinst1174 = envinst1174 ,
         .envinst1042 = envinst1042 ,
         .envinst1046 = envinst1046 ,
-        .envinst1173 = envinst1173 ,
+        .envinst1200 = envinst1200 ,
     };
-    struct Slice_919  args2717 = ( (  get1155 ) ( ) );
-    struct List_373  temp1239;
-    struct List_373  file2718 = (  temp1239 );
-    struct Maybe_264  mfilename2719 = ( (struct Maybe_264) { .tag = Maybe_264_None_t } );
-    if ( (  eq45 ( ( (  args2717 ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) ) ) {
-        file2718 = ( (  mk964 ) ( (  al2568 ) ) );
-        struct funenv558  temp1240 = ( (struct funenv558){ .fun = add558, .env =  envinst558  } );
-        ( temp1240.fun ( temp1240.env ,  ( & (  file2718 ) ) ,  ( (  mk965 ) ( (  al2568 ) ) ) ) );
+    struct Slice_919  args2716 = ( (  get1156 ) ( ) );
+    struct List_373  temp1240;
+    struct List_373  file2717 = (  temp1240 );
+    struct Maybe_264  mfilename2718 = ( (struct Maybe_264) { .tag = Maybe_264_None_t } );
+    if ( (  eq45 ( ( (  args2716 ) .f_count ) , (  from_dash_integral11 ( 0 ) ) ) ) ) {
+        file2717 = ( (  mk964 ) ( (  al2565 ) ) );
+        struct funenv558  temp1241 = ( (struct funenv558){ .fun = add558, .env =  envinst558  } );
+        ( temp1241.fun ( temp1241.env ,  ( & (  file2717 ) ) ,  ( (  mk965 ) ( (  al2565 ) ) ) ) );
     } else {
-        struct funenv1196  temp1241 = ( (struct funenv1196){ .fun = load_dash_file1196, .env =  envinst1196  } );
-        file2718 = ( temp1241.fun ( temp1241.env ,  (  elem_dash_get929 ( (  args2717 ) , (  from_dash_integral11 ( 0 ) ) ) ) ,  (  al2568 ) ) );
-        struct funenv1038  temp1242 = ( (struct funenv1038){ .fun = mk_dash_const_dash_str1038, .env =  envinst1038  } );
-        mfilename2719 = ( ( Maybe_264_Just ) ( ( temp1242.fun ( temp1242.env ,  (  elem_dash_get929 ( (  args2717 ) , (  from_dash_integral11 ( 0 ) ) ) ) ,  (  al2568 ) ) ) ) );
+        struct funenv1197  temp1242 = ( (struct funenv1197){ .fun = load_dash_file1197, .env =  envinst1197  } );
+        file2717 = ( temp1242.fun ( temp1242.env ,  (  elem_dash_get929 ( (  args2716 ) , (  from_dash_integral11 ( 0 ) ) ) ) ,  (  al2565 ) ) );
+        struct funenv1038  temp1243 = ( (struct funenv1038){ .fun = mk_dash_const_dash_str1038, .env =  envinst1038  } );
+        mfilename2718 = ( ( Maybe_264_Just ) ( ( temp1243.fun ( temp1243.env ,  (  elem_dash_get929 ( (  args2716 ) , (  from_dash_integral11 ( 0 ) ) ) ) ,  (  al2565 ) ) ) ) );
     }
-    struct Editor_1056  temp1243 = ( (struct Editor_1056) { .f_cursor = ( (struct Cursor_1057) { .f_x = (  from_dash_integral29 ( 0 ) ) , .f_y = (  from_dash_integral29 ( 0 ) ) } ) , .f_running = ( true ) , .f_goal_dash_x = ( ( Visual_1058_Visual ) ( (  from_dash_integral29 ( 0 ) ) ) ) , .f_screen_dash_top = (  from_dash_integral29 ( 0 ) ) , .f_screen_dash_left = (  from_dash_integral29 ( 0 ) ) , .f_current_dash_file = (  file2718 ) , .f_filename = (  mfilename2719 ) , .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } ) , .f_anim = ( ( Maybe_1053_Just ) ( ( (  now1069 ) ( ) ) ) ) } );
-    struct Editor_1056 *  ed2720 = ( &temp1243 );
-    struct funenv1086  temp1245 = ( (struct funenv1086){ .fun = mk1086, .env =  envinst1086  } );
-    struct Tui_635  temp1244 = ( temp1245.fun ( temp1245.env ) );
-    struct Tui_635 *  tui2721 = ( &temp1244 );
-    enum CAllocator_4  al2722 = ( (  idc935 ) ( ) );
-    struct Screen_634  temp1246 = ( (  mk_dash_screen1110 ) ( (  tui2721 ) ,  (  al2722 ) ) );
-    struct Screen_634 *  screen2723 = ( &temp1246 );
-    uint32_t  counter2724 = ( (  from_dash_integral36 ( 0 ) ) );
-    bool  first_dash_draw2725 = ( true );
-    while ( ( ( * (  ed2720 ) ) .f_running ) ) {
-        int32_t  events2726 = (  from_dash_integral29 ( 0 ) );
-        struct FunIter_537  temp1247 =  into_dash_iter536 ( ( (  from_dash_function543 ) ( (  read_dash_key1103 ) ) ) );
+    struct Editor_1056  temp1244 = ( (struct Editor_1056) { .f_cursor = ( (struct Cursor_1057) { .f_x = (  from_dash_integral29 ( 0 ) ) , .f_y = (  from_dash_integral29 ( 0 ) ) } ) , .f_running = ( true ) , .f_goal_dash_x = ( ( Visual_1058_Visual ) ( (  from_dash_integral29 ( 0 ) ) ) ) , .f_screen_dash_top = (  from_dash_integral29 ( 0 ) ) , .f_screen_dash_left = (  from_dash_integral29 ( 0 ) ) , .f_current_dash_file = (  file2717 ) , .f_filename = (  mfilename2718 ) , .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } ) , .f_anim = ( ( Maybe_1053_Just ) ( ( (  now1070 ) ( ) ) ) ) , .f_selected = ( (struct Maybe_1059) { .tag = Maybe_1059_None_t } ) } );
+    struct Editor_1056 *  ed2719 = ( &temp1244 );
+    struct funenv1087  temp1246 = ( (struct funenv1087){ .fun = mk1087, .env =  envinst1087  } );
+    struct Tui_635  temp1245 = ( temp1246.fun ( temp1246.env ) );
+    struct Tui_635 *  tui2720 = ( &temp1245 );
+    enum CAllocator_4  al2721 = ( (  idc935 ) ( ) );
+    struct Screen_634  temp1247 = ( (  mk_dash_screen1111 ) ( (  tui2720 ) ,  (  al2721 ) ) );
+    struct Screen_634 *  screen2722 = ( &temp1247 );
+    uint32_t  counter2723 = ( (  from_dash_integral36 ( 0 ) ) );
+    bool  first_dash_draw2724 = ( true );
+    while ( ( ( * (  ed2719 ) ) .f_running ) ) {
+        int32_t  events2725 = (  from_dash_integral29 ( 0 ) );
+        struct FunIter_537  temp1248 =  into_dash_iter536 ( ( (  from_dash_function543 ) ( (  read_dash_key1104 ) ) ) );
         while (true) {
-            struct Maybe_538  __cond1248 =  next542 (&temp1247);
-            if (  __cond1248 .tag == 0 ) {
+            struct Maybe_538  __cond1249 =  next542 (&temp1248);
+            if (  __cond1249 .tag == 0 ) {
                 break;
             }
-            struct InputEvent_539  ev2728 =  __cond1248 .stuff .Maybe_538_Just_s .field0;
-            events2726 = (  op_dash_add81 ( (  events2726 ) , (  from_dash_integral29 ( 1 ) ) ) );
-            struct funenv1109  temp1249 = ( (struct funenv1109){ .fun = update_dash_dimensions1109, .env =  envinst1109  } );
-            ( temp1249.fun ( temp1249.env ,  (  tui2721 ) ) );
-            struct InputEvent_539  dref2729 = (  ev2728 );
-            if ( dref2729.tag == InputEvent_539_Key_t ) {
-                struct Key_540  dref2731 = ( dref2729 .stuff .InputEvent_539_Key_s .field0 );
-                if ( dref2731.tag == Key_540_Char_t ) {
-                    struct Mode_780 *  dref2733 = ( & ( ( * (  ed2720 ) ) .f_mode ) );
-                    if ( (* dref2733 ).tag == Mode_780_Normal_t ) {
-                        int32_t  code2734 = ( (  u8_dash_i32275 ) ( ( (  cast194 ) ( ( dref2731 .stuff .Key_540_Char_s .field0 ) ) ) ) );
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "q" ) ) ) ) ) ) {
-                            (*  ed2720 ) .f_running = ( false );
+            struct InputEvent_539  ev2727 =  __cond1249 .stuff .Maybe_538_Just_s .field0;
+            events2725 = (  op_dash_add81 ( (  events2725 ) , (  from_dash_integral29 ( 1 ) ) ) );
+            struct funenv1110  temp1250 = ( (struct funenv1110){ .fun = update_dash_dimensions1110, .env =  envinst1110  } );
+            ( temp1250.fun ( temp1250.env ,  (  tui2720 ) ) );
+            struct InputEvent_539  dref2728 = (  ev2727 );
+            if ( dref2728.tag == InputEvent_539_Key_t ) {
+                struct Key_540  dref2730 = ( dref2728 .stuff .InputEvent_539_Key_s .field0 );
+                if ( dref2730.tag == Key_540_Char_t ) {
+                    struct Mode_780 *  dref2732 = ( & ( ( * (  ed2719 ) ) .f_mode ) );
+                    if ( (* dref2732 ).tag == Mode_780_Normal_t ) {
+                        int32_t  code2733 = ( (  u8_dash_i32275 ) ( ( (  cast194 ) ( ( dref2730 .stuff .Key_540_Char_s .field0 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "q" ) ) ) ) ) ) {
+                            (*  ed2719 ) .f_running = ( false );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "k" ) ) ) ) ) ) {
-                            struct funenv1173  temp1250 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  envinst1173  } );
-                            struct funenv1208  temp1251 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1250.fun ( temp1250.env ,  (  ed2720 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1251.fun ( temp1251.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "k" ) ) ) ) ) ) {
+                            struct funenv1174  temp1251 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  envinst1174  } );
+                            struct funenv1209  temp1252 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1251.fun ( temp1251.env ,  (  ed2719 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1252.fun ( temp1252.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "j" ) ) ) ) ) ) {
-                            struct funenv1173  temp1252 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  envinst1173  } );
-                            struct funenv1208  temp1253 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1252.fun ( temp1252.env ,  (  ed2720 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1253.fun ( temp1253.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "j" ) ) ) ) ) ) {
+                            struct funenv1174  temp1253 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  envinst1174  } );
+                            struct funenv1209  temp1254 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1253.fun ( temp1253.env ,  (  ed2719 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1254.fun ( temp1254.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "h" ) ) ) ) ) ) {
-                            struct funenv1175  temp1254 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                            struct funenv1208  temp1255 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1254.fun ( temp1254.env ,  (  ed2720 ) ,  ( temp1255.fun ( temp1255.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "h" ) ) ) ) ) ) {
+                            struct funenv1176  temp1255 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                            struct funenv1209  temp1256 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1255.fun ( temp1255.env ,  (  ed2719 ) ,  ( temp1256.fun ( temp1256.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "l" ) ) ) ) ) ) {
-                            struct funenv1179  temp1256 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                            struct funenv1208  temp1257 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1256.fun ( temp1256.env ,  (  ed2720 ) ,  ( temp1257.fun ( temp1257.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "l" ) ) ) ) ) ) {
+                            struct funenv1180  temp1257 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                            struct funenv1209  temp1258 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1257.fun ( temp1257.env ,  (  ed2719 ) ,  ( temp1258.fun ( temp1258.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "i" ) ) ) ) ) ) {
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "i" ) ) ) ) ) ) {
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "d" ) ) ) ) ) ) {
-                            struct funenv1187  temp1258 = ( (struct funenv1187){ .fun = delete_dash_at_dash_current1187, .env =  envinst1187  } );
-                            ( temp1258.fun ( temp1258.env ,  (  ed2720 ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "d" ) ) ) ) ) ) {
+                            struct funenv1188  temp1259 = ( (struct funenv1188){ .fun = delete_dash_at_dash_current1188, .env =  envinst1188  } );
+                            ( temp1259.fun ( temp1259.env ,  (  ed2719 ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "c" ) ) ) ) ) ) {
-                            struct funenv1187  temp1259 = ( (struct funenv1187){ .fun = delete_dash_at_dash_current1187, .env =  envinst1187  } );
-                            ( temp1259.fun ( temp1259.env ,  (  ed2720 ) ) );
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "c" ) ) ) ) ) ) {
+                            struct funenv1188  temp1260 = ( (struct funenv1188){ .fun = delete_dash_at_dash_current1188, .env =  envinst1188  } );
+                            ( temp1260.fun ( temp1260.env ,  (  ed2719 ) ) );
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "I" ) ) ) ) ) ) {
-                            struct funenv1182  temp1260 = ( (struct funenv1182){ .fun = move_dash_to_dash_start_dash_of_dash_line_dash_indented1182, .env =  envinst1182  } );
-                            struct funenv1208  temp1261 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1260.fun ( temp1260.env ,  (  ed2720 ) ,  ( temp1261.fun ( temp1261.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "I" ) ) ) ) ) ) {
+                            struct funenv1183  temp1261 = ( (struct funenv1183){ .fun = move_dash_to_dash_start_dash_of_dash_line_dash_indented1183, .env =  envinst1183  } );
+                            struct funenv1209  temp1262 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1261.fun ( temp1261.env ,  (  ed2719 ) ,  ( temp1262.fun ( temp1262.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
-                            struct funenv1184  temp1262 = ( (struct funenv1184){ .fun = move_dash_to_dash_end_dash_of_dash_line1184, .env =  envinst1184  } );
-                            struct funenv1208  temp1263 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1262.fun ( temp1262.env ,  (  ed2720 ) ,  ( temp1263.fun ( temp1263.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
+                            struct funenv1185  temp1263 = ( (struct funenv1185){ .fun = move_dash_to_dash_end_dash_of_dash_line1185, .env =  envinst1185  } );
+                            struct funenv1209  temp1264 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1263.fun ( temp1263.env ,  (  ed2719 ) ,  ( temp1264.fun ( temp1264.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "o" ) ) ) ) ) ) {
-                            struct funenv1191  temp1264 = ( (struct funenv1191){ .fun = insert_dash_empty_dash_row_dash_at1191, .env =  envinst1191  } );
-                            ( temp1264.fun ( temp1264.env ,  (  ed2720 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  al2722 ) ) );
-                            struct List_3 *  currow2735 = ( (  get_dash_row1158 ) ( (  ed2720 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
-                            struct funenv1167  temp1265 = ( (struct funenv1167){ .fun = move_dash_to1167, .env =  envinst1167  } );
-                            struct funenv1208  temp1266 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1265.fun ( temp1265.env ,  (  ed2720 ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  currow2735 ) ) ) ) ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1266.fun ( temp1266.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "o" ) ) ) ) ) ) {
+                            struct funenv1192  temp1265 = ( (struct funenv1192){ .fun = insert_dash_empty_dash_row_dash_at1192, .env =  envinst1192  } );
+                            ( temp1265.fun ( temp1265.env ,  (  ed2719 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  (  al2721 ) ) );
+                            struct List_3 *  currow2734 = ( (  get_dash_row1159 ) ( (  ed2719 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
+                            struct funenv1168  temp1266 = ( (struct funenv1168){ .fun = move_dash_to1168, .env =  envinst1168  } );
+                            struct funenv1209  temp1267 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1266.fun ( temp1266.env ,  (  ed2719 ) ,  ( (  size_dash_i32269 ) ( ( (  size998 ) ( (  currow2734 ) ) ) ) ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1267.fun ( temp1267.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "O" ) ) ) ) ) ) {
-                            struct funenv1191  temp1267 = ( (struct funenv1191){ .fun = insert_dash_empty_dash_row_dash_at1191, .env =  envinst1191  } );
-                            ( temp1267.fun ( temp1267.env ,  (  ed2720 ) ,  ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ,  (  al2722 ) ) );
-                            struct funenv1184  temp1268 = ( (struct funenv1184){ .fun = move_dash_to_dash_end_dash_of_dash_line1184, .env =  envinst1184  } );
-                            struct funenv1208  temp1269 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1268.fun ( temp1268.env ,  (  ed2720 ) ,  ( temp1269.fun ( temp1269.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                            (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "O" ) ) ) ) ) ) {
+                            struct funenv1192  temp1268 = ( (struct funenv1192){ .fun = insert_dash_empty_dash_row_dash_at1192, .env =  envinst1192  } );
+                            ( temp1268.fun ( temp1268.env ,  (  ed2719 ) ,  ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ,  (  al2721 ) ) );
+                            struct funenv1185  temp1269 = ( (struct funenv1185){ .fun = move_dash_to_dash_end_dash_of_dash_line1185, .env =  envinst1185  } );
+                            struct funenv1209  temp1270 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1269.fun ( temp1269.env ,  (  ed2719 ) ,  ( temp1270.fun ( temp1270.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
+                            (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Insert_t } );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( ":" ) ) ) ) ) ) {
-                            (*  ed2720 ) .f_mode = ( ( Mode_780_Cmd ) ( ( (  mk1036 ) ( (  al2722 ) ) ) ) );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( ":" ) ) ) ) ) ) {
+                            (*  ed2719 ) .f_mode = ( ( Mode_780_Cmd ) ( ( (  mk1036 ) ( (  al2721 ) ) ) ) );
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "w" ) ) ) ) ) ) {
-                            struct funenv1208  temp1270 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            struct Dims_1168  dims2736 = ( temp1270.fun ( temp1270.env ,  (  ed2720 ) ,  (  tui2721 ) ) );
-                            struct funenv1179  temp1271 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                            ( temp1271.fun ( temp1271.env ,  (  ed2720 ) ,  (  dims2736 ) ) );
-                            bool  changed2737 = ( true );
-                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1186 ) ( (  ed2720 ) ) ) ) {
-                                struct funenv1179  temp1272 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1272.fun ( temp1272.env ,  (  ed2720 ) ,  (  dims2736 ) ) ) ) ) {
-                                    changed2737 = ( false );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "w" ) ) ) ) ) ) {
+                            struct funenv1209  temp1271 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            struct Dims_1169  dims2735 = ( temp1271.fun ( temp1271.env ,  (  ed2719 ) ,  (  tui2720 ) ) );
+                            struct funenv1180  temp1272 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                            ( temp1272.fun ( temp1272.env ,  (  ed2719 ) ,  (  dims2735 ) ) );
+                            bool  changed2736 = ( true );
+                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1187 ) ( (  ed2719 ) ) ) ) {
+                                struct funenv1180  temp1273 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1273.fun ( temp1273.env ,  (  ed2719 ) ,  (  dims2735 ) ) ) ) ) {
+                                    changed2736 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1061 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1273 ) ,  ( false ) ) ) ) {
-                                struct funenv1179  temp1274 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1274.fun ( temp1274.env ,  (  ed2720 ) ,  (  dims2736 ) ) ) ) ) {
-                                    changed2737 = ( false );
+                            while ( ( (  maybe1062 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1274 ) ,  ( false ) ) ) ) {
+                                struct funenv1180  temp1275 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1275.fun ( temp1275.env ,  (  ed2719 ) ,  (  dims2735 ) ) ) ) ) {
+                                    changed2736 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1062 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1275 ) ,  ( false ) ) ) ) {
-                                struct funenv1179  temp1276 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1276.fun ( temp1276.env ,  (  ed2720 ) ,  (  dims2736 ) ) ) ) ) {
-                                    changed2737 = ( false );
+                            while ( ( (  maybe1063 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1276 ) ,  ( false ) ) ) ) {
+                                struct funenv1180  temp1277 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1277.fun ( temp1277.env ,  (  ed2719 ) ,  (  dims2735 ) ) ) ) ) {
+                                    changed2736 = ( false );
                                     break;
                                 }
                             }
-                            if ( (  changed2737 ) ) {
-                                struct funenv1175  temp1277 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                                ( temp1277.fun ( temp1277.env ,  (  ed2720 ) ,  (  dims2736 ) ) );
+                            if ( (  changed2736 ) ) {
+                                struct funenv1176  temp1278 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                                ( temp1278.fun ( temp1278.env ,  (  ed2719 ) ,  (  dims2735 ) ) );
                             }
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "e" ) ) ) ) ) ) {
-                            struct funenv1208  temp1278 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            struct Dims_1168  dims2742 = ( temp1278.fun ( temp1278.env ,  (  ed2720 ) ,  (  tui2721 ) ) );
-                            struct funenv1179  temp1279 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                            ( temp1279.fun ( temp1279.env ,  (  ed2720 ) ,  (  dims2742 ) ) );
-                            bool  changed2743 = ( true );
-                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1186 ) ( (  ed2720 ) ) ) ) {
-                                struct funenv1179  temp1280 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1280.fun ( temp1280.env ,  (  ed2720 ) ,  (  dims2742 ) ) ) ) ) {
-                                    changed2743 = ( false );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "e" ) ) ) ) ) ) {
+                            struct funenv1209  temp1279 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            struct Dims_1169  dims2741 = ( temp1279.fun ( temp1279.env ,  (  ed2719 ) ,  (  tui2720 ) ) );
+                            struct funenv1180  temp1280 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                            ( temp1280.fun ( temp1280.env ,  (  ed2719 ) ,  (  dims2741 ) ) );
+                            bool  changed2742 = ( true );
+                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1187 ) ( (  ed2719 ) ) ) ) {
+                                struct funenv1180  temp1281 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1281.fun ( temp1281.env ,  (  ed2719 ) ,  (  dims2741 ) ) ) ) ) {
+                                    changed2742 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1063 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1281 ) ,  ( false ) ) ) ) {
-                                struct funenv1179  temp1282 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1282.fun ( temp1282.env ,  (  ed2720 ) ,  (  dims2742 ) ) ) ) ) {
-                                    changed2743 = ( false );
+                            while ( ( (  maybe1064 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1282 ) ,  ( false ) ) ) ) {
+                                struct funenv1180  temp1283 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1283.fun ( temp1283.env ,  (  ed2719 ) ,  (  dims2741 ) ) ) ) ) {
+                                    changed2742 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1064 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1283 ) ,  ( false ) ) ) ) {
-                                struct funenv1179  temp1284 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                if ( ( ! ( temp1284.fun ( temp1284.env ,  (  ed2720 ) ,  (  dims2742 ) ) ) ) ) {
-                                    changed2743 = ( false );
+                            while ( ( (  maybe1065 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1284 ) ,  ( false ) ) ) ) {
+                                struct funenv1180  temp1285 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                if ( ( ! ( temp1285.fun ( temp1285.env ,  (  ed2719 ) ,  (  dims2741 ) ) ) ) ) {
+                                    changed2742 = ( false );
                                     break;
                                 }
                             }
-                            if ( (  changed2743 ) ) {
-                                struct funenv1175  temp1285 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                                ( temp1285.fun ( temp1285.env ,  (  ed2720 ) ,  (  dims2742 ) ) );
+                            if ( (  changed2742 ) ) {
+                                struct funenv1176  temp1286 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                                ( temp1286.fun ( temp1286.env ,  (  ed2719 ) ,  (  dims2741 ) ) );
                             }
                         }
-                        if ( (  eq47 ( ( dref2731 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "b" ) ) ) ) ) ) {
-                            struct funenv1208  temp1286 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            struct Dims_1168  dims2748 = ( temp1286.fun ( temp1286.env ,  (  ed2720 ) ,  (  tui2721 ) ) );
-                            struct funenv1175  temp1287 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                            ( temp1287.fun ( temp1287.env ,  (  ed2720 ) ,  (  dims2748 ) ) );
-                            bool  changed2749 = ( true );
-                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1186 ) ( (  ed2720 ) ) ) ) {
-                                struct funenv1175  temp1288 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                                if ( ( ! ( temp1288.fun ( temp1288.env ,  (  ed2720 ) ,  (  dims2748 ) ) ) ) ) {
-                                    changed2749 = ( false );
+                        if ( (  eq47 ( ( dref2730 .stuff .Key_540_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "b" ) ) ) ) ) ) {
+                            struct funenv1209  temp1287 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            struct Dims_1169  dims2747 = ( temp1287.fun ( temp1287.env ,  (  ed2719 ) ,  (  tui2720 ) ) );
+                            struct funenv1176  temp1288 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                            ( temp1288.fun ( temp1288.env ,  (  ed2719 ) ,  (  dims2747 ) ) );
+                            bool  changed2748 = ( true );
+                            while ( ( (  cursor_dash_is_dash_at_dash_line_dash_end1187 ) ( (  ed2719 ) ) ) ) {
+                                struct funenv1176  temp1289 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                                if ( ( ! ( temp1289.fun ( temp1289.env ,  (  ed2719 ) ,  (  dims2747 ) ) ) ) ) {
+                                    changed2748 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1065 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1289 ) ,  ( false ) ) ) ) {
-                                struct funenv1175  temp1290 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                                if ( ( ! ( temp1290.fun ( temp1290.env ,  (  ed2720 ) ,  (  dims2748 ) ) ) ) ) {
-                                    changed2749 = ( false );
+                            while ( ( (  maybe1066 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1290 ) ,  ( false ) ) ) ) {
+                                struct funenv1176  temp1291 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                                if ( ( ! ( temp1291.fun ( temp1291.env ,  (  ed2719 ) ,  (  dims2747 ) ) ) ) ) {
+                                    changed2748 = ( false );
                                     break;
                                 }
                             }
-                            while ( ( (  maybe1066 ) ( ( (  char_dash_at_dash_cursor1161 ) ( (  ed2720 ) ) ) ,  (  lam1291 ) ,  ( false ) ) ) ) {
-                                struct funenv1175  temp1292 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                                if ( ( ! ( temp1292.fun ( temp1292.env ,  (  ed2720 ) ,  (  dims2748 ) ) ) ) ) {
-                                    changed2749 = ( false );
+                            while ( ( (  maybe1067 ) ( ( (  char_dash_at_dash_cursor1162 ) ( (  ed2719 ) ) ) ,  (  lam1292 ) ,  ( false ) ) ) ) {
+                                struct funenv1176  temp1293 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                                if ( ( ! ( temp1293.fun ( temp1293.env ,  (  ed2719 ) ,  (  dims2747 ) ) ) ) ) {
+                                    changed2748 = ( false );
                                     break;
                                 }
                             }
-                            if ( (  changed2749 ) ) {
-                                struct funenv1179  temp1293 = ( (struct funenv1179){ .fun = move_dash_right1179, .env =  envinst1179  } );
-                                ( temp1293.fun ( temp1293.env ,  (  ed2720 ) ,  (  dims2748 ) ) );
+                            if ( (  changed2748 ) ) {
+                                struct funenv1180  temp1294 = ( (struct funenv1180){ .fun = move_dash_right1180, .env =  envinst1180  } );
+                                ( temp1294.fun ( temp1294.env ,  (  ed2719 ) ,  (  dims2747 ) ) );
                             }
                         }
                     }
-                    else if ( (* dref2733 ).tag == Mode_780_Insert_t ) {
-                        struct funenv973  temp1294 = ( (struct funenv973){ .fun = insert973, .env =  envinst973  } );
-                        ( temp1294.fun ( temp1294.env ,  ( (  cursor_dash_row1159 ) ( (  ed2720 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_x ) ) ) ,  ( dref2731 .stuff .Key_540_Char_s .field0 ) ) );
-                        struct funenv1171  temp1295 = ( (struct funenv1171){ .fun = move_dash_to_dash_col1171, .env =  envinst1171  } );
-                        struct funenv1208  temp1296 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                        ( temp1295.fun ( temp1295.env ,  (  ed2720 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1296.fun ( temp1296.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                    else if ( (* dref2732 ).tag == Mode_780_Insert_t ) {
+                        struct funenv973  temp1295 = ( (struct funenv973){ .fun = insert973, .env =  envinst973  } );
+                        ( temp1295.fun ( temp1295.env ,  ( (  cursor_dash_row1160 ) ( (  ed2719 ) ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_x ) ) ) ,  ( dref2730 .stuff .Key_540_Char_s .field0 ) ) );
+                        struct funenv1172  temp1296 = ( (struct funenv1172){ .fun = move_dash_to_dash_col1172, .env =  envinst1172  } );
+                        struct funenv1209  temp1297 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                        ( temp1296.fun ( temp1296.env ,  (  ed2719 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1297.fun ( temp1297.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                     }
-                    else if ( (* dref2733 ).tag == Mode_780_Cmd_t ) {
-                        struct funenv619  temp1297 = ( (struct funenv619){ .fun = write_dash_char619, .env =  envinst619  } );
-                        ( temp1297.fun ( temp1297.env ,  ( & ( (* dref2733 ) .stuff .Mode_780_Cmd_s .field0 ) ) ,  ( dref2731 .stuff .Key_540_Char_s .field0 ) ) );
+                    else if ( (* dref2732 ).tag == Mode_780_Cmd_t ) {
+                        struct funenv625  temp1298 = ( (struct funenv625){ .fun = write_dash_char625, .env =  envinst625  } );
+                        ( temp1298.fun ( temp1298.env ,  ( & ( (* dref2732 ) .stuff .Mode_780_Cmd_s .field0 ) ) ,  ( dref2730 .stuff .Key_540_Char_s .field0 ) ) );
                     }
                 }
-                else if ( dref2731.tag == Key_540_Ctrl_t ) {
-                    if ( (  eq47 ( ( dref2731 .stuff .Key_540_Ctrl_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "u" ) ) ) ) ) ) {
-                        (*  ed2720 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( ( * (  ed2720 ) ) .f_screen_dash_top ) , (  from_dash_integral29 ( 15 ) ) ) ) ) );
-                        struct funenv1173  temp1298 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  envinst1173  } );
-                        struct funenv1208  temp1299 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                        ( temp1298.fun ( temp1298.env ,  (  ed2720 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 15 ) ) ) ) ,  ( temp1299.fun ( temp1299.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                else if ( dref2730.tag == Key_540_Ctrl_t ) {
+                    if ( (  eq47 ( ( dref2730 .stuff .Key_540_Ctrl_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "u" ) ) ) ) ) ) {
+                        (*  ed2719 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( ( ( * (  ed2719 ) ) .f_screen_dash_top ) , (  from_dash_integral29 ( 15 ) ) ) ) ) );
+                        struct funenv1174  temp1299 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  envinst1174  } );
+                        struct funenv1209  temp1300 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                        ( temp1299.fun ( temp1299.env ,  (  ed2719 ) ,  (  op_dash_sub82 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 15 ) ) ) ) ,  ( temp1300.fun ( temp1300.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                     }
-                    if ( (  eq47 ( ( dref2731 .stuff .Key_540_Ctrl_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "d" ) ) ) ) ) ) {
-                        (*  ed2720 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_add81 ( ( ( * (  ed2720 ) ) .f_screen_dash_top ) , (  from_dash_integral29 ( 15 ) ) ) ) ) );
-                        struct funenv1173  temp1300 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  envinst1173  } );
-                        struct funenv1208  temp1301 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                        ( temp1300.fun ( temp1300.env ,  (  ed2720 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 15 ) ) ) ) ,  ( temp1301.fun ( temp1301.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                    }
-                }
-                else if ( dref2731.tag == Key_540_Escape_t ) {
-                    struct Mode_780  dref2756 = ( ( * (  ed2720 ) ) .f_mode );
-                    if ( dref2756.tag == Mode_780_Normal_t ) {
-                    }
-                    else if ( dref2756.tag == Mode_780_Insert_t ) {
-                        (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
-                    }
-                    else if ( dref2756.tag == Mode_780_Cmd_t ) {
-                        ( (  free1037 ) ( ( & ( dref2756 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
-                        (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
+                    if ( (  eq47 ( ( dref2730 .stuff .Key_540_Ctrl_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "d" ) ) ) ) ) ) {
+                        (*  ed2719 ) .f_screen_dash_top = ( (  max766 ) ( (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_add81 ( ( ( * (  ed2719 ) ) .f_screen_dash_top ) , (  from_dash_integral29 ( 15 ) ) ) ) ) );
+                        struct funenv1174  temp1301 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  envinst1174  } );
+                        struct funenv1209  temp1302 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                        ( temp1301.fun ( temp1301.env ,  (  ed2719 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 15 ) ) ) ) ,  ( temp1302.fun ( temp1302.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                     }
                 }
-                else if ( dref2731.tag == Key_540_Backspace_t ) {
-                    struct Mode_780 *  dref2758 = ( & ( ( * (  ed2720 ) ) .f_mode ) );
-                    if ( (* dref2758 ).tag == Mode_780_Normal_t ) {
+                else if ( dref2730.tag == Key_540_Escape_t ) {
+                    struct Mode_780  dref2755 = ( ( * (  ed2719 ) ) .f_mode );
+                    if ( dref2755.tag == Mode_780_Normal_t ) {
                     }
-                    else if ( (* dref2758 ).tag == Mode_780_Insert_t ) {
-                        if ( ( ! ( (  eq41 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 0 ) ) ) ) && (  eq41 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 0 ) ) ) ) ) ) ) {
-                            struct funenv1175  temp1302 = ( (struct funenv1175){ .fun = move_dash_left1175, .env =  envinst1175  } );
-                            struct funenv1208  temp1303 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1302.fun ( temp1302.env ,  (  ed2720 ) ,  ( temp1303.fun ( temp1303.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
-                            struct funenv1187  temp1304 = ( (struct funenv1187){ .fun = delete_dash_at_dash_current1187, .env =  envinst1187  } );
-                            ( temp1304.fun ( temp1304.env ,  (  ed2720 ) ) );
+                    else if ( dref2755.tag == Mode_780_Insert_t ) {
+                        (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
+                    }
+                    else if ( dref2755.tag == Mode_780_Cmd_t ) {
+                        ( (  free1037 ) ( ( & ( dref2755 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
+                        (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
+                    }
+                }
+                else if ( dref2730.tag == Key_540_Backspace_t ) {
+                    struct Mode_780 *  dref2757 = ( & ( ( * (  ed2719 ) ) .f_mode ) );
+                    if ( (* dref2757 ).tag == Mode_780_Normal_t ) {
+                    }
+                    else if ( (* dref2757 ).tag == Mode_780_Insert_t ) {
+                        if ( ( ! ( (  eq41 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_x ) , (  from_dash_integral29 ( 0 ) ) ) ) && (  eq41 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 0 ) ) ) ) ) ) ) {
+                            struct funenv1176  temp1303 = ( (struct funenv1176){ .fun = move_dash_left1176, .env =  envinst1176  } );
+                            struct funenv1209  temp1304 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1303.fun ( temp1303.env ,  (  ed2719 ) ,  ( temp1304.fun ( temp1304.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
+                            struct funenv1188  temp1305 = ( (struct funenv1188){ .fun = delete_dash_at_dash_current1188, .env =  envinst1188  } );
+                            ( temp1305.fun ( temp1305.env ,  (  ed2719 ) ) );
                         }
                     }
-                    else if ( (* dref2758 ).tag == Mode_780_Cmd_t ) {
-                        if ( (  cmp9 ( ( (  count1035 ) ( ( & ( (* dref2758 ) .stuff .Mode_780_Cmd_s .field0 ) ) ) ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ) {
-                            struct funenv1033  temp1305 = ( (struct funenv1033){ .fun = pop1033, .env =  envinst1033  } );
-                            ( temp1305.fun ( temp1305.env ,  ( & ( (* dref2758 ) .stuff .Mode_780_Cmd_s .field0 ) ) ) );
+                    else if ( (* dref2757 ).tag == Mode_780_Cmd_t ) {
+                        if ( (  cmp9 ( ( (  count1035 ) ( ( & ( (* dref2757 ) .stuff .Mode_780_Cmd_s .field0 ) ) ) ) , (  from_dash_integral11 ( 0 ) ) ) == 2 ) ) {
+                            struct funenv1033  temp1306 = ( (struct funenv1033){ .fun = pop1033, .env =  envinst1033  } );
+                            ( temp1306.fun ( temp1306.env ,  ( & ( (* dref2757 ) .stuff .Mode_780_Cmd_s .field0 ) ) ) );
                         }
                     }
                 }
-                else if ( dref2731.tag == Key_540_Enter_t ) {
-                    struct Mode_780  dref2760 = ( ( * (  ed2720 ) ) .f_mode );
-                    if ( dref2760.tag == Mode_780_Normal_t ) {
+                else if ( dref2730.tag == Key_540_Enter_t ) {
+                    struct Mode_780  dref2759 = ( ( * (  ed2719 ) ) .f_mode );
+                    if ( dref2759.tag == Mode_780_Normal_t ) {
                     }
-                    else if ( dref2760.tag == Mode_780_Insert_t ) {
-                        int32_t  cx2761 = ( ( ( * (  ed2720 ) ) .f_cursor ) .f_x );
-                        struct List_3  temp1306 = ( (  mk965 ) ( (  al2722 ) ) );
-                        struct List_3 *  nurow2762 = ( &temp1306 );
-                        struct TakeWhile_502  rowws2763 = ( (  indent_dash_on_dash_row1160 ) ( (  ed2720 ) ,  ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ) );
-                        int32_t  offchars2764 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( (  rowws2763 ) ) ) ) );
-                        struct funenv985  temp1307 = ( (struct funenv985){ .fun = add_dash_all985, .env =  envinst985  } );
-                        ( temp1307.fun ( temp1307.env ,  (  nurow2762 ) ,  (  rowws2763 ) ) );
-                        struct List_3 *  cur_dash_row2765 = ( (  cursor_dash_row1159 ) ( (  ed2720 ) ) );
-                        struct funenv987  temp1308 = ( (struct funenv987){ .fun = add_dash_all987, .env =  envinst987  } );
-                        ( temp1308.fun ( temp1308.env ,  (  nurow2762 ) ,  ( (  subslice283 ) ( ( (  to_dash_slice995 ) ( ( * (  cur_dash_row2765 ) ) ) ) ,  ( (  i32_dash_size267 ) ( (  cx2761 ) ) ) ,  ( ( * (  cur_dash_row2765 ) ) .f_count ) ) ) ) );
-                        ( (  trim989 ) ( (  cur_dash_row2765 ) ,  ( (  i32_dash_size267 ) ( (  cx2761 ) ) ) ) );
-                        struct funenv970  temp1309 = ( (struct funenv970){ .fun = insert970, .env =  envinst970  } );
-                        ( temp1309.fun ( temp1309.env ,  ( & ( ( * (  ed2720 ) ) .f_current_dash_file ) ) ,  (  op_dash_add92 ( ( (  i32_dash_size267 ) ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ) ) , (  from_dash_integral11 ( 1 ) ) ) ) ,  ( * (  nurow2762 ) ) ) );
-                        struct funenv1167  temp1310 = ( (struct funenv1167){ .fun = move_dash_to1167, .env =  envinst1167  } );
-                        struct funenv1208  temp1311 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                        ( temp1310.fun ( temp1310.env ,  (  ed2720 ) ,  (  offchars2764 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1311.fun ( temp1311.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+                    else if ( dref2759.tag == Mode_780_Insert_t ) {
+                        int32_t  cx2760 = ( ( ( * (  ed2719 ) ) .f_cursor ) .f_x );
+                        struct List_3  temp1307 = ( (  mk965 ) ( (  al2721 ) ) );
+                        struct List_3 *  nurow2761 = ( &temp1307 );
+                        struct TakeWhile_502  rowws2762 = ( (  indent_dash_on_dash_row1161 ) ( (  ed2719 ) ,  ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ) );
+                        int32_t  offchars2763 = ( (  size_dash_i32269 ) ( ( (  count729 ) ( (  rowws2762 ) ) ) ) );
+                        struct funenv985  temp1308 = ( (struct funenv985){ .fun = add_dash_all985, .env =  envinst985  } );
+                        ( temp1308.fun ( temp1308.env ,  (  nurow2761 ) ,  (  rowws2762 ) ) );
+                        struct List_3 *  cur_dash_row2764 = ( (  cursor_dash_row1160 ) ( (  ed2719 ) ) );
+                        struct funenv987  temp1309 = ( (struct funenv987){ .fun = add_dash_all987, .env =  envinst987  } );
+                        ( temp1309.fun ( temp1309.env ,  (  nurow2761 ) ,  ( (  subslice283 ) ( ( (  to_dash_slice995 ) ( ( * (  cur_dash_row2764 ) ) ) ) ,  ( (  i32_dash_size267 ) ( (  cx2760 ) ) ) ,  ( ( * (  cur_dash_row2764 ) ) .f_count ) ) ) ) );
+                        ( (  trim989 ) ( (  cur_dash_row2764 ) ,  ( (  i32_dash_size267 ) ( (  cx2760 ) ) ) ) );
+                        struct funenv970  temp1310 = ( (struct funenv970){ .fun = insert970, .env =  envinst970  } );
+                        ( temp1310.fun ( temp1310.env ,  ( & ( ( * (  ed2719 ) ) .f_current_dash_file ) ) ,  (  op_dash_add92 ( ( (  i32_dash_size267 ) ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ) ) , (  from_dash_integral11 ( 1 ) ) ) ) ,  ( * (  nurow2761 ) ) ) );
+                        struct funenv1168  temp1311 = ( (struct funenv1168){ .fun = move_dash_to1168, .env =  envinst1168  } );
+                        struct funenv1209  temp1312 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                        ( temp1311.fun ( temp1311.env ,  (  ed2719 ) ,  (  offchars2763 ) ,  (  op_dash_add81 ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) , (  from_dash_integral29 ( 1 ) ) ) ) ,  ( temp1312.fun ( temp1312.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                     }
-                    else if ( dref2760.tag == Mode_780_Cmd_t ) {
-                        struct DynStr_130  s2767 = ( (  as_dash_str786 ) ( ( & ( dref2760 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
-                        struct funenv1230  temp1312 = ( (struct funenv1230){ .fun = run_dash_cmd1230, .env =  envinst1230  } );
-                        struct funenv1208  temp1313 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                        ( temp1312.fun ( temp1312.env ,  (  ed2720 ) ,  (  s2767 ) ,  ( temp1313.fun ( temp1313.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ,  (  al2722 ) ) );
-                        ( (  free1037 ) ( ( & ( dref2760 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
-                        (*  ed2720 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
+                    else if ( dref2759.tag == Mode_780_Cmd_t ) {
+                        struct DynStr_130  s2766 = ( (  as_dash_str786 ) ( ( & ( dref2759 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
+                        struct funenv1231  temp1313 = ( (struct funenv1231){ .fun = run_dash_cmd1231, .env =  envinst1231  } );
+                        struct funenv1209  temp1314 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                        ( temp1313.fun ( temp1313.env ,  (  ed2719 ) ,  (  s2766 ) ,  ( temp1314.fun ( temp1314.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ,  (  al2721 ) ) );
+                        ( (  free1037 ) ( ( & ( dref2759 .stuff .Mode_780_Cmd_s .field0 ) ) ) );
+                        (*  ed2719 ) .f_mode = ( (struct Mode_780) { .tag = Mode_780_Normal_t } );
                     }
                 }
                 else if ( true ) {
                 }
             }
-            else if ( dref2729.tag == InputEvent_539_Mouse_t ) {
-                enum MouseButton_141  dref2769 = ( ( dref2729 .stuff .InputEvent_539_Mouse_s .field0 ) .f_button );
-                switch (  dref2769 ) {
-                    case MouseButton_141_MouseLeft : {
-                        if ( ( ( dref2729 .stuff .InputEvent_539_Mouse_s .field0 ) .f_pressed ) ) {
-                            int32_t  linecnt2770 = ( (  size_dash_i32269 ) ( ( ( ( * (  ed2720 ) ) .f_current_dash_file ) .f_count ) ) );
-                            int32_t  cy2771 = ( (  clamp767 ) ( (  op_dash_add81 ( ( ( * (  ed2720 ) ) .f_screen_dash_top ) , ( ( dref2729 .stuff .InputEvent_539_Mouse_s .field0 ) .f_y ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  linecnt2770 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
-                            struct funenv1206  temp1314 = ( (struct funenv1206){ .fun = left_dash_offset1206, .env =  envinst1206  } );
-                            struct Visual_1058  vx2772 = ( ( Visual_1058_Visual ) ( (  op_dash_sub82 ( ( ( dref2729 .stuff .InputEvent_539_Mouse_s .field0 ) .f_x ) , ( ( temp1314.fun ( temp1314.env ,  (  ed2720 ) ) ) .f_total_dash_offset ) ) ) ) );
-                            struct funenv1163  temp1315 = ( (struct funenv1163){ .fun = visual_dash_x_dash_to_dash_x1163, .env =  envinst1163  } );
-                            int32_t  cx2773 = ( temp1315.fun ( temp1315.env ,  (  ed2720 ) ,  (  vx2772 ) ,  (  cy2771 ) ) );
-                            (*  ed2720 ) .f_cursor .f_x = (  cx2773 );
-                            (*  ed2720 ) .f_goal_dash_x = (  vx2772 );
-                            struct funenv1173  temp1316 = ( (struct funenv1173){ .fun = move_dash_to_dash_row1173, .env =  envinst1173  } );
-                            struct funenv1208  temp1317 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                            ( temp1316.fun ( temp1316.env ,  (  ed2720 ) ,  (  cy2771 ) ,  ( temp1317.fun ( temp1317.env ,  (  ed2720 ) ,  (  tui2721 ) ) ) ) );
+            else if ( dref2728.tag == InputEvent_539_Mouse_t ) {
+                enum MouseButton_143  dref2768 = ( ( dref2728 .stuff .InputEvent_539_Mouse_s .field0 ) .f_button );
+                switch (  dref2768 ) {
+                    case MouseButton_143_MouseLeft : {
+                        if ( ( ( dref2728 .stuff .InputEvent_539_Mouse_s .field0 ) .f_pressed ) ) {
+                            int32_t  linecnt2769 = ( (  size_dash_i32269 ) ( ( ( ( * (  ed2719 ) ) .f_current_dash_file ) .f_count ) ) );
+                            int32_t  cy2770 = ( (  clamp767 ) ( (  op_dash_add81 ( ( ( * (  ed2719 ) ) .f_screen_dash_top ) , ( ( dref2728 .stuff .InputEvent_539_Mouse_s .field0 ) .f_y ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  op_dash_sub82 ( (  linecnt2769 ) , (  from_dash_integral29 ( 1 ) ) ) ) ) );
+                            struct funenv1207  temp1315 = ( (struct funenv1207){ .fun = left_dash_offset1207, .env =  envinst1207  } );
+                            struct Visual_1058  vx2771 = ( ( Visual_1058_Visual ) ( (  op_dash_sub82 ( ( ( dref2728 .stuff .InputEvent_539_Mouse_s .field0 ) .f_x ) , ( ( temp1315.fun ( temp1315.env ,  (  ed2719 ) ) ) .f_total_dash_offset ) ) ) ) );
+                            struct funenv1164  temp1316 = ( (struct funenv1164){ .fun = visual_dash_x_dash_to_dash_x1164, .env =  envinst1164  } );
+                            int32_t  cx2772 = ( temp1316.fun ( temp1316.env ,  (  ed2719 ) ,  (  vx2771 ) ,  (  cy2770 ) ) );
+                            (*  ed2719 ) .f_cursor .f_x = (  cx2772 );
+                            (*  ed2719 ) .f_goal_dash_x = (  vx2771 );
+                            struct funenv1174  temp1317 = ( (struct funenv1174){ .fun = move_dash_to_dash_row1174, .env =  envinst1174  } );
+                            struct funenv1209  temp1318 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                            ( temp1317.fun ( temp1317.env ,  (  ed2719 ) ,  (  cy2770 ) ,  ( temp1318.fun ( temp1318.env ,  (  ed2719 ) ,  (  tui2720 ) ) ) ) );
                         }
                         break;
                     }
@@ -9922,39 +9945,39 @@ int main(int argc, const char **argv) {
                 ( (  unreachable898 ) ( ) );
             }
         }
-        struct funenv1124  temp1318 = ( (struct funenv1124){ .fun = resize_dash_screen_dash_if_dash_needed1124, .env =  envinst1124  } );
-        bool  resized2774 = ( temp1318.fun ( temp1318.env ,  (  screen2723 ) ) );
-        if ( ( ( ( (  resized2774 ) || (  cmp74 ( (  events2726 ) , (  from_dash_integral29 ( 0 ) ) ) == 2 ) ) || (  first_dash_draw2725 ) ) || ( (  is_dash_just1052 ) ( ( ( * (  ed2720 ) ) .f_anim ) ) ) ) ) {
-            first_dash_draw2725 = ( false );
-            ( (  clear_dash_screen1114 ) ( (  screen2723 ) ) );
-            ( (  set_dash_screen_dash_fg1126 ) ( (  screen2723 ) ,  ( ( Color_53_Color16 ) ( ( Color16_55_White16 ) ) ) ) );
-            ( (  set_dash_screen_dash_bg1127 ) ( (  screen2723 ) ,  ( ( Color_53_Color16 ) ( ( Color16_55_Black16 ) ) ) ) );
-            ( (  fill_dash_default1129 ) ( (  screen2723 ) ) );
-            struct funenv1210  temp1319 = ( (struct funenv1210){ .fun = render_dash_editor1210, .env =  envinst1210  } );
-            ( temp1319.fun ( temp1319.env ,  (  screen2723 ) ,  (  ed2720 ) ) );
-            bool  debug2775 = ( true );
-            if ( (  debug2775 ) ) {
-                ( (  draw_dash_str_dash_right1144 ) ( (  screen2723 ) ,  ( ( StrConcat_779_StrConcat ) ( ( "mode: " ) ,  ( ( * (  ed2720 ) ) .f_mode ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 0 ) ) ) );
-                ( (  draw_dash_str_dash_right1145 ) ( (  screen2723 ) ,  ( ( StrConcat_795_StrConcat ) ( ( "fps: " ) ,  ( ( * (  tui2721 ) ) .f_actual_dash_fps ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 1 ) ) ) );
+        struct funenv1125  temp1319 = ( (struct funenv1125){ .fun = resize_dash_screen_dash_if_dash_needed1125, .env =  envinst1125  } );
+        bool  resized2773 = ( temp1319.fun ( temp1319.env ,  (  screen2722 ) ) );
+        if ( ( ( ( (  resized2773 ) || (  cmp74 ( (  events2725 ) , (  from_dash_integral29 ( 0 ) ) ) == 2 ) ) || (  first_dash_draw2724 ) ) || ( (  is_dash_just1052 ) ( ( ( * (  ed2719 ) ) .f_anim ) ) ) ) ) {
+            first_dash_draw2724 = ( false );
+            ( (  clear_dash_screen1115 ) ( (  screen2722 ) ) );
+            ( (  set_dash_screen_dash_fg1127 ) ( (  screen2722 ) ,  ( ( Color_53_Color16 ) ( ( Color16_55_White16 ) ) ) ) );
+            ( (  set_dash_screen_dash_bg1128 ) ( (  screen2722 ) ,  ( ( Color_53_Color16 ) ( ( Color16_55_Black16 ) ) ) ) );
+            ( (  fill_dash_default1130 ) ( (  screen2722 ) ) );
+            struct funenv1211  temp1320 = ( (struct funenv1211){ .fun = render_dash_editor1211, .env =  envinst1211  } );
+            ( temp1320.fun ( temp1320.env ,  (  screen2722 ) ,  (  ed2719 ) ) );
+            bool  debug2774 = ( true );
+            if ( (  debug2774 ) ) {
+                ( (  draw_dash_str_dash_right1145 ) ( (  screen2722 ) ,  ( ( StrConcat_779_StrConcat ) ( ( "mode: " ) ,  ( ( * (  ed2719 ) ) .f_mode ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 0 ) ) ) );
+                ( (  draw_dash_str_dash_right1146 ) ( (  screen2722 ) ,  ( ( StrConcat_795_StrConcat ) ( ( "fps: " ) ,  ( ( * (  tui2720 ) ) .f_actual_dash_fps ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 1 ) ) ) );
                 struct env1055 envinst1055 = {
-                    .ed2720 =  ed2720 ,
+                    .ed2719 =  ed2719 ,
                 };
-                struct Maybe_357  charcode2780 = ( (  fmap_dash_maybe1060 ) ( ( (  and_dash_maybe1054 ) ( ( (  try_dash_get961 ) ( ( & ( ( * (  ed2720 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ) ) ) ) ,  ( (struct funenv1055){ .fun = lam1055, .env = envinst1055 } ) ) ) ,  (  lam1320 ) ) );
-                ( (  draw_dash_str_dash_right1146 ) ( (  screen2723 ) ,  ( ( StrConcat_797_StrConcat ) ( ( "CURRENT CHAR CODE: " ) ,  (  charcode2780 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 2 ) ) ) );
-                ( (  draw_dash_str_dash_right1147 ) ( (  screen2723 ) ,  ( ( StrConcat_823_StrConcat ) ( ( ( StrConcat_824_StrConcat ) ( ( ( StrConcat_825_StrConcat ) ( ( "pos: " ) ,  ( ( ( * (  ed2720 ) ) .f_cursor ) .f_x ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "," ) ) ) ) ) ,  ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 3 ) ) ) );
-                size_t  rowcount2781 = ( ( * ( (  get_dash_row1158 ) ( (  ed2720 ) ,  ( ( ( * (  ed2720 ) ) .f_cursor ) .f_y ) ) ) ) .f_count );
-                ( (  draw_dash_str_dash_right1148 ) ( (  screen2723 ) ,  ( ( StrConcat_17_StrConcat ) ( ( "row char count: " ) ,  (  rowcount2781 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 4 ) ) ) );
-                int32_t  gx2782 = ( (  from_dash_visual1157 ) ( ( ( * (  ed2720 ) ) .f_goal_dash_x ) ) );
-                ( (  draw_dash_str_dash_right1149 ) ( (  screen2723 ) ,  ( ( StrConcat_825_StrConcat ) ( ( "goal x: " ) ,  (  gx2782 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 5 ) ) ) );
-                struct funenv1208  temp1321 = ( (struct funenv1208){ .fun = screen_dash_dims1208, .env =  envinst1208  } );
-                struct Dims_1168  dim2783 = ( temp1321.fun ( temp1321.env ,  (  ed2720 ) ,  (  tui2721 ) ) );
-                ( (  draw_dash_str_dash_right1150 ) ( (  screen2723 ) ,  ( ( StrConcat_832_StrConcat ) ( ( ( StrConcat_833_StrConcat ) ( ( ( StrConcat_825_StrConcat ) ( ( "sl: " ) ,  ( ( * (  ed2720 ) ) .f_screen_dash_left ) ) ) ,  ( " | " ) ) ) ,  ( (  dim2783 ) .f_cols ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 6 ) ) ) );
+                struct Maybe_357  charcode2779 = ( (  fmap_dash_maybe1061 ) ( ( (  and_dash_maybe1054 ) ( ( (  try_dash_get961 ) ( ( & ( ( * (  ed2719 ) ) .f_current_dash_file ) ) ,  ( (  i32_dash_size267 ) ( ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ) ) ) ) ,  ( (struct funenv1055){ .fun = lam1055, .env = envinst1055 } ) ) ) ,  (  lam1321 ) ) );
+                ( (  draw_dash_str_dash_right1147 ) ( (  screen2722 ) ,  ( ( StrConcat_797_StrConcat ) ( ( "CURRENT CHAR CODE: " ) ,  (  charcode2779 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 2 ) ) ) );
+                ( (  draw_dash_str_dash_right1148 ) ( (  screen2722 ) ,  ( ( StrConcat_823_StrConcat ) ( ( ( StrConcat_824_StrConcat ) ( ( ( StrConcat_825_StrConcat ) ( ( "pos: " ) ,  ( ( ( * (  ed2719 ) ) .f_cursor ) .f_x ) ) ) ,  ( (  from_dash_charlike1 ) ( ( "," ) ) ) ) ) ,  ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 3 ) ) ) );
+                size_t  rowcount2780 = ( ( * ( (  get_dash_row1159 ) ( (  ed2719 ) ,  ( ( ( * (  ed2719 ) ) .f_cursor ) .f_y ) ) ) ) .f_count );
+                ( (  draw_dash_str_dash_right1149 ) ( (  screen2722 ) ,  ( ( StrConcat_17_StrConcat ) ( ( "row char count: " ) ,  (  rowcount2780 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 4 ) ) ) );
+                int32_t  gx2781 = ( (  from_dash_visual1158 ) ( ( ( * (  ed2719 ) ) .f_goal_dash_x ) ) );
+                ( (  draw_dash_str_dash_right1150 ) ( (  screen2722 ) ,  ( ( StrConcat_825_StrConcat ) ( ( "goal x: " ) ,  (  gx2781 ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 5 ) ) ) );
+                struct funenv1209  temp1322 = ( (struct funenv1209){ .fun = screen_dash_dims1209, .env =  envinst1209  } );
+                struct Dims_1169  dim2782 = ( temp1322.fun ( temp1322.env ,  (  ed2719 ) ,  (  tui2720 ) ) );
+                ( (  draw_dash_str_dash_right1151 ) ( (  screen2722 ) ,  ( ( StrConcat_832_StrConcat ) ( ( ( StrConcat_833_StrConcat ) ( ( ( StrConcat_825_StrConcat ) ( ( "sl: " ) ,  ( ( * (  ed2719 ) ) .f_screen_dash_left ) ) ) ,  ( " | " ) ) ) ,  ( (  dim2782 ) .f_cols ) ) ) ,  (  from_dash_integral29 ( 0 ) ) ,  (  from_dash_integral29 ( 6 ) ) ) );
             }
-            ( (  update_dash_animation1225 ) ( ( & ( ( * (  ed2720 ) ) .f_anim ) ) ,  (  screen2723 ) ) );
-            ( (  render_dash_screen1118 ) ( (  screen2723 ) ) );
+            ( (  update_dash_animation1226 ) ( ( & ( ( * (  ed2719 ) ) .f_anim ) ) ,  (  screen2722 ) ) );
+            ( (  render_dash_screen1119 ) ( (  screen2722 ) ) );
         }
-        ( (  sync1092 ) ( (  tui2721 ) ) );
+        ( (  sync1093 ) ( (  tui2720 ) ) );
     }
-    ( (  free_dash_screen1113 ) ( (  screen2723 ) ) );
-    ( (  deinit1096 ) ( (  tui2721 ) ) );
+    ( (  free_dash_screen1114 ) ( (  screen2722 ) ) );
+    ( (  deinit1097 ) ( (  tui2720 ) ) );
 }

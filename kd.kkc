@@ -77,6 +77,7 @@ Editor al
 	screen-top I32
 	screen-left I32
 	anim Maybe Cnile.Timespec
+	selected Maybe Cursor
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -368,6 +369,13 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 		alfname = filename StrBuilder.mk-const-str(al)
 		og = ed&.current-file
 		ed <&.current-file= load-file(alfname, al)
+		case ed&.filename
+			None
+				pass
+			Just(olefname)
+				al Alloc.free({ ptr: olefname cast(), count: 0 })
+
+		ed <&.filename= Just(alfname)
 
 		# reset mouse pointer
 		ed <&.cursor= { x: 0, y: 0 }
@@ -375,7 +383,6 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 		ed <&.screen-top= 0
 
 		og free-file()
-		al Alloc.free({ ptr: alfname cast(), count: 0 })
 	
 	else
 		case cmd parse-int()
@@ -405,6 +412,7 @@ ed =& Editor
 	, filename: mfilename
 	, mode: Normal
 	, anim: Just(Time.now())
+	, selected: None
 	}
 
 
