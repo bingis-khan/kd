@@ -24,6 +24,40 @@ fn char-len (c Char)
 	else
 		return 1
 
+
+Theme
+	bg Color
+	text Color
+	cursor-bg Color
+	cursor-text Color
+	selection-bg Color
+	selection-text Color
+	line-num-hi-bg Color
+	line-num-hi-text Color
+
+dark-theme =& Theme
+	{ bg: Term.Color8(Term.Black8)
+	, text: Term.Color8(Term.White8)
+	, cursor-bg: Term.Color8(Term.White8)
+	, cursor-text: Term.Color8(Term.Black8)
+	, selection-bg: Term.Color16(Term.BrightWhite16)
+	, selection-text: Term.Color16(Term.Black16)
+	, line-num-hi-bg: Term.Color8(Term.White8)
+	, line-num-hi-text: Term.Color8(Term.Black8)
+	}
+
+light-theme =& Theme
+	{ bg: Term.Color16(Term.BrightWhite16)
+	, text: Term.Color8(Term.Black8)
+	, cursor-bg: Term.Color8(Term.Black8)
+	, cursor-text: Term.Color16(Term.BrightWhite16)
+	, selection-bg: Term.Color16(Term.BrightBlack16)
+	, selection-text: Term.Color16(Term.BrightWhite16)
+	, line-num-hi-bg: Term.Color8(Term.Black8)
+	, line-num-hi-text: Term.Color16(Term.BrightWhite16)
+	}
+
+
 Cursor
 	x I32
 	y I32
@@ -87,6 +121,7 @@ Editor al
 	mode (Mode al)
 	anim Maybe Cnile.Timespec
 	selected Maybe Cursor
+	theme Ptr Theme
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -345,19 +380,15 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 			screen Tui.put-char(' ', xx + pad + max-digits, y)
 
 		if ed&.cursor.y == row-num - 1
-			fg = screen&.default-fg
-			bg = screen&.default-bg
 			for xxx in 0 to (max-digits - 1)
 				cp = screen Tui.get-cell-ptr(xxx + pad, y) or-fail('screen index somehow landed outside of screen')
-				cp <&.fg= bg
-				cp <&.bg= fg
+				cp <&.fg= ed&.theme&.line-num-hi-text
+				cp <&.bg= ed&.theme&.line-num-hi-bg
 
 		for (char, cx) in row zip(from(0)) drop(from-x i32-size())
 			in-selection = ed is-in-selection({ x: cx, y: cy })
-			og-fg = screen&.default-fg
-			og-bg = screen&.default-bg
 			if in-selection
-				screen Tui.set-screen-colors(Term.Color16(Term.BrightBlack16), Term.Color16(Term.BrightWhite16))
+				screen Tui.set-screen-colors(ed&.theme&.selection-text, ed&.theme&.selection-bg)
 
 			if char == '\t'
 				screen Tui.put-char(' ', left-off + x, y)
@@ -367,7 +398,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 				screen Tui.put-char(char, left-off + x, y)
 
 			if in-selection
-				screen Tui.set-screen-colors(og-fg, og-bg)
+				screen Tui.set-screen-colors(ed&.theme&.text, ed&.theme&.bg)
 
 			x <= x + 1
 			if x >= w
@@ -375,8 +406,8 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 
 		if x < w and ed is-in-selection({ x: row.count size-i32(), y: cy })
 			cell = screen Tui.get-cell-ptr(left-off + x, y) or-fail('x < w condition should assert that the cell exists.')
-			cell <&.fg= Term.Color16(Term.BrightBlack16)
-			cell <&.bg= Term.Color16(Term.BrightWhite16)
+			cell <&.fg= ed&.theme&.selection-text
+			cell <&.bg= ed&.theme&.selection-bg
 
 
 		y <= y + 1
@@ -394,8 +425,8 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 
 	for x in 0 to (len - 1)
 		cursor-cell = screen Tui.get-cell-ptr(left-off - ed&.screen-left + vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
-		cursor-cell <&.fg= Term.Color8(Term.Black8)
-		cursor-cell <&.bg= Term.Color8(Term.White8)
+		cursor-cell <&.fg= ed&.theme&.cursor-text
+		cursor-cell <&.bg= ed&.theme&.cursor-bg
 
 
 # example anim.
@@ -477,6 +508,16 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 
 		og free-file()
 	
+	elif cmd Str.eq ('theme')
+		theme-name = rest take-while(is-not-whitespace)
+		if theme-name Str.eq ('dark')
+			ed <&.theme= dark-theme
+		elif theme-name Str.eq ('light')
+			ed <&.theme= light-theme
+		else
+			# TODO: message about not being able to find a theme
+			pass
+	
 	else
 		case cmd parse-int()
 			Just(unline)
@@ -506,6 +547,7 @@ ed =& Editor
 	, mode: Normal
 	, anim: Just(Time.now())
 	, selected: None
+	, theme: dark-theme
 	}
 
 
@@ -766,8 +808,8 @@ while ed&.running
 		first-draw <= False
 
 		screen Tui.clear-screen()
-		screen Tui.set-screen-fg(Term.Color16(Term.White16))
-		screen Tui.set-screen-bg(Term.Color16(Term.Black16))
+		screen Tui.set-screen-fg(ed&.theme&.text)
+		screen Tui.set-screen-bg(ed&.theme&.bg)
 		# screen Tui.set-screen-fg(Term.Color16(Term.Black16))
 		# screen Tui.set-screen-bg(Term.Color16(Term.White16))
 		screen Tui.fill-default()
