@@ -11739,14 +11739,14 @@ int main(int argc, const char **argv) {
                                 ( temp1495.fun ( temp1495.env ,  (  ed3012 ) ) );
                             }
                             if ( (  eq48 ( ( dref3023 .stuff .Key_548_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "I" ) ) ) ) ) ) {
+                                (*  ed3012 ) .f_mode = ( (struct Mode_823) { .tag = Mode_823_Insert_t } );
                                 struct funenv1435  temp1496 = ( (struct funenv1435){ .fun = screen_dash_dims1435, .env =  envinst1435  } );
                                 ( (  move_dash_to_dash_start_dash_of_dash_line_dash_indented1345 ) ( (  ed3012 ) ,  ( temp1496.fun ( temp1496.env ,  (  ed3012 ) ,  (  tui3013 ) ) ) ) );
-                                (*  ed3012 ) .f_mode = ( (struct Mode_823) { .tag = Mode_823_Insert_t } );
                             }
                             if ( (  eq48 ( ( dref3023 .stuff .Key_548_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "A" ) ) ) ) ) ) {
+                                (*  ed3012 ) .f_mode = ( (struct Mode_823) { .tag = Mode_823_Insert_t } );
                                 struct funenv1435  temp1497 = ( (struct funenv1435){ .fun = screen_dash_dims1435, .env =  envinst1435  } );
                                 ( (  move_dash_to_dash_end_dash_of_dash_line1346 ) ( (  ed3012 ) ,  ( temp1497.fun ( temp1497.env ,  (  ed3012 ) ,  (  tui3013 ) ) ) ) );
-                                (*  ed3012 ) .f_mode = ( (struct Mode_823) { .tag = Mode_823_Insert_t } );
                             }
                             if ( (  eq48 ( ( dref3023 .stuff .Key_548_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "o" ) ) ) ) ) ) {
                                 struct funenv1397  temp1498 = ( (struct funenv1397){ .fun = insert_dash_empty_dash_row_dash_at1397, .env =  envinst1397  } );

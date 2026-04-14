@@ -963,11 +963,11 @@ while ed&.running
 										ed dedent-selection()
 
 									if c == 'I'
+										ed <&.mode= Insert
 										ed move-to-start-of-line-indented(ed screen-dims(tui))
-										ed <&.mode= Insert
 									if c == 'A'
-										ed move-to-end-of-line(ed screen-dims(tui))
 										ed <&.mode= Insert
+										ed move-to-end-of-line(ed screen-dims(tui))
 
 									if c == 'o'
 										ed insert-empty-row-at(ed&.cursor.y + 1, al)
