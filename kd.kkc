@@ -362,11 +362,11 @@ fn copy-selection (ed Ptr (Editor Allocator))
 			ed <&.mode= Normal
 
 # also moves the cursor to the end of selection.
-# PastePos
-# 	PasteBefore
-# 	PasteAfter
+PastePos
+	PasteBefore
+	PasteAfter
 
-fn paste-clipboard-after-cursor (ed Ptr (Editor al), dims Dims) <= Allocator al
+fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) <= Allocator al
 	if not ed&.clipboard is-just()
 		return
 	cp = ed&.clipboard or-fail('expect clipboard')
@@ -375,27 +375,42 @@ fn paste-clipboard-after-cursor (ed Ptr (Editor al), dims Dims) <= Allocator al
 	# that seems like a nice behavior.
 	does-it-end-in-newline = cp.contents[cp.contents.count - 1] == '\n'
 	if does-it-end-in-newline
-		from = ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor)
-		for (line, idx) in cp lines() zip(Iter.from(from.y + 1))
+		from-y =
+			(case pastepos)
+				PasteAfter: ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor).y + 1
+				_: ed&.selected Misc.maybe(fn s: Math.min(s, ed&.cursor), ed&.cursor).y
+		for (line, idx) in cp lines() zip(Iter.from(from-y))
 			row = ed insert-row(idx)
 			row List.add-all(line)
 			ed move-to(line.contents.count size-i32(), idx, dims)
-		ed <&.selected= Just({ x: 0, y: from.y + 1 }) # set after to avoid automatic deselection.
+		ed <&.selected= Just({ x: 0, y: from-y }) # set after to avoid automatic deselection.
 		ed <&.mode= Normal
 
 	else
-		from-cur = ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor)
-		from-x = (from-cur.x + 1) i32-size()
-		if ed is-at-line-end(from-cur.x, from-cur.y)
-			if ed num-rows() == (from-cur.y + 1) i32-size() # if we're at the end, add a new row.
-				List.add(&ed&.current-file, List.mk(ed&.al))
-			from-cur <= { x: 0, y: from-cur.y + 1 }
-			from-x <= 0
+		from-x = @undefined
+		from-y = @undefined
+		case pastepos
+			PasteAfter
+				from-cur = ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor)
+				from-x <= (from-cur.x + 1) i32-size()
+				from-y <= from-cur.y
+
+				if ed is-at-line-end(from-cur.x, from-cur.y)
+					if (from-y + 1) i32-size() >= ed num-rows() # if we're at the end, add a new row.
+						List.add(&ed&.current-file, List.mk(ed&.al))
+					from-y <= from-y + 1
+					from-x <= 0
+
+			PasteBefore
+				from-cur = ed&.selected Misc.maybe(fn s: Math.min(s, ed&.cursor), ed&.cursor)
+				from-x <= from-cur.x i32-size()
+				from-y <= from-cur.y
+
 
 		# copy the character after cursor to a separate buffer and start inserting lines in between
 		# Q: are zero allocations allowed?
 		# A: apparently I get null or an address, but in this case idc, since I'll only be reading `count`
-		cur-line = ed get-row(from-cur.y)
+		cur-line = ed get-row(from-y)
 		rest-of-line = cur-line& List.to-slice() Slice.from(from-x)
 		rest = Alloc.allocate(ed&.al, rest-of-line.count)
 		rest-of-line Slice.copy-to(rest)
@@ -408,8 +423,8 @@ fn paste-clipboard-after-cursor (ed Ptr (Editor al), dims Dims) <= Allocator al
 
 		# now add more lines.
 		last-line = cur-line
-		to-y = from-cur.y
-		for (line, idx) in lines drop(1) zip(Iter.from(from-cur.y + 1))
+		to-y = from-y
+		for (line, idx) in lines drop(1) zip(Iter.from(from-y + 1))
 			last-line <= ed insert-row(idx)
 			to-y <= idx
 			last-line List.add-all(line)
@@ -421,11 +436,11 @@ fn paste-clipboard-after-cursor (ed Ptr (Editor al), dims Dims) <= Allocator al
 		assert(to-x > 0, 'since clipboard is nonempty, this should also be nonempty')
 
 		# we must preserve cursor "order"
-		if ed&.cursor >= from-cur
+		if ed&.cursor >= ed&.selected or-else(ed&.cursor)
 			ed move-to(to-x - 1, to-y, dims)
-			ed <&.selected= Just({ x: from-x size-i32(), y: from-cur.y})
+			ed <&.selected= Just({ x: from-x size-i32(), y: from-y})
 		else
-			ed move-to(from-x size-i32(), from-cur.y, dims)
+			ed move-to(from-x size-i32(), from-y, dims)
 			ed <&.selected= Just({ x: to-x - 1, y: to-y})
 
 		ed <&.mode= Normal
@@ -896,9 +911,9 @@ while ed&.running
 									if c == 'y'
 										ed copy-selection()
 									if c == 'p'
-										ed paste-clipboard-after-cursor(ed screen-dims(tui))
+										ed paste-clipboard-at-cursor(PasteAfter, ed screen-dims(tui))
 									if c == 'P'
-										# ed paste-clipboard-at-cursor(PasteBefore)
+										ed paste-clipboard-at-cursor(PasteBefore, ed screen-dims(tui))
 										pass
 
 									if c == 'I'

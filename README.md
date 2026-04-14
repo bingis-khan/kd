@@ -14,10 +14,10 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 
 ## todo
 
-- [V] searching + wrapping (fwd and bwd)
-- [V] editor messages (send message Str -> () which allocates and frees n stuff)
-- [V] SELECT mode
-- [ ] copy-paste (at deletion + when pressed y)
+- [x] searching + wrapping (fwd and bwd)
+- [x] editor messages (send message Str -> () which allocates and frees n stuff)
+- [x] SELECT mode
+- [x] copy-paste (at deletion + when pressed y)
 - [ ] indent dedent
 - [ ] filepicker (which respects .ignore and .gitignore)
 - ...
