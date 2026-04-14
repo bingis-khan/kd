@@ -865,6 +865,9 @@ while ed&.running
 							
 							Ptr(SearchBox(sb))
 								StrBuilder.write-char(&sb, c)
+							
+							_
+								todo()
 
 					Tui.Ctrl(c)
 						# the helix version keeps the cursor in place, but still offsets screen at top/bottom borders.
@@ -906,6 +909,9 @@ while ed&.running
 							Ptr(SearchBox(st))
 								if StrBuilder.count(&st) > 0
 									StrBuilder.pop(&st)
+							
+							_
+								todo()
 
 					Tui.Enter
 						case ed&.mode
@@ -944,10 +950,20 @@ while ed&.running
 								# don't actually set the search box if we didn't input anything.
 								if StrBuilder.count(&sb) > 0
 									ed <&.search-term= Just(sb)
+									case ed find-next-occurence(StrBuilder.as-char-slice(&sb))
+										None
+											pass
+										Just(cur)
+											ed move-to(cur.x + StrBuilder.count(&sb) size-i32() - 1, cur.y, ed screen-dims(tui))
+											ed <&.selected= Just(cur)
+
 								else
 									ed <&.search-term= None
 										
 								ed <&.mode= Normal
+						
+							_
+								todo()
 						
 					_
 						pass
