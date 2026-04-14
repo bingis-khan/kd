@@ -85,8 +85,27 @@ fn from-visual(Visual(x)): x
 Mode al
 	Normal
 	Insert
+	Select
 	Cmd (StrBuilder al)
 	SearchBox (StrBuilder al)
+
+inst Eq Mode
+	eq (l, r)
+		case (l, r)
+			(Normal, Normal)
+				return True
+			(Insert, Insert)
+				return True
+			(Select, Select)
+				return True
+
+			(Cmd(_), Cmd(_))
+				panic('todo: implement more stuff. technically, not reachable yet.')
+			(SearchBox(_), SearchBox(_))
+				panic('todo: implement more stuff. technically, not reachable yet.')
+
+			_
+				return False
 
 inst Str Mode
 	print-str (self)
@@ -95,6 +114,8 @@ inst Str Mode
 				Str.print-str('Normal')
 			Insert
 				Str.print-str('Insert')
+			Select
+				Str.print-str('Select')
 			Cmd(s)
 				ss = StrBuilder.as-str(&s)
 				Str.print-str('Cmd \(ss)')
@@ -102,6 +123,7 @@ inst Str Mode
 			SearchBox(s)
 				ss = StrBuilder.as-str(&s)
 				Str.print-str('Search \(ss)')
+				
 
 	chars (self)
 		c = @undefined
@@ -110,6 +132,8 @@ inst Str Mode
 				c <= 'Normal' Str.StrCase1()
 			Insert
 				c <= 'Insert' Str.StrCase1()
+			Select
+				c <= 'Select' Str.StrCase1()
 			Cmd(s)
 				ss = StrBuilder.as-str(&s)
 				c <= 'Cmd(\(ss))' Str.StrCase2()
@@ -173,6 +197,12 @@ fn visual-x-to-x (ed Ptr (Editor al), Visual(vx), y I32) -> I32
 	return chars&.count size-i32()
 
 
+# SELECT compatible selection remove
+fn set-selection(ed Ptr (Editor al), sel Maybe Cursor)
+	if ed&.mode /= Select or not ed&.selected is-just()
+		ed <&.selected= sel
+
+
 fn reset-msg (ed Ptr (Editor Allocator))
 	case ed&.msg
 		None
@@ -225,7 +255,8 @@ fn move-to (ed Ptr (Editor al), x I32, y I32, dim Dims)
 		pass  # todo or actually nothing?
 
 	ed <&.cursor= { x, y }
-	ed <&.selected= None  # on select mode you would not reset it.
+
+	ed set-selection(None)
 
 
 fn move-to-col (ed Ptr (Editor al), x I32, dim Dims)
@@ -334,6 +365,7 @@ fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 					ed remove-row(cto.y)
 
 			ed <&.selected= None
+			ed <&.mode = Normal
 			ed move-to(cfrom.x, cfrom.y, dims)
 
 # NOTE: also indents from current row!
@@ -688,174 +720,6 @@ while ed&.running
 				case k
 					Tui.Char(c)
 						case &ed&.mode
-							Ptr(Normal)
-								code = c cast() Mem.u8-i32()
-								if c == 'q'
-									ed <&.running= False
-
-								if c == 'k'
-									ed move-to-row(ed&.cursor.y - 1, ed screen-dims(tui))
-								if c == 'j'
-									ed move-to-row(ed&.cursor.y + 1, ed screen-dims(tui))
-								if c == 'h'
-									ed move-left(ed screen-dims(tui))
-
-								if c == 'l'
-									ed move-right(ed screen-dims(tui))
-
-								if c == 'i'
-									ed <&.mode= Insert
-
-								if c == 'd'
-									ed delete-selected(ed screen-dims(tui))
-
-								if c == 'c'
-									ed delete-selected(ed screen-dims(tui))
-									ed <&.mode= Insert
-
-								if c == 'I'
-									ed move-to-start-of-line-indented(ed screen-dims(tui))
-									ed <&.mode= Insert
-								if c == 'A'
-									ed move-to-end-of-line(ed screen-dims(tui))
-									ed <&.mode= Insert
-
-								if c == 'o'
-									ed insert-empty-row-at(ed&.cursor.y + 1, al)
-									currow = ed get-row(ed&.cursor.y + 1)
-									ed move-to(currow List.size() size-i32(), ed&.cursor.y + 1, ed screen-dims(tui))
-									ed <&.mode= Insert
-								if c == 'O'
-									ed insert-empty-row-at(ed&.cursor.y, al)
-									ed move-to-end-of-line(ed screen-dims(tui))
-									ed <&.mode= Insert
-
-								if c == ':'
-									ed <&.mode= StrBuilder.mk(al) Cmd()
-								
-								if c == '/'
-									ed <&.mode= StrBuilder.mk(al) SearchBox()
-								
-								if c == 'n'
-									case ed&.search-term
-										None
-											pass
-										Just(st)
-											case ed find-next-occurence(StrBuilder.as-char-slice(&st))
-												None
-													pass
-												Just(cur)
-													ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
-													ed <&.selected= Just(cur)
-													
-																					
-								if c == 'N'
-									case ed&.search-term
-										None
-											pass
-										Just(st)
-											case ed find-prev-occurence(StrBuilder.as-char-slice(&st))
-												None
-													pass
-												Just(cur)
-													ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
-													ed <&.selected= Just(cur)
-								
-								# big selector!
-								if c == 'x'
-									# we should also support helix's multiselection.
-									# the way helix does it is it checks if the selection is at the beginning and cursor at the end.
-									# if so, we move to next row.
-									# select start of line and move to front.
-									if ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.x) == 0 and ed cursor-is-at-line-end()
-										dims = ed screen-dims(tui)
-										sel = ed&.selected or-else(ed&.cursor)  # it's gonna get unselected, so make sure to back up that selection.
-										ed move-to-row(ed&.cursor.y + 1, dims)
-										ed move-to-end-of-line(dims)
-										ed <&.selected= Just(sel)
-									else
-										# expand selection and move cursor to end.
-										ed move-to-end-of-line(ed screen-dims(tui))
-										ed <&.selected= Just({ x: 0, y: ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.y) })
-
-								# word jumping!~
-								# TODO: lots of duplication, but how would we generalize this behavior?
-								if c == 'w'  # fwd to word start
-									dims = ed screen-dims(tui)
-
-									first-pos = ed&.cursor
-									ed move-right(dims)
-									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
-										first-pos <= ed&.cursor
-
-									while ed cursor-is-at-line-end()
-										if not ed move-right(dims)
-											break
-										first-pos <= ed&.cursor
-
-									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
-										if not ed move-right(dims) 
-											break
-
-									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
-										if not ed move-right(dims)
-											break
-									
-									if first-pos /= ed&.cursor
-										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
-										ed <&.selected= Just(first-pos)
-
-								if c == 'e'  # fwd to word end
-									dims = ed screen-dims(tui)
-
-									first-pos = ed&.cursor
-									ed move-right(dims)
-									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
-										first-pos <= ed&.cursor
-
-									while ed cursor-is-at-line-end()
-										if not ed move-right(dims)
-											break
-										first-pos <= ed&.cursor
-
-
-									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
-										if not ed move-right(dims)
-											break
-
-									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
-										if not ed move-right(dims) 
-											break
-
-									if first-pos /= ed&.cursor
-										ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
-										ed <&.selected= Just(first-pos)
-
-								if c == 'b'  # bwd to word start
-									dims = ed screen-dims(tui)
-
-									first-pos = ed&.cursor
-									ed move-left(dims)
-									if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
-										first-pos <= ed&.cursor
-
-									while ed cursor-is-at-line-end()
-										if not ed move-left(dims)
-											break
-										first-pos <= ed&.cursor
-
-									while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
-										if not ed move-left(dims)
-											break
-									while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
-										if not ed move-left(dims) 
-											break
-
-									if first-pos /= ed&.cursor
-										if ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), True)
-											ed move-right(dims)
-										ed <&.selected= Just(first-pos)
-
 							Ptr(Insert)
 								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
 								ed move-to-col(ed&.cursor.x + 1, ed screen-dims(tui))
@@ -865,9 +729,183 @@ while ed&.running
 							
 							Ptr(SearchBox(sb))
 								StrBuilder.write-char(&sb, c)
-							
-							_
-								todo()
+
+							Ptr(mode)
+								if mode == Normal or mode == Select
+									code = c cast() Mem.u8-i32()
+									if c == 'q'
+										ed <&.running= False
+
+									if c == 'k'
+										ed move-to-row(ed&.cursor.y - 1, ed screen-dims(tui))
+									if c == 'j'
+										ed move-to-row(ed&.cursor.y + 1, ed screen-dims(tui))
+									if c == 'h'
+										ed move-left(ed screen-dims(tui))
+
+									if c == 'l'
+										ed move-right(ed screen-dims(tui))
+
+									if c == 'i'
+										ed <&.mode= Insert
+
+									if c == 'v'
+										ed <&.mode= Select
+										ed set-selection(Just(ed&.cursor))
+
+									if c == 'd'
+										ed delete-selected(ed screen-dims(tui))
+
+									if c == 'c'
+										ed delete-selected(ed screen-dims(tui))
+										ed <&.mode= Insert
+
+									if c == 'I'
+										ed move-to-start-of-line-indented(ed screen-dims(tui))
+										ed <&.mode= Insert
+									if c == 'A'
+										ed move-to-end-of-line(ed screen-dims(tui))
+										ed <&.mode= Insert
+
+									if c == 'o'
+										ed insert-empty-row-at(ed&.cursor.y + 1, al)
+										currow = ed get-row(ed&.cursor.y + 1)
+										ed move-to(currow List.size() size-i32(), ed&.cursor.y + 1, ed screen-dims(tui))
+										ed <&.mode= Insert
+									if c == 'O'
+										ed insert-empty-row-at(ed&.cursor.y, al)
+										ed move-to-end-of-line(ed screen-dims(tui))
+										ed <&.mode= Insert
+
+									if c == ':'
+										ed <&.mode= StrBuilder.mk(al) Cmd()
+								
+									if c == '/'
+										ed <&.mode= StrBuilder.mk(al) SearchBox()
+								
+									if c == 'n'
+										case ed&.search-term
+											None
+												pass
+											Just(st)
+												case ed find-next-occurence(StrBuilder.as-char-slice(&st))
+													None
+														pass
+													Just(cur)
+														ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
+														# currently, no multiple cursors, so just jump.
+														ed <&.selected= Just(cur)
+													
+																					
+									if c == 'N'
+										case ed&.search-term
+											None
+												pass
+											Just(st)
+												case ed find-prev-occurence(StrBuilder.as-char-slice(&st))
+													None
+														pass
+													Just(cur)
+														ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
+														ed <&.selected= Just(cur)
+								
+									# big selector!
+									if c == 'x'
+										# we should also support helix's multiselection.
+										# the way helix does it is it checks if the selection is at the beginning and cursor at the end.
+										# if so, we move to next row.
+										# select start of line and move to front.
+										if ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.x) == 0 and ed cursor-is-at-line-end()
+											dims = ed screen-dims(tui)
+											sel = ed&.selected or-else(ed&.cursor)  # it's gonna get unselected, so make sure to back up that selection.
+											ed move-to-row(ed&.cursor.y + 1, dims)
+											ed move-to-end-of-line(dims)
+											ed <&.selected= Just(sel)
+										else
+											# expand selection and move cursor to end.
+											ed move-to-end-of-line(ed screen-dims(tui))
+											ed <&.selected= Just({ x: 0, y: ed&.selected Misc.maybe(fn s: s.x, ed&.cursor.y) })
+
+									# word jumping!~
+									# TODO: lots of duplication, but how would we generalize this behavior?
+									if c == 'w'  # fwd to word start
+										dims = ed screen-dims(tui)
+
+										first-pos = ed&.cursor
+										ed move-right(dims)
+										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+											first-pos <= ed&.cursor
+
+										while ed cursor-is-at-line-end()
+											if not ed move-right(dims)
+												break
+											first-pos <= ed&.cursor
+
+										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+											if not ed move-right(dims) 
+												break
+
+										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+											if not ed move-right(dims)
+												break
+									
+										if first-pos /= ed&.cursor
+											ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+											ed set-selection(Just(first-pos))
+
+									if c == 'e'  # fwd to word end
+										dims = ed screen-dims(tui)
+
+										first-pos = ed&.cursor
+										ed move-right(dims)
+										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+											first-pos <= ed&.cursor
+
+										while ed cursor-is-at-line-end()
+											if not ed move-right(dims)
+												break
+											first-pos <= ed&.cursor
+
+
+										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+											if not ed move-right(dims)
+												break
+
+										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+											if not ed move-right(dims) 
+												break
+
+										if first-pos /= ed&.cursor
+											ed move-left(dims)  # matching helix, stop BEFORE word (useful for removing whole words)
+											ed set-selection(Just(first-pos))
+
+									if c == 'b'  # bwd to word start
+										dims = ed screen-dims(tui)
+
+										first-pos = ed&.cursor
+										ed move-left(dims)
+										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+											first-pos <= ed&.cursor
+
+										while ed cursor-is-at-line-end()
+											if not ed move-left(dims)
+												break
+											first-pos <= ed&.cursor
+
+										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+											if not ed move-left(dims)
+												break
+										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+											if not ed move-left(dims) 
+												break
+
+										if first-pos /= ed&.cursor
+											if ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), True)
+												ed move-right(dims)
+											ed set-selection(Just(first-pos))
+								else
+									todo()
+
 
 					Tui.Ctrl(c)
 						# the helix version keeps the cursor in place, but still offsets screen at top/bottom borders.
@@ -892,10 +930,14 @@ while ed&.running
 								ed <&.mode= Normal
 							SearchBox(sb)
 								todo()
+							Select
+								ed <&.mode= Normal
 
 					Tui.Backspace
 						case &ed&.mode
 							Ptr(Normal)
+								pass
+							Ptr(Select)
 								pass
 							Ptr(Insert)
 								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
@@ -909,13 +951,12 @@ while ed&.running
 							Ptr(SearchBox(st))
 								if StrBuilder.count(&st) > 0
 									StrBuilder.pop(&st)
-							
-							_
-								todo()
 
 					Tui.Enter
 						case ed&.mode
 							Normal
+								pass
+							Select
 								pass
 							Insert
 								# TODO: indent
@@ -962,8 +1003,6 @@ while ed&.running
 										
 								ed <&.mode= Normal
 						
-							_
-								todo()
 						
 					_
 						pass
