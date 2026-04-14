@@ -16,7 +16,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 
 - [V] searching + wrapping (fwd and bwd)
 - [V] editor messages (send message Str -> () which allocates and frees n stuff)
-- [ ] SELECT mode
+- [V] SELECT mode
 - [ ] copy-paste (at deletion + when pressed y)
 - [ ] indent dedent
 - [ ] filepicker (which respects .ignore and .gitignore)

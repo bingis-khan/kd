@@ -750,8 +750,11 @@ while ed&.running
 										ed <&.mode= Insert
 
 									if c == 'v'
-										ed <&.mode= Select
-										ed set-selection(Just(ed&.cursor))
+										if mode == Select
+											ed <&.mode= Normal
+										else
+											ed <&.mode= Select
+											ed set-selection(Just(ed&.cursor))
 
 									if c == 'd'
 										ed delete-selected(ed screen-dims(tui))

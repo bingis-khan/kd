@@ -10688,8 +10688,12 @@ int main(int argc, const char **argv) {
                                 (*  ed2907 ) .f_mode = ( (struct Mode_783) { .tag = Mode_783_Insert_t } );
                             }
                             if ( (  eq48 ( ( dref2918 .stuff .Key_522_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "v" ) ) ) ) ) ) {
-                                (*  ed2907 ) .f_mode = ( (struct Mode_783) { .tag = Mode_783_Select_t } );
-                                ( (  set_dash_selection1242 ) ( (  ed2907 ) ,  ( ( Maybe_948_Just ) ( ( ( * (  ed2907 ) ) .f_cursor ) ) ) ) );
+                                if ( (  eq1227 ( ( (* dref2920 ) ) , ( (struct Mode_783) { .tag = Mode_783_Select_t } ) ) ) ) {
+                                    (*  ed2907 ) .f_mode = ( (struct Mode_783) { .tag = Mode_783_Normal_t } );
+                                } else {
+                                    (*  ed2907 ) .f_mode = ( (struct Mode_783) { .tag = Mode_783_Select_t } );
+                                    ( (  set_dash_selection1242 ) ( (  ed2907 ) ,  ( ( Maybe_948_Just ) ( ( ( * (  ed2907 ) ) .f_cursor ) ) ) ) );
+                                }
                             }
                             if ( (  eq48 ( ( dref2918 .stuff .Key_522_Char_s .field0 ) , ( (  from_dash_charlike1 ) ( ( "d" ) ) ) ) ) ) {
                                 struct funenv1267  temp1370 = ( (struct funenv1267){ .fun = delete_dash_selected1267, .env =  envinst1267  } );
