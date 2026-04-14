@@ -19,9 +19,9 @@ use DynStr
 	DynStr
 
 
-tab-size = 2
 fn char-len (c Char)
 	if c == '\t'
+		tab-size = 2
 		return tab-size
 	else
 		return 1
@@ -610,6 +610,24 @@ fn find-prev-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <
 			return None
 
 
+fn indent-selection (ed Ptr (Editor Allocator))
+	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
+	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
+	
+	for rowid in from-y to (to-y)
+		row = ed get-row(rowid)
+		row List.insert(0, '\t')
+
+fn dedent-selection (ed Ptr (Editor Allocator))
+	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
+	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
+	
+	for rowid in from-y to (to-y)
+		# TODO: handle multispaces
+		if ed char-at({ x: 0, y: rowid }) == Just('\t')
+			row = ed get-row(rowid)
+			row List.remove(0)
+
 al = Alloc.idc()
 fn load-file (filename, al)
 	file =& filename File.read-contents(al)
@@ -914,7 +932,11 @@ while ed&.running
 										ed paste-clipboard-at-cursor(PasteAfter, ed screen-dims(tui))
 									if c == 'P'
 										ed paste-clipboard-at-cursor(PasteBefore, ed screen-dims(tui))
-										pass
+										
+									if c == '>'
+										ed indent-selection()
+									if c == '<'
+										ed dedent-selection()
 
 									if c == 'I'
 										ed move-to-start-of-line-indented(ed screen-dims(tui))
@@ -1061,7 +1083,7 @@ while ed&.running
 												ed move-right(dims)
 											ed set-selection(Just(first-pos))
 								else
-									todo()
+									panic('new mode? \(mode)')
 
 
 					Tui.Ctrl(c)
@@ -1086,7 +1108,8 @@ while ed&.running
 								StrBuilder.free(&sb)
 								ed <&.mode= Normal
 							SearchBox(sb)
-								todo()
+								StrBuilder.free(&sb)
+								ed <&.mode= Normal
 							Select
 								ed <&.mode= Normal
 

@@ -18,8 +18,14 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] editor messages (send message Str -> () which allocates and frees n stuff)
 - [x] SELECT mode
 - [x] copy-paste (at deletion + when pressed y)
-- [ ] indent dedent
-- [ ] filepicker (which respects .ignore and .gitignore)
+- [x] indent dedent
+- [ ] `g` and `<space>` submenu
+- [ ] undo/redo
+  ...
+- [ ] filepicker (which respects .ignore and .gitignore) (will require more std functions.)
+  ...
+- [ ] multipane
+- [ ] multicursor
 - ...
 - [ ] nice UI and animations
 - ...
