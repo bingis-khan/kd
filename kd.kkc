@@ -159,6 +159,7 @@ Editor al
 	theme Ptr Theme
 	search-term Maybe (StrBuilder al)
 	msg Maybe DynStr
+	clipboard Maybe DynStr
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -171,6 +172,10 @@ fn indent-on-row (ed Ptr (Editor al), y I32):
 	ed get-row(y) take-while(is-whitespace)
 
 fn num-rows (ed Ptr (Editor al)): List.size(&ed&.current-file)
+
+fn insert-row (ed Ptr (Editor al), y I32) <= Allocator al
+	List.insert(&ed&.current-file, y i32-size(), List.mk(ed&.al))
+	return ed get-row(y)
 
 fn remove-row(ed Ptr (Editor Allocator), y I32)
 	next-row = ed get-row(y)
@@ -255,7 +260,6 @@ fn move-to (ed Ptr (Editor al), x I32, y I32, dim Dims)
 		pass  # todo or actually nothing?
 
 	ed <&.cursor= { x, y }
-
 	ed set-selection(None)
 
 
@@ -305,8 +309,132 @@ fn cursor-is-at-line-end (ed Ptr (Editor al)):
 	ed&.cursor.x == ed cursor-row() List.size() size-i32()
 
 
+fn set-clipboard (ed Ptr (Editor Allocator), clip Maybe DynStr)
+	case ed&.clipboard
+		None
+			pass
+		Just(cp)
+			ed&.al Alloc.free(cp.contents)
+	ed <&.clipboard= clip
+
+fn copy-selection (ed Ptr (Editor Allocator))
+	case ed&.selected
+		None
+			case ed char-at-cursor()
+				None
+					ed set-clipboard(None)
+				Just(c)
+					sb =& StrBuilder.mk(ed&.al)
+					sb StrBuilder.write-char(c)
+					sb StrBuilder.as-str()
+					ed set-clipboard(Just(sb StrBuilder.as-str()))
+
+		Just(sel)
+			sb =& StrBuilder.mk(ed&.al)
+
+			from = Math.min(sel, ed&.cursor)
+			to =   Math.max(sel, ed&.cursor)
+
+			if from.y == to.y
+				currow = ed get-row(from.y)
+				sb StrBuilder.write-slice(currow& List.to-slice() subslice(from.x i32-size(), to.x i32-size() + 1))
+				if ed is-at-line-end(to.x, to.y)
+					sb StrBuilder.write('\n')
+				ed <&.mode= Normal
+			else
+				assert(to.y > from.y, 'THATS WHAT WERE CHECKIN YO')
+
+				currow = ed get-row(from.y)
+				sb StrBuilder.write-slice(currow& List.to-slice() subslice(from.x i32-size(), currow List.size()))
+				sb StrBuilder.write('\n')
+
+				for row in ed&.current-file List.to-slice() subslice(from.y i32-size() + 1, to.y i32-size())
+					sb StrBuilder.write-slice(row List.to-slice())
+					sb StrBuilder.write('\n')
+
+				lastrow = ed get-row(to.y)
+				sb StrBuilder.write-slice(lastrow& List.to-slice() subslice(0, to.x i32-size() + 1))
+				if ed is-at-line-end(to.x, to.y)
+					sb StrBuilder.write('\n')
+
+			s = sb StrBuilder.as-str()
+			ed set-clipboard(Just(s))
+			ed <&.mode= Normal
+
+# also moves the cursor to the end of selection.
+# PastePos
+# 	PasteBefore
+# 	PasteAfter
+
+fn paste-clipboard-after-cursor (ed Ptr (Editor al), dims Dims) <= Allocator al
+	if not ed&.clipboard is-just()
+		return
+	cp = ed&.clipboard or-fail('expect clipboard')
+
+	# that's actually a funny thing. helix, when a cp line ends in a newline, just pastes the thing line down and does not split the current line.
+	# that seems like a nice behavior.
+	does-it-end-in-newline = cp.contents[cp.contents.count - 1] == '\n'
+	if does-it-end-in-newline
+		from = ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor)
+		for (line, idx) in cp lines() zip(Iter.from(from.y + 1))
+			row = ed insert-row(idx)
+			row List.add-all(line)
+			ed move-to(line.contents.count size-i32(), idx, dims)
+		ed <&.selected= Just({ x: 0, y: from.y + 1 }) # set after to avoid automatic deselection.
+		ed <&.mode= Normal
+
+	else
+		from-cur = ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor)
+		from-x = (from-cur.x + 1) i32-size()
+		if ed is-at-line-end(from-cur.x, from-cur.y)
+			if ed num-rows() == (from-cur.y + 1) i32-size() # if we're at the end, add a new row.
+				List.add(&ed&.current-file, List.mk(ed&.al))
+			from-cur <= { x: 0, y: from-cur.y + 1 }
+			from-x <= 0
+
+		# copy the character after cursor to a separate buffer and start inserting lines in between
+		# Q: are zero allocations allowed?
+		# A: apparently I get null or an address, but in this case idc, since I'll only be reading `count`
+		cur-line = ed get-row(from-cur.y)
+		rest-of-line = cur-line& List.to-slice() Slice.from(from-x)
+		rest = Alloc.allocate(ed&.al, rest-of-line.count)
+		rest-of-line Slice.copy-to(rest)
+		cur-line List.trim(from-x)
+
+
+		lines = cp lines()
+		# first line lands on current-line
+		cur-line List.add-all(lines head() or-fail('clipboard cannot be empty'))
+
+		# now add more lines.
+		last-line = cur-line
+		to-y = from-cur.y
+		for (line, idx) in lines drop(1) zip(Iter.from(from-cur.y + 1))
+			last-line <= ed insert-row(idx)
+			to-y <= idx
+			last-line List.add-all(line)
+
+		to-x = last-line List.size() size-i32()
+		last-line List.add-all(rest)
+		Alloc.free(ed&.al, rest)
+
+		assert(to-x > 0, 'since clipboard is nonempty, this should also be nonempty')
+
+		# we must preserve cursor "order"
+		if ed&.cursor >= from-cur
+			ed move-to(to-x - 1, to-y, dims)
+			ed <&.selected= Just({ x: from-x size-i32(), y: from-cur.y})
+		else
+			ed move-to(from-x size-i32(), from-cur.y, dims)
+			ed <&.selected= Just({ x: to-x - 1, y: to-y})
+
+		ed <&.mode= Normal
+
+
 # dims are unfortunately needed to reposition the cursor properly.
 fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
+	ed copy-selection()
+
 	case ed&.selected
 		None
 			row = ed cursor-row()
@@ -696,6 +824,7 @@ ed =& Editor
 	, search-term: None
 	, al: al
 	, msg: None
+	, clipboard: None
 	}
 
 
@@ -758,10 +887,19 @@ while ed&.running
 
 									if c == 'd'
 										ed delete-selected(ed screen-dims(tui))
+										ed <&.mode= Normal
 
 									if c == 'c'
 										ed delete-selected(ed screen-dims(tui))
 										ed <&.mode= Insert
+
+									if c == 'y'
+										ed copy-selection()
+									if c == 'p'
+										ed paste-clipboard-after-cursor(ed screen-dims(tui))
+									if c == 'P'
+										# ed paste-clipboard-at-cursor(PasteBefore)
+										pass
 
 									if c == 'I'
 										ed move-to-start-of-line-indented(ed screen-dims(tui))
@@ -787,6 +925,7 @@ while ed&.running
 										ed <&.mode= StrBuilder.mk(al) SearchBox()
 								
 									if c == 'n'
+										# TODO: if SELECT, multiple cursors.
 										case ed&.search-term
 											None
 												pass
@@ -1064,6 +1203,8 @@ while ed&.running
 			# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
 			screen Tui.draw-str-right('search term: \(ed&.search-term)', 0, 7)
 			screen Tui.draw-str-right('msg: \(ed&.msg)', 0, 8)
+			cpsize = ed&.clipboard Misc.fmap-maybe(fn s: s.contents.count)
+			screen Tui.draw-str-right('clipboard: \(cpsize)', 0, 9)
 
 		update-animation(&ed&.anim, screen)
 
