@@ -15,6 +15,8 @@ use Mem
 	u32-i64
 	size-i32
 	cast
+use DynStr
+	DynStr
 
 
 tab-size = 2
@@ -84,6 +86,7 @@ Mode al
 	Normal
 	Insert
 	Cmd (StrBuilder al)
+	SearchBox (StrBuilder al)
 
 inst Str Mode
 	print-str (self)
@@ -95,6 +98,10 @@ inst Str Mode
 			Cmd(s)
 				ss = StrBuilder.as-str(&s)
 				Str.print-str('Cmd \(ss)')
+			
+			SearchBox(s)
+				ss = StrBuilder.as-str(&s)
+				Str.print-str('Search \(ss)')
 
 	chars (self)
 		c = @undefined
@@ -106,11 +113,15 @@ inst Str Mode
 			Cmd(s)
 				ss = StrBuilder.as-str(&s)
 				c <= 'Cmd(\(ss))' Str.StrCase2()
+			SearchBox(s)
+				ss = StrBuilder.as-str(&s)
+				c <= 'Search(\(ss))' Str.StrCase2()
 
 		return c chars()
 
 
 Editor al
+	al al
 	running Bool
 	cursor Cursor
 	screen-top I32
@@ -122,6 +133,8 @@ Editor al
 	anim Maybe Cnile.Timespec
 	selected Maybe Cursor
 	theme Ptr Theme
+	search-term Maybe (StrBuilder al)
+	msg Maybe DynStr
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -158,6 +171,21 @@ fn visual-x-to-x (ed Ptr (Editor al), Visual(vx), y I32) -> I32
 			return x
 
 	return chars&.count size-i32()
+
+
+fn reset-msg (ed Ptr (Editor Allocator))
+	case ed&.msg
+		None
+			pass
+		Just(olmsg)
+			ed&.al Alloc.free(olmsg.contents)
+			ed <&.msg= None
+
+fn send-msg (ed Ptr (Editor Allocator), s Str)
+	ed reset-msg()
+	s = s StrBuilder.mk-dyn-str(ed&.al)
+	ed <&.msg= Just(s)
+
 
 Dims
 	cols I32
@@ -325,6 +353,86 @@ fn is-in-selection (ed Ptr (Editor al), c Cursor):
 fn is-word-char (c Char): is-not-whitespace(c)
 fn is-word-char' (c Maybe Char): c Misc.maybe(is-word-char, False)
 
+
+# TODO: maybe I should just return the two cursor positions and set pos in the calling code?
+# TODO: line should center when we move the cursor outside of the screen.
+fn find-next-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <= Allocator al
+	from = Math.max(ed&.cursor, ed&.selected or-else({ x: 0, y: 0 }))
+	curline = ed get-row(from.y)& List.to-slice()
+
+	case curline subslice(from.x i32-size() + 1, curline.count) Slice.find-slice(needle)
+		Just(idx)
+			return Just({ x: from.x + 1 + idx size-i32(), y: from.y })
+		None
+			for (row, from-y) in ed&.current-file List.to-slice() Slice.from(from.y i32-size() + 1) zip(Iter.from(from.y + 1))
+				case row List.to-slice() Slice.find-slice(needle)
+					None
+						pass
+					Just(idx)
+						return Just({ x: idx size-i32(), y: from-y })
+
+			ed send-msg('Wrapped!')
+
+			# here, we wrapped.
+			for (row, from-y) in ed&.current-file List.to-slice() Slice.subslice(0, from.y i32-size()) zip(Iter.from(0))
+				case row List.to-slice() Slice.find-slice(needle)
+					None
+						pass
+					Just(idx)
+						return Just({ x: idx size-i32(), y: from-y })
+
+			# at last, check the line BEFORE the cursor. since the cursor may sit on the pattern, just scan the whole line, since we know that the last subslice has no matches..
+			case curline Slice.find-slice(needle)
+				None
+					pass
+				Just(idx)
+					return Just({ x: idx size-i32(), y: from.y })
+
+			ed send-msg('NOT FOUND!!!')
+			return None
+
+
+fn find-prev-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <= Allocator al
+	from = ed&.selected Misc.maybe(fn s: Math.min(ed&.cursor, s), ed&.cursor)
+	curline = ed get-row(from.y)& List.to-slice()
+
+	case curline subslice(0, from.x i32-size()) Slice.find-last-occurence-of-slice(needle)
+		Just(idx)
+			return Just({ x: idx size-i32(), y: from.y })
+		None
+			from-y = from.y - 1
+			while from-y >= 0
+				row = ed get-row(from-y)
+				case row& List.to-slice() Slice.find-last-occurence-of-slice(needle)
+					None
+						pass
+					Just(idx)
+						return Just({ x: idx size-i32(), y: from-y })
+
+				from-y <= from-y - 1
+
+			ed send-msg('Wrapped!')
+
+			# here, we wrapped.
+			from-y = ed num-rows() size-i32() - 1
+			while from-y > from.y
+				row = ed get-row(from-y)
+				case row& List.to-slice() Slice.find-last-occurence-of-slice(needle)
+					None
+						pass
+					Just(idx)
+						return Just({ x: idx size-i32(), y: from-y })
+
+				from-y <= from-y - 1
+
+			case curline Slice.find-last-occurence-of-slice(needle)
+				None
+					pass
+				Just(idx)
+					return Just({ x: idx size-i32(), y: from.y })
+
+			ed send-msg('NOT FOUND!!!')
+			return None
 
 
 al = Alloc.idc()
@@ -553,6 +661,9 @@ ed =& Editor
 	, anim: Just(Time.now())
 	, selected: None
 	, theme: dark-theme
+	, search-term: None
+	, al: al
+	, msg: None
 	}
 
 
@@ -566,6 +677,10 @@ first-draw = True
 while ed&.running
 	events = 0
 	for ev in Iter.from-function(Tui.read-key)
+		# like Helix, reset the message for new input. be sure to do it once per a stream of events.
+		if events == 0
+			ed reset-msg()
+
 		events <= events + 1
 		tui Tui.update-dimensions()
 		case ev
@@ -617,6 +732,34 @@ while ed&.running
 
 								if c == ':'
 									ed <&.mode= StrBuilder.mk(al) Cmd()
+								
+								if c == '/'
+									ed <&.mode= StrBuilder.mk(al) SearchBox()
+								
+								if c == 'n'
+									case ed&.search-term
+										None
+											pass
+										Just(st)
+											case ed find-next-occurence(StrBuilder.as-char-slice(&st))
+												None
+													pass
+												Just(cur)
+													ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
+													ed <&.selected= Just(cur)
+													
+																					
+								if c == 'N'
+									case ed&.search-term
+										None
+											pass
+										Just(st)
+											case ed find-prev-occurence(StrBuilder.as-char-slice(&st))
+												None
+													pass
+												Just(cur)
+													ed move-to(cur.x + StrBuilder.count(&st) size-i32() - 1, cur.y, ed screen-dims(tui))
+													ed <&.selected= Just(cur)
 								
 								# big selector!
 								if c == 'x'
@@ -719,6 +862,9 @@ while ed&.running
 
 							Ptr(Cmd(sb))
 								StrBuilder.write-char(&sb, c)
+							
+							Ptr(SearchBox(sb))
+								StrBuilder.write-char(&sb, c)
 
 					Tui.Ctrl(c)
 						# the helix version keeps the cursor in place, but still offsets screen at top/bottom borders.
@@ -741,6 +887,8 @@ while ed&.running
 							Cmd(sb)
 								StrBuilder.free(&sb)
 								ed <&.mode= Normal
+							SearchBox(sb)
+								todo()
 
 					Tui.Backspace
 						case &ed&.mode
@@ -754,6 +902,10 @@ while ed&.running
 							Ptr(Cmd(cmd))
 								if StrBuilder.count(&cmd) > 0
 									StrBuilder.pop(&cmd)
+							
+							Ptr(SearchBox(st))
+								if StrBuilder.count(&st) > 0
+									StrBuilder.pop(&st)
 
 					Tui.Enter
 						case ed&.mode
@@ -780,6 +932,21 @@ while ed&.running
 								ed run-cmd(s, ed screen-dims(tui), al)
 
 								StrBuilder.free(&sb)
+								ed <&.mode= Normal
+							
+							SearchBox(sb)
+								case ed&.search-term
+									Just(prev-st)
+										StrBuilder.free(&prev-st)
+									None
+										pass
+									
+								# don't actually set the search box if we didn't input anything.
+								if StrBuilder.count(&sb) > 0
+									ed <&.search-term= Just(sb)
+								else
+									ed <&.search-term= None
+										
 								ed <&.mode= Normal
 						
 					_
@@ -837,6 +1004,8 @@ while ed&.running
 			dim = ed screen-dims(tui)
 			screen Tui.draw-str-right('sl: \(ed&.screen-left) | \(dim.cols)', 0, 6)
 			# screen Tui.draw-str-right('anim: \(ed&.anim)', 0, 6)
+			screen Tui.draw-str-right('search term: \(ed&.search-term)', 0, 7)
+			screen Tui.draw-str-right('msg: \(ed&.msg)', 0, 8)
 
 		update-animation(&ed&.anim, screen)
 
