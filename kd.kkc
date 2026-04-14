@@ -34,6 +34,8 @@ Theme
 	cursor-text Color
 	selection-bg Color
 	selection-text Color
+	selection-cursor-bg Color
+	selection-cursor-text Color
 	line-num-hi-bg Color
 	line-num-hi-text Color
 
@@ -44,6 +46,8 @@ dark-theme =& Theme
 	, cursor-text: Term.Color8(Term.Black8)
 	, selection-bg: Term.Color16(Term.BrightWhite16)
 	, selection-text: Term.Color16(Term.Black16)
+	, selection-cursor-bg: Term.Color16(Term.BrightBlack16)
+	, selection-cursor-text: Term.Color8(Term.Black8)
 	, line-num-hi-bg: Term.Color8(Term.White8)
 	, line-num-hi-text: Term.Color8(Term.Black8)
 	}
@@ -53,8 +57,10 @@ light-theme =& Theme
 	, text: Term.Color8(Term.Black8)
 	, cursor-bg: Term.Color8(Term.Black8)
 	, cursor-text: Term.Color16(Term.BrightWhite16)
-	, selection-bg: Term.Color16(Term.BrightBlack16)
+	, selection-bg: Term.Color16(Term.White16)
 	, selection-text: Term.Color16(Term.BrightWhite16)
+	, selection-cursor-bg: Term.Color16(Term.BrightBlack16)
+	, selection-cursor-text: Term.Color16(Term.BrightWhite16)
 	, line-num-hi-bg: Term.Color8(Term.Black8)
 	, line-num-hi-text: Term.Color16(Term.BrightWhite16)
 	}
@@ -721,6 +727,25 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		if y >= h
 			break
 
+	# render selected cursor
+	case ed&.selected
+		None
+			pass
+		Just(sel)
+			vx = ed x-to-visual-x(sel.x, sel.y) from-visual()
+			len = ed
+				get-row(sel.y)
+				List.try-get(sel.x i32-size())
+				Misc.maybe(char-len, 1)
+				
+			for x in 0 to (len - 1)
+				case screen Tui.get-cell-ptr(left-off - ed&.screen-left + vx + x, sel.y - from-y)
+					None
+						pass
+					Just(cursor-cell)
+						cursor-cell <&.fg= ed&.theme&.selection-cursor-text
+						cursor-cell <&.bg= ed&.theme&.selection-cursor-bg
+		
 	# render cursor
 	cur = ed&.cursor
 	vx = ed x-to-visual-x(cur.x, cur.y) from-visual()
@@ -728,7 +753,6 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		cursor-row()
 		List.try-get(cur.x i32-size())
 		Misc.maybe(char-len, 1)
-
 	for x in 0 to (len - 1)
 		cursor-cell = screen Tui.get-cell-ptr(left-off - ed&.screen-left + vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
 		cursor-cell <&.fg= ed&.theme&.cursor-text
