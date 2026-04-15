@@ -6,6 +6,8 @@ use Tui
 	Color8
 	Tui
 	Screen
+use Str2
+	is-alphanumeric
 use Mem
 	u32-i32
 	size-u32
@@ -26,6 +28,30 @@ fn char-len (c Char)
 	else
 		return 1
 
+CharType
+	CharSpace
+	CharWord
+	CharPunctuation
+
+inst Eq CharType
+	eq (l, r)
+		case (l, r)
+			(CharSpace, CharSpace)
+				return True
+			(CharWord, CharWord)
+				return True
+			(CharPunctuation, CharPunctuation)
+				return True
+			_
+				return False
+
+fn char-type (c Char)
+	if c is-whitespace()
+		return CharSpace
+	elif c is-alphanumeric() or c == '-' or c == '_'
+		return CharWord
+	else
+		return CharPunctuation
 
 Theme
 	bg Color
@@ -125,7 +151,6 @@ inst Str Mode
 			Cmd(s)
 				ss = StrBuilder.as-str(&s)
 				Str.print-str('Cmd \(ss)')
-			
 			SearchBox(s)
 				ss = StrBuilder.as-str(&s)
 				Str.print-str('Search \(ss)')
@@ -150,6 +175,14 @@ inst Str Mode
 		return c chars()
 
 
+Action
+	DeleteSelection DynStr Cursor
+	PasteSelection DynStr Cursor
+
+Actions al
+	list List al Action
+	cur Size
+
 Editor al
 	al al
 	running Bool
@@ -166,6 +199,7 @@ Editor al
 	search-term Maybe (StrBuilder al)
 	msg Maybe DynStr
 	clipboard Maybe DynStr
+	actions List al Action
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -323,17 +357,16 @@ fn set-clipboard (ed Ptr (Editor Allocator), clip Maybe DynStr)
 			ed&.al Alloc.free(cp.contents)
 	ed <&.clipboard= clip
 
-fn copy-selection (ed Ptr (Editor Allocator))
+fn copy-selection (ed Ptr (Editor Allocator)) -> Maybe DynStr
 	case ed&.selected
 		None
 			case ed char-at-cursor()
 				None
-					ed set-clipboard(None)
+					return None
 				Just(c)
 					sb =& StrBuilder.mk(ed&.al)
 					sb StrBuilder.write-char(c)
-					sb StrBuilder.as-str()
-					ed set-clipboard(Just(sb StrBuilder.as-str()))
+					return sb StrBuilder.as-str() Just()
 
 		Just(sel)
 			sb =& StrBuilder.mk(ed&.al)
@@ -364,8 +397,11 @@ fn copy-selection (ed Ptr (Editor Allocator))
 					sb StrBuilder.write('\n')
 
 			s = sb StrBuilder.as-str()
-			ed set-clipboard(Just(s))
 			ed <&.mode= Normal
+			return Just(s)
+
+fn copy-selection-to-clipboard (ed Ptr (Editor Allocator))
+	ed set-clipboard(ed copy-selection())
 
 # also moves the cursor to the end of selection.
 PastePos
@@ -454,7 +490,9 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 
 # dims are unfortunately needed to reposition the cursor properly.
 fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
-	ed copy-selection()
+	sel = ed copy-selection()
+	ed set-clipboard(sel)
+	# ed add-action()
 
 	case ed&.selected
 		None
@@ -531,8 +569,6 @@ fn is-in-selection (ed Ptr (Editor al), c Cursor):
 		Just(sel): c Math.between(ed&.cursor, sel)
 		_: False
 
-fn is-word-char (c Char): is-not-whitespace(c)
-fn is-word-char' (c Maybe Char): c Misc.maybe(is-word-char, False)
 
 
 # TODO: maybe I should just return the two cursor positions and set pos in the calling code?
@@ -633,6 +669,26 @@ fn dedent-selection (ed Ptr (Editor Allocator))
 		if ed char-at({ x: 0, y: rowid }) == Just('\t')
 			row = ed get-row(rowid)
 			row List.remove(0)
+
+
+## UNDO/REDO
+
+fn action-undo(ed Ptr (Editor Allocator), action Action)
+	todo()
+
+fn action-redo(ed Ptr (Editor Allocator), action Action)
+	todo()
+
+
+fn undo(ed Ptr (Editor Allocator))
+	todo()
+
+fn redo(ed Ptr (Editor Allocator))
+	todo()
+
+fn add-action(ed Ptr (Editor Allocator), action Action)
+	todo()
+
 
 al = Alloc.idc()
 fn load-file (filename, al)
@@ -882,6 +938,7 @@ ed =& Editor
 	, al: al
 	, msg: None
 	, clipboard: None
+	, actions: List.mk(al)
 	}
 
 
@@ -951,7 +1008,7 @@ while ed&.running
 										ed <&.mode= Insert
 
 									if c == 'y'
-										ed copy-selection()
+										ed copy-selection-to-clipboard()
 									if c == 'p'
 										ed paste-clipboard-at-cursor(PasteAfter, ed screen-dims(tui))
 									if c == 'P'
@@ -1036,7 +1093,7 @@ while ed&.running
 
 										first-pos = ed&.cursor
 										ed move-right(dims)
-										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										if ed char-at-cursor() fmap-maybe(char-type) /= ed char-at(first-pos) fmap-maybe(char-type)
 											first-pos <= ed&.cursor
 
 										while ed cursor-is-at-line-end()
@@ -1044,11 +1101,12 @@ while ed&.running
 												break
 											first-pos <= ed&.cursor
 
-										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										cur-char-type = ed char-at-cursor() Misc.fmap-maybe(char-type)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() Just() == cur-char-type, False)
 											if not ed move-right(dims) 
 												break
 
-										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() == CharSpace, False)
 											if not ed move-right(dims)
 												break
 									
@@ -1061,7 +1119,7 @@ while ed&.running
 
 										first-pos = ed&.cursor
 										ed move-right(dims)
-										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										if ed char-at-cursor() fmap-maybe(char-type) /= ed char-at(first-pos) fmap-maybe(char-type)
 											first-pos <= ed&.cursor
 
 										while ed cursor-is-at-line-end()
@@ -1069,12 +1127,12 @@ while ed&.running
 												break
 											first-pos <= ed&.cursor
 
-
-										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() == CharSpace, False)
 											if not ed move-right(dims)
 												break
 
-										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										cur-char-type = ed char-at-cursor() Misc.fmap-maybe(char-type)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() Just() == cur-char-type, False)
 											if not ed move-right(dims) 
 												break
 
@@ -1087,7 +1145,7 @@ while ed&.running
 
 										first-pos = ed&.cursor
 										ed move-left(dims)
-										if ed char-at-cursor() fmap-maybe(is-word-char) /= ed char-at(first-pos) fmap-maybe(is-word-char)
+										if ed char-at-cursor() fmap-maybe(char-type) /= ed char-at(first-pos) fmap-maybe(char-type)
 											first-pos <= ed&.cursor
 
 										while ed cursor-is-at-line-end()
@@ -1095,15 +1153,17 @@ while ed&.running
 												break
 											first-pos <= ed&.cursor
 
-										while ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), False)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() == CharSpace, False)
 											if not ed move-left(dims)
 												break
-										while ed char-at-cursor() Misc.maybe(fn c: is-word-char(c), False)
+										
+										cur-char-type = ed char-at-cursor() Misc.fmap-maybe(char-type)
+										while ed char-at-cursor() Misc.maybe(fn c: c char-type() Just() == cur-char-type, False)
 											if not ed move-left(dims) 
 												break
 
 										if first-pos /= ed&.cursor
-											if ed char-at-cursor() Misc.maybe(fn c: not is-word-char(c), True)
+											if ed char-at-cursor() Misc.maybe(fn c: c char-type() Just() /= cur-char-type, True)
 												ed move-right(dims)
 											ed set-selection(Just(first-pos))
 								else
