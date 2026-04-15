@@ -27,6 +27,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [ ] syntax (keyword) highlighting
 - ...
 - [ ] nice UI and animations
+- [ ] UTF8 handling
 - [ ] multipane
 - [ ] multicursor
 - ...
