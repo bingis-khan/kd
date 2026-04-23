@@ -9,13 +9,6 @@ use Tui
 use Str2
 	is-alphanumeric
 use Mem
-	u32-i32
-	size-u32
-	i32-u32
-	i32-size
-	i64-i32
-	u32-i64
-	size-i32
 	cast
 use DynStr
 	DynStr
@@ -23,8 +16,7 @@ use DynStr
 
 fn char-len (c Char)
 	if c == '\t'
-		tab-size = 2
-		return tab-size
+		return 2
 	else
 		return 1
 
@@ -175,12 +167,12 @@ inst Str Mode
 		return c chars()
 
 
-Action
-	DeleteSelection DynStr Cursor
-	PasteSelection DynStr Cursor
+Primitive
+	PrimInsert Cursor DynStr
+	PrimDelete Cursor DynStr
 
 Actions al
-	list List al Action
+	list List al Primitive
 	cur Size
 
 Editor al
@@ -199,7 +191,9 @@ Editor al
 	search-term Maybe (StrBuilder al)
 	msg Maybe DynStr
 	clipboard Maybe DynStr
-	actions List al Action
+	actions Actions al
+	insert-start Maybe Cursor
+	delete-acc Maybe (StrBuilder al)
 
 
 fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
@@ -379,7 +373,6 @@ fn copy-selection (ed Ptr (Editor Allocator)) -> Maybe DynStr
 				sb StrBuilder.write-slice(currow& List.to-slice() subslice(from.x i32-size(), to.x i32-size() + 1))
 				if ed is-at-line-end(to.x, to.y)
 					sb StrBuilder.write('\n')
-				ed <&.mode= Normal
 			else
 				assert(to.y > from.y, 'THATS WHAT WERE CHECKIN YO')
 
@@ -397,7 +390,6 @@ fn copy-selection (ed Ptr (Editor Allocator)) -> Maybe DynStr
 					sb StrBuilder.write('\n')
 
 			s = sb StrBuilder.as-str()
-			ed <&.mode= Normal
 			return Just(s)
 
 fn copy-selection-to-clipboard (ed Ptr (Editor Allocator))
@@ -408,25 +400,152 @@ PastePos
 	PasteBefore
 	PasteAfter
 
+## UNDO/REDO
+
+fn apply-primitive(ed Ptr (Editor Allocator), prim Primitive, dims Dims)
+	case prim
+		PrimInsert(cur, text)
+			x = cur.x
+			y = cur.y
+			if y i32-size() >= ed num-rows()
+				List.add(&ed&.current-file, List.mk(ed&.al))
+			for c in text.contents
+				if c == '\n'
+					cur-line = ed get-row(y)
+					nurow =& List.mk(ed&.al)
+					nurow List.add-all(cur-line& List.to-slice() Slice.from(x i32-size()))
+					cur-line List.trim(x i32-size())
+					(&ed&.current-file) List.insert(y i32-size() + 1, nurow&)
+					y <= y + 1
+					x <= 0
+				else
+					ed get-row(y) List.insert(x i32-size(), c)
+					x <= x + 1
+			ed <&.goal-x= ed x-to-visual-x(x, y)
+			ed move-to(x, y, dims)
+
+		PrimDelete(cur, text)
+			x = cur.x
+			y = cur.y
+			for _ in 0 to (text.contents.count size-i32() - 1)
+				row = ed get-row(y)
+				if x i32-size() >= row&.count
+					if y + 1 < ed num-rows() size-i32()
+						next-row = ed get-row(y + 1)
+						row List.add-all(next-row)
+						ed remove-row(y + 1)
+				else
+					row List.remove(x i32-size())
+			ed <&.goal-x= ed x-to-visual-x(x, y)
+			ed move-to(x, y, dims)
+
+fn invert-primitive(prim Primitive) -> Primitive
+	case prim
+		PrimInsert(cur, s)
+			return PrimDelete(cur, s)
+		PrimDelete(cur, s)
+			return PrimInsert(cur, s)
+
+
+fn push-action (actions Ptr (Actions Allocator), prim Primitive)
+	(&actions&.list) List.trim(actions&.cur)
+	List.add(&actions&.list, prim)
+	actions <&.cur= actions&.cur + 1
+
+fn flush-insert (ed Ptr (Editor Allocator))
+	case ed&.insert-start
+		None
+			return
+		Just(start)
+			ed <&.insert-start= None
+
+			del-count = 0
+			case ed&.delete-acc
+				None
+					pass
+				Just(acc)
+					del-text = StrBuilder.as-str(&acc)
+					ed <&.delete-acc= None
+					if del-text.contents.count > 0
+						del-count <= del-text.contents.count size-i32()
+						rev-sb =& StrBuilder.mk(ed&.al)
+						for i in 0 to (del-count - 1)
+							rev-sb StrBuilder.write-char(del-text.contents[(del-count - 1 - i) i32-size()])
+						ed&.al Alloc.free(del-text.contents)
+						rev-text = rev-sb StrBuilder.as-str()
+						del-pos = { x: start.x - del-count, y: start.y }
+						(&ed&.actions) push-action(PrimDelete(del-pos, rev-text))
+					else
+						ed&.al Alloc.free(del-text.contents)
+
+			adj-start = { x: start.x - del-count, y: start.y }
+			if adj-start == ed&.cursor
+				return
+			sb =& StrBuilder.mk(ed&.al)
+			if adj-start.y == ed&.cursor.y
+				row = ed get-row(adj-start.y)
+				sb StrBuilder.write-slice(row& List.to-slice() subslice(adj-start.x i32-size(), ed&.cursor.x i32-size()))
+			else
+				first-row = ed get-row(adj-start.y)
+				sb StrBuilder.write-slice(first-row& List.to-slice() Slice.from(adj-start.x i32-size()))
+				sb StrBuilder.write('\n')
+				for (row, y) in ed&.current-file List.to-slice() subslice(adj-start.y i32-size() + 1, ed&.cursor.y i32-size()) zip(Iter.from(adj-start.y + 1))
+					sb StrBuilder.write-slice(row List.to-slice())
+					sb StrBuilder.write('\n')
+				last-row = ed get-row(ed&.cursor.y)
+				sb StrBuilder.write-slice(last-row& List.to-slice() subslice(0, ed&.cursor.x i32-size()))
+			text = sb StrBuilder.as-str()
+			if text.contents.count == 0
+				ed&.al Alloc.free(text.contents)
+				return
+			(&ed&.actions) push-action(PrimInsert(adj-start, text))
+
+fn set-mode-normal(ed Ptr (Editor Allocator))
+	ed flush-insert()
+	ed <&.mode= Normal
+
+fn enter-insert-mode(ed Ptr (Editor Allocator))
+	ed <&.mode= Insert
+	ed <&.insert-start= Just(ed&.cursor)
+	ed <&.delete-acc= None
+
+fn add-action(ed Ptr (Editor Allocator), prim Primitive)
+	ed flush-insert()
+	(&ed&.actions) push-action(prim)
+
+fn undo(ed Ptr (Editor Allocator), dims Dims)
+	if ed&.actions.cur == 0
+		return
+	ed <&.actions.cur= ed&.actions.cur - 1
+	prim = ed&.actions.list[ed&.actions.cur]
+	ed apply-primitive(prim invert-primitive(), dims)
+
+fn redo(ed Ptr (Editor Allocator), dims Dims)
+	if ed&.actions.cur >= ed&.actions.list.count
+		return
+	prim = ed&.actions.list[ed&.actions.cur]
+	ed apply-primitive(prim, dims)
+	ed <&.actions.cur= ed&.actions.cur + 1
+
+
 fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) <= Allocator al
 	if not ed&.clipboard is-just()
 		return
 	cp = ed&.clipboard or-fail('expect clipboard')
 
-	# that's actually a funny thing. helix, when a cp line ends in a newline, just pastes the thing line down and does not split the current line.
-	# that seems like a nice behavior.
 	does-it-end-in-newline = cp.contents[cp.contents.count - 1] == '\n'
 	if does-it-end-in-newline
 		from-y =
 			(case pastepos)
 				PasteAfter: ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor).y + 1
 				_: ed&.selected Misc.maybe(fn s: Math.min(s, ed&.cursor), ed&.cursor).y
-		for (line, idx) in cp lines() zip(Iter.from(from-y))
-			row = ed insert-row(idx)
-			row List.add-all(line)
-			ed move-to(line.contents.count size-i32(), idx, dims)
-		ed <&.selected= Just({ x: 0, y: from-y }) # set after to avoid automatic deselection.
-		ed <&.mode= Normal
+		prim = PrimInsert({ x: 0, y: from-y }, cp)
+		ed apply-primitive(prim, dims)
+		ed add-action(prim)
+		last-pasted-y = ed&.cursor.y - 1
+		ed move-to(ed get-row(last-pasted-y)&.count size-i32(), last-pasted-y, dims)
+		ed <&.selected= Just({ x: 0, y: from-y })
+		ed set-mode-normal()
 
 	else
 		from-x = @undefined
@@ -438,8 +557,6 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 				from-y <= from-cur.y
 
 				if ed is-at-line-end(from-cur.x, from-cur.y)
-					if (from-y + 1) i32-size() >= ed num-rows() # if we're at the end, add a new row.
-						List.add(&ed&.current-file, List.mk(ed&.al))
 					from-y <= from-y + 1
 					from-x <= 0
 
@@ -448,112 +565,30 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 				from-x <= from-cur.x i32-size()
 				from-y <= from-cur.y
 
-
-		# copy the character after cursor to a separate buffer and start inserting lines in between
-		# Q: are zero allocations allowed?
-		# A: apparently I get null or an address, but in this case idc, since I'll only be reading `count`
-		cur-line = ed get-row(from-y)
-		rest-of-line = cur-line& List.to-slice() Slice.from(from-x)
-		rest = Alloc.allocate(ed&.al, rest-of-line.count)
-		rest-of-line Slice.copy-to(rest)
-		cur-line List.trim(from-x)
+		prim = PrimInsert({ x: from-x size-i32(), y: from-y }, cp)
+		ed apply-primitive(prim, dims)
+		ed add-action(prim)
+		ed set-mode-normal()
 
 
-		lines = cp lines()
-		# first line lands on current-line
-		cur-line List.add-all(lines head() or-fail('clipboard cannot be empty'))
-
-		# now add more lines.
-		last-line = cur-line
-		to-y = from-y
-		for (line, idx) in lines drop(1) zip(Iter.from(from-y + 1))
-			last-line <= ed insert-row(idx)
-			to-y <= idx
-			last-line List.add-all(line)
-
-		to-x = last-line List.size() size-i32()
-		last-line List.add-all(rest)
-		Alloc.free(ed&.al, rest)
-
-		assert(to-x > 0, 'since clipboard is nonempty, this should also be nonempty')
-
-		# we must preserve cursor "order"
-		if ed&.cursor >= ed&.selected or-else(ed&.cursor)
-			ed move-to(to-x - 1, to-y, dims)
-			ed <&.selected= Just({ x: from-x size-i32(), y: from-y})
-		else
-			ed move-to(from-x size-i32(), from-y, dims)
-			ed <&.selected= Just({ x: to-x - 1, y: to-y})
-
-		ed <&.mode= Normal
-
-
-# dims are unfortunately needed to reposition the cursor properly.
 fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
-	sel = ed copy-selection()
-	ed set-clipboard(sel)
-	# ed add-action()
+	cfrom =
+		(case ed&.selected)
+			Just(sel): Math.min(sel, ed&.cursor)
+			_: ed&.cursor
 
-	case ed&.selected
+	ed set-clipboard(ed copy-selection())
+
+	case ed copy-selection()
 		None
-			row = ed cursor-row()
-			if ed&.cursor.x i32-size() < row&.count  # else should delete newline and merge rows.
-				ed cursor-row() List.remove(ed&.cursor.x i32-size())
-			elif ed cursor-is-at-line-end()
-				# marge next to this one.
-				if ed&.cursor.y + 1 < ed num-rows() size-i32()
-					cur-row = ed cursor-row()
-					next-row-id = ed&.cursor.y + 1
-					next-row = ed get-row(next-row-id)
-					cur-row List.add-all(next-row)
-					ed remove-row(next-row-id)
-
-		Just(sel)
-			# first, remove all rows in between cursors (exclusive)
-			cfrom = Math.min(sel, ed&.cursor)
-			cto = Math.max(sel, ed&.cursor)
-
-			for row-id in (cfrom.y + 1) to (cto.y - 1)
-				assert(row-id > 0, 'rows in between must be ACTUAL ROWS (greater than 0, otherwise sel and cursor have weird values?)')
-				ed remove-row(cfrom.y + 1)  # rows move afterwards, so we can't keep deleting the same row.
-
-			nu-to-y = cto.y - Math.max((cto.y - 1) - (cfrom.y + 1) + 1, 0)
-			assert(nu-to-y == cfrom.y or nu-to-y == cfrom.y + 1, 'when removing rows in between, afterwards the new nu-to-y must be either the same row or the next one')
-
-			cto = { x: cto.x, y: nu-to-y }
-
-			# is-cursor-at-end = ed is-at-line-end(cto.x) # and next-row-id < List.size(&ed&.current-file) size-i32()
-			should-merge-next-line = ed is-at-line-end(cto.x, cto.y)
-			if should-merge-next-line
-				first-row = ed get-row(cfrom.y)
-				first-row List.trim(cfrom.x i32-size())
-
-				on-last-row = cto.y + 1 >= ed num-rows() size-i32()
-				if not on-last-row
-					first-row List.add-all(ed get-row(cto.y + 1))
-
-				if cto.y == cfrom.y
-					if not on-last-row
-						ed remove-row(cto.y + 1)
-				else
-					if not on-last-row
-						ed remove-row(cto.y + 1)
-					ed remove-row(cto.y)
-			else
-				first-row = ed get-row(cfrom.y)
-				if cto.y == cfrom.y
-					for xx in cfrom.x to (Math.min(cto.x, first-row List.size() size-i32() - 1))
-						 first-row List.remove(cfrom.x i32-size())
-				else
-					# NOTE: UNTESTED
-					# different lines. trim + add
-					first-row List.trim(cfrom.x i32-size())
-					first-row List.add-all(ed get-row(cto.y)& List.to-slice() Slice.subslice(0, (cto.x - 1) clamp-uint()))
-					ed remove-row(cto.y)
-
+			return
+		Just(text)
+			if ed&.selected is-just()
+				ed set-mode-normal()
 			ed <&.selected= None
-			ed <&.mode = Normal
-			ed move-to(cfrom.x, cfrom.y, dims)
+			prim = PrimDelete(cfrom, text)
+			ed apply-primitive(prim, dims)
+			ed add-action(prim)
 
 # NOTE: also indents from current row!
 fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
@@ -652,42 +687,30 @@ fn find-prev-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <
 			return None
 
 
-fn indent-selection (ed Ptr (Editor Allocator))
+fn indent-selection (ed Ptr (Editor Allocator), dims Dims)
 	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
 	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
-	
+	saved-cursor = ed&.cursor
+	saved-selected = ed&.selected
 	for rowid in from-y to (to-y)
-		row = ed get-row(rowid)
-		row List.insert(0, '\t')
+		prim = PrimInsert({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al))
+		ed apply-primitive(prim, dims)
+		ed add-action(prim)
+	ed <&.cursor= saved-cursor
+	ed <&.selected= saved-selected
 
-fn dedent-selection (ed Ptr (Editor Allocator))
+fn dedent-selection (ed Ptr (Editor Allocator), dims Dims)
 	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
 	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
-	
+	saved-cursor = ed&.cursor
+	saved-selected = ed&.selected
 	for rowid in from-y to (to-y)
-		# TODO: handle multispaces
 		if ed char-at({ x: 0, y: rowid }) == Just('\t')
-			row = ed get-row(rowid)
-			row List.remove(0)
-
-
-## UNDO/REDO
-
-fn action-undo(ed Ptr (Editor Allocator), action Action)
-	todo()
-
-fn action-redo(ed Ptr (Editor Allocator), action Action)
-	todo()
-
-
-fn undo(ed Ptr (Editor Allocator))
-	todo()
-
-fn redo(ed Ptr (Editor Allocator))
-	todo()
-
-fn add-action(ed Ptr (Editor Allocator), action Action)
-	todo()
+			prim = PrimDelete({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al))
+			ed apply-primitive(prim, dims)
+			ed add-action(prim)
+	ed <&.cursor= saved-cursor
+	ed <&.selected= saved-selected
 
 
 al = Alloc.idc()
@@ -938,7 +961,9 @@ ed =& Editor
 	, al: al
 	, msg: None
 	, clipboard: None
-	, actions: List.mk(al)
+	, actions: { list: List.mk(al), cur: 0 }
+	, insert-start: None
+	, delete-acc: None
 	}
 
 
@@ -979,6 +1004,11 @@ while ed&.running
 									if c == 'q'
 										ed <&.running= False
 
+									if c == 'u'
+										ed undo(ed screen-dims(tui))
+									if c == 'U'
+										ed redo(ed screen-dims(tui))
+
 									if c == 'k'
 										ed move-to-row(ed&.cursor.y - 1, ed screen-dims(tui))
 									if c == 'j'
@@ -990,51 +1020,52 @@ while ed&.running
 										ed move-right(ed screen-dims(tui))
 
 									if c == 'i'
-										ed <&.mode= Insert
+										ed enter-insert-mode()
 
 									if c == 'v'
 										if mode == Select
-											ed <&.mode= Normal
+											ed set-mode-normal()
 										else
 											ed <&.mode= Select
 											ed set-selection(Just(ed&.cursor))
 
 									if c == 'd'
 										ed delete-selected(ed screen-dims(tui))
-										ed <&.mode= Normal
+										ed set-mode-normal()
 
 									if c == 'c'
 										ed delete-selected(ed screen-dims(tui))
-										ed <&.mode= Insert
+										ed enter-insert-mode()
 
 									if c == 'y'
 										ed copy-selection-to-clipboard()
+										ed set-mode-normal()
 									if c == 'p'
 										ed paste-clipboard-at-cursor(PasteAfter, ed screen-dims(tui))
 									if c == 'P'
 										ed paste-clipboard-at-cursor(PasteBefore, ed screen-dims(tui))
 										
 									if c == '>'
-										ed indent-selection()
+										ed indent-selection(ed screen-dims(tui))
 									if c == '<'
-										ed dedent-selection()
+										ed dedent-selection(ed screen-dims(tui))
 
 									if c == 'I'
-										ed <&.mode= Insert
 										ed move-to-start-of-line-indented(ed screen-dims(tui))
+										ed enter-insert-mode()
 									if c == 'A'
-										ed <&.mode= Insert
 										ed move-to-end-of-line(ed screen-dims(tui))
+										ed enter-insert-mode()
 
 									if c == 'o'
 										ed insert-empty-row-at(ed&.cursor.y + 1, al)
 										currow = ed get-row(ed&.cursor.y + 1)
 										ed move-to(currow List.size() size-i32(), ed&.cursor.y + 1, ed screen-dims(tui))
-										ed <&.mode= Insert
+										ed enter-insert-mode()
 									if c == 'O'
 										ed insert-empty-row-at(ed&.cursor.y, al)
 										ed move-to-end-of-line(ed screen-dims(tui))
-										ed <&.mode= Insert
+										ed enter-insert-mode()
 
 									if c == ':'
 										ed <&.mode= StrBuilder.mk(al) Cmd()
@@ -1187,15 +1218,15 @@ while ed&.running
 								# ed <&.running= False
 								pass
 							Insert
-								ed <&.mode= Normal
+								ed set-mode-normal()
 							Cmd(sb)
 								StrBuilder.free(&sb)
-								ed <&.mode= Normal
+								ed set-mode-normal()
 							SearchBox(sb)
 								StrBuilder.free(&sb)
-								ed <&.mode= Normal
+								ed set-mode-normal()
 							Select
-								ed <&.mode= Normal
+								ed set-mode-normal()
 
 					Tui.Backspace
 						case &ed&.mode
@@ -1205,8 +1236,30 @@ while ed&.running
 								pass
 							Ptr(Insert)
 								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
-									ed move-left(ed screen-dims(tui))
-									ed delete-selected(ed screen-dims(tui))
+									dims = ed screen-dims(tui)
+									ed move-left(dims)
+									case ed copy-selection()
+										None
+											pass
+										Just(text)
+											del-acc-count =
+												(case ed&.delete-acc)
+													Just(acc): StrBuilder.count(&acc) size-i32()
+													_: 0
+											case ed&.insert-start
+												Just(start)
+													if ed&.cursor.x < start.x - del-acc-count and ed&.cursor.y == start.y
+														if not ed&.delete-acc is-just()
+															ed <&.delete-acc= Just(StrBuilder.mk(ed&.al))
+														case &ed&.delete-acc
+															Ptr(Just(acc))
+																(&acc) StrBuilder.write-char(text.contents[0])
+															_
+																pass
+												_
+													pass
+											ed apply-primitive(PrimDelete(ed&.cursor, text), dims)
+											ed&.al Alloc.free(text.contents)
 									
 							Ptr(Cmd(cmd))
 								if StrBuilder.count(&cmd) > 0
@@ -1243,7 +1296,7 @@ while ed&.running
 								ed run-cmd(s, ed screen-dims(tui), al)
 
 								StrBuilder.free(&sb)
-								ed <&.mode= Normal
+								ed set-mode-normal()
 							
 							SearchBox(sb)
 								case ed&.search-term
@@ -1265,7 +1318,7 @@ while ed&.running
 								else
 									ed <&.search-term= None
 										
-								ed <&.mode= Normal
+								ed set-mode-normal()
 						
 						
 					_
