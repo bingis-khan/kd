@@ -171,14 +171,20 @@ Primitive
 	PrimInsert Cursor DynStr
 	PrimDelete Cursor DynStr
 
+Pos
+	cur Cursor
+	sel Maybe Cursor
+
 Action
 	prim Primitive
-	before-cursor Cursor
-	before-sel Maybe Cursor
+	selected Bool
+	before-pos Maybe Pos
 
+ChangeSet = Slice Action
 Actions al
-	list List al Action
+	list List al (Either ChangeSet Action)
 	cur Size
+	changeset Maybe (List al Action)
 
 Editor al
 	al al
@@ -220,6 +226,9 @@ fn remove-row(ed Ptr (Editor Allocator), y I32)
 	next-row = ed get-row(y)
 	next-row List.free()
 	(&ed&.current-file) List.remove(y i32-size())
+
+fn is-row-empty(ed Ptr (Editor Allocator), y I32):
+	ed get-row(y) all(is-whitespace)
 
 fn char-at (ed Ptr (Editor al), cur Cursor) -> Maybe Char:
 	ed get-row(cur.y) List.try-get(cur.x i32-size())
@@ -457,11 +466,41 @@ fn free-primitive(prim Primitive, al Allocator)
 		PrimDelete(cur, s)
 			al Alloc.free(s.contents)
 
+fn free-action(action Either ChangeSet Action, al Allocator)
+	case action
+		Right(action)
+			action.prim free-primitive(al)
+		Left(changeset)
+			changeset for-each(fn action: action.prim free-primitive(al))
+			al Alloc.free(changeset)
+
+fn start-changeset(ed Ptr (Editor Allocator))
+	assert(not ed&.actions.changeset is-just(), 'unfinished changeset SOMEHOW!')
+	ed <&.actions.changeset= Just(List.mk(ed&.al))
+
+fn end-changeset(ed Ptr (Editor Allocator))
+	changeset = ed&.actions.changeset or-fail('nonexistent changeset')
+	assert(ed&.actions.cur == ed&.actions.list.count, 'no new changes shouldve been added!')
+	ed <&.actions.changeset= None
+
+	# in case there were no changes, don't make a new changeset.
+	if changeset.count == 0
+		List.free(&changeset)
+		return
+
+	changeset = changeset List.to-slice()
+	List.add(&ed&.actions.list, changeset Left())
+	ed <&.actions.cur= ed&.actions.cur + 1
+
 fn push-action (actions Ptr (Actions Allocator), action Action, al Allocator)
-	List.to-slice(actions&.list) Slice.from(actions&.cur) for-each(fn x: free-primitive(x.prim, al))
+	List.to-slice(actions&.list) Slice.from(actions&.cur) for-each(fn action: action free-action(al))
 	(&actions&.list) List.trim(actions&.cur)
-	List.add(&actions&.list, action)
-	actions <&.cur= actions&.cur + 1
+	case actions
+		Ptr({ changeset: Just(changeset) })
+			List.add(&changeset, action)
+		_
+			List.add(&actions&.list, action Right())
+			actions <&.cur= actions&.cur + 1
 
 # TODO/NOTE: slopped up. teh ai replaced my code, which handled all these cool cases and slowly readded handling for these cases
 # and now it looks stupid. i have to redo it, because it's unreadable.
@@ -488,7 +527,7 @@ fn flush-insert (ed Ptr (Editor Allocator))
 						ed&.al Alloc.free(del-text.contents)
 						rev-text = rev-sb StrBuilder.as-str()
 						del-pos = { x: start.x - del-count, y: start.y }
-						(&ed&.actions) push-action({ prim: PrimDelete(del-pos, rev-text), before-cursor: start, before-sel: None }, ed&.al)
+						(&ed&.actions) push-action({ prim: PrimDelete(del-pos, rev-text), selected: False, before-pos: None }, ed&.al)
 					else
 						ed&.al Alloc.free(del-text.contents)
 
@@ -512,7 +551,7 @@ fn flush-insert (ed Ptr (Editor Allocator))
 			if text.contents.count == 0
 				ed&.al Alloc.free(text.contents)
 				return
-			(&ed&.actions) push-action({ prim: PrimInsert(adj-start, text), before-cursor: adj-start, before-sel: None }, ed&.al)
+			(&ed&.actions) push-action({ prim: PrimInsert(adj-start, text), selected: False, before-pos: None }, ed&.al)
 
 fn set-mode-normal(ed Ptr (Editor Allocator))
 	ed flush-insert()
@@ -523,26 +562,54 @@ fn enter-insert-mode(ed Ptr (Editor Allocator))
 	ed <&.insert-start= Just(ed&.cursor)
 	ed <&.delete-acc= None
 
-fn do-action(ed Ptr (Editor Allocator), prim Primitive, dims Dims, before-cursor Cursor, before-sel Maybe Cursor)
+fn do-action(ed Ptr (Editor Allocator), action Action, dims Dims)
 	ed flush-insert()
-	(&ed&.actions) push-action({ prim: prim, before-cursor: before-cursor, before-sel: before-sel }, ed&.al)
-	ed apply-primitive(prim, dims)
+	(&ed&.actions) push-action(action, ed&.al)
+	ed apply-primitive(action.prim, dims)
 
 fn undo(ed Ptr (Editor Allocator), dims Dims)
 	if ed&.actions.cur == 0
 		return
 	ed <&.actions.cur= ed&.actions.cur - 1
 	action = ed&.actions.list[ed&.actions.cur]
-	ed apply-primitive(action.prim invert-primitive(), dims)
-	ed move-to(action.before-cursor.x, action.before-cursor.y, dims)
-	ed <&.selected= action.before-sel
+	last-action = @undefined
+	case action
+		Right(action)
+			ed apply-primitive(action.prim invert-primitive(), dims)
+			last-action <= action
+		Left(changeset)
+			for action in changeset Slice.reversed()
+				ed apply-primitive(action.prim invert-primitive(), dims)
+			last-action <= changeset[0]
+
+	case last-action.before-pos
+		None
+			pass
+		Just(bp)
+			ed move-to(bp.cur.x, bp.cur.y, dims)
+			ed <&.selected= bp.sel
 
 fn redo(ed Ptr (Editor Allocator), dims Dims)
 	if ed&.actions.cur >= ed&.actions.list.count
 		return
 	action = ed&.actions.list[ed&.actions.cur]
-	ed apply-primitive(action.prim, dims)
 	ed <&.actions.cur= ed&.actions.cur + 1
+	last-action = @undefined
+	case action
+		Right(action)
+			ed apply-primitive(action.prim, dims)
+			last-action <= action
+		Left(changeset)
+			for action in changeset
+				ed apply-primitive(action.prim, dims)
+			last-action <= changeset[changeset.count - 1]
+	case last-action.prim
+		PrimInsert(cur, _)
+			ed move-left(dims)
+			if last-action.selected
+				ed <&.selected= Just(cur)
+		_
+			pass
 
 
 fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) <= Allocator al
@@ -551,6 +618,7 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 	cp = ed&.clipboard or-fail('expect clipboard')
 	before-cursor = ed&.cursor
 	before-sel = ed&.selected
+	before-pos = { cur: before-cursor, sel: before-sel }
 
 	does-it-end-in-newline = cp.contents[cp.contents.count - 1] == '\n'
 	if does-it-end-in-newline
@@ -559,7 +627,7 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 				PasteAfter: ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor).y + 1
 				_: ed&.selected Misc.maybe(fn s: Math.min(s, ed&.cursor), ed&.cursor).y
 		prim = PrimInsert({ x: 0, y: from-y }, cp DynStr.clone(ed&.al))
-		ed do-action(prim, dims, before-cursor, before-sel)
+		ed do-action({ prim, selected: True, before-pos: Just(before-pos) }, dims)
 		last-pasted-y = ed&.cursor.y - 1
 		ed move-to(ed get-row(last-pasted-y)&.count size-i32(), last-pasted-y, dims)
 		ed <&.selected= Just({ x: 0, y: from-y })
@@ -584,7 +652,7 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 				from-y <= from-cur.y
 
 		prim = PrimInsert({ x: from-x size-i32(), y: from-y }, cp DynStr.clone(ed&.al))
-		ed do-action(prim, dims, before-cursor, before-sel)
+		ed do-action({ prim, selected: True, before-pos: Just(before-pos) }, dims)
 		ed move-left(dims)
 		ed <&.selected= Just({ x: from-x size-i32(), y: from-y })
 		ed set-mode-normal()
@@ -593,6 +661,7 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 	before-cursor = ed&.cursor
 	before-sel = ed&.selected
+	before-pos = { cur: before-cursor, sel: before-sel }
 	cfrom =
 		(case ed&.selected)
 			Just(sel): Math.min(sel, ed&.cursor)
@@ -612,7 +681,7 @@ fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 			del <= text
 			ed set-clipboard(Just(text DynStr.clone(ed&.al)))
 
-	ed do-action(PrimDelete(cfrom, del), dims, before-cursor, before-sel)
+	ed do-action({ prim: PrimDelete(cfrom, del), selected: True, before-pos: Just(before-pos) }, dims)
 
 # NOTE: also indents from current row!
 fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
@@ -716,19 +785,35 @@ fn indent-selection (ed Ptr (Editor Allocator), dims Dims)
 	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
 	saved-cursor = ed&.cursor
 	saved-selected = ed&.selected
+	before-pos = { cur: saved-cursor, sel: saved-selected }
+	ed start-changeset()
 	for rowid in from-y to (to-y)
-		ed do-action(PrimInsert({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al)), dims, saved-cursor, saved-selected)
-	ed <&.cursor= saved-cursor
-	ed <&.selected= saved-selected
+		if not ed is-row-empty(rowid)
+			ed do-action({ prim: PrimInsert({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al)), selected: False, before-pos: Just(before-pos) }, dims)
+	ed end-changeset()
+	ed <&.cursor= saved-cursor { x: saved-cursor.x + 1 }
+	ed <&.selected= saved-selected Misc.fmap-maybe(fn s: s { x: s.x + 1 })
 
 fn dedent-selection (ed Ptr (Editor Allocator), dims Dims)
 	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
 	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
 	saved-cursor = ed&.cursor
 	saved-selected = ed&.selected
+	before-pos = { cur: saved-cursor, sel: saved-selected }
+	ed start-changeset()
 	for rowid in from-y to (to-y)
 		if ed char-at({ x: 0, y: rowid }) == Just('\t')
-			ed do-action(PrimDelete({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al)), dims, saved-cursor, saved-selected)
+			ed do-action({ prim: PrimDelete({ x: 0, y: rowid }, '\t' StrBuilder.mk-dyn-str(ed&.al)), selected: False, before-pos: Just(before-pos) }, dims)
+			if saved-cursor.y == rowid
+				saved-cursor <= saved-cursor { x: if saved-cursor.x > 0: saved-cursor.x - 1 else 0 }
+			case saved-selected
+				None
+					pass
+				Just(ss)
+					if ss.y == rowid
+						saved-selected <= Just(ss { x: if ss.x > 0: ss.x - 1 else 0 })
+
+	ed end-changeset()
 	ed <&.cursor= saved-cursor
 	ed <&.selected= saved-selected
 
@@ -981,7 +1066,7 @@ ed =& Editor
 	, al: al
 	, msg: None
 	, clipboard: None
-	, actions: { list: List.mk(al), cur: 0 }
+	, actions: { list: List.mk(al), cur: 0, changeset: None }
 	, insert-start: None
 	, delete-acc: None
 	}
@@ -1255,6 +1340,7 @@ while ed&.running
 							Ptr(Select)
 								pass
 							Ptr(Insert)
+								# SMELL: whole block. just weird.
 								if not (ed&.cursor.x == 0 and ed&.cursor.y == 0)
 									dims = ed screen-dims(tui)
 									if ed&.cursor.x == 0
@@ -1263,7 +1349,7 @@ while ed&.running
 										ed move-left(dims)
 										sb =& StrBuilder.mk(ed&.al)
 										sb StrBuilder.write-char('\n')
-										ed do-action(PrimDelete(ed&.cursor, sb StrBuilder.as-str()), dims, before-merge-cursor, None)
+										ed do-action({ prim: PrimDelete(ed&.cursor, sb StrBuilder.as-str()), selected: False, before-pos: None }, dims)
 										ed enter-insert-mode()
 									else
 										ed move-left(dims)
@@ -1305,7 +1391,6 @@ while ed&.running
 							Select
 								pass
 							Insert
-								# TODO: indent
 								cx = ed&.cursor.x
 
 								# insert empty line below
