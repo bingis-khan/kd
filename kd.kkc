@@ -1040,6 +1040,10 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 			None
 				return
 
+# alternatively, when it's not stdout, force stdout and return the result to the original thing
+if not Term.is-terminal()
+	panic('not running in a terminal!')
+	
 args = Args.get()
 file = @undefined
 mfilename = None

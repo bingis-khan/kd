@@ -20,11 +20,13 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] copy-paste (at deletion + when pressed y)
 - [x] indent dedent
 - [ ] `g` and `<space>` submenu
-- [ ] undo/redo
+- [x] undo/redo
 - ...
 - [ ] filepicker (which respects .ignore and .gitignore) (will require more std functions.)
 - ...
 - [ ] syntax (keyword) highlighting
+- ...
+- [ ] hex edit mode (this requires file type detection)
 - ...
 - [ ] nice UI and animations
 - [ ] UTF8 handling
