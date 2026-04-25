@@ -818,6 +818,83 @@ fn dedent-selection (ed Ptr (Editor Allocator), dims Dims)
 	ed <&.selected= saved-selected
 
 
+fn toggle-comment-on-selection (ed Ptr (Editor Allocator), dims Dims)
+	comment-char = '#'
+
+	from-y = ed&.selected Misc.maybe(fn s: Math.min(s.y, ed&.cursor.y), ed&.cursor.y)
+	to-y = ed&.selected Misc.maybe(fn s: Math.max(s.y, ed&.cursor.y), ed&.cursor.y)
+	saved-cursor = ed&.cursor
+	saved-selected = ed&.selected
+	before-pos = { cur: saved-cursor, sel: saved-selected }
+	ed start-changeset()
+	remove-comments = True
+	for rowid in from-y to (to-y)
+		case ed get-row(rowid) drop-while(is-whitespace) head()
+			None
+				pass # empty row.
+			Just(c)
+				remove-comments <= remove-comments and c == comment-char
+
+	new-cursor = @undefined
+	new-selected = None
+	for rowid in from-y to (to-y)
+		if not ed is-row-empty(rowid)
+			if remove-comments
+				row = ed get-row(rowid)
+				first-char-idx = row take-while(is-whitespace) count()
+				# asume first char is `comment-char`
+				# also possibly remove one space
+				s = @undefined
+				if List.try-get(row, first-char-idx + 1) == Just(' ')
+					s <= '\(comment-char) ' StrBuilder.mk-dyn-str(ed&.al)
+				else
+					s <= '\(comment-char)' StrBuilder.mk-dyn-str(ed&.al)
+
+				ed do-action({ prim: PrimDelete({ x: first-char-idx size-i32(), y: rowid }, s), selected: False, before-pos: Just(before-pos) }, dims)
+
+				move-len = s count() size-i32()
+				if rowid == saved-cursor.y
+					if saved-cursor.x >= first-char-idx size-i32() + move-len
+						new-cursor <= saved-cursor { x: saved-cursor.x - move-len }
+					elif saved-cursor.x >= first-char-idx size-i32()
+						new-cursor <= saved-cursor { x: first-char-idx size-i32() }
+					else
+						new-cursor <= saved-cursor
+				case saved-selected
+					None
+						pass
+					Just(ss)
+						if ss.y == rowid
+							if ss.x >= (first-char-idx size-i32() + move-len)
+								new-selected <= Just(ss { x: ss.x - move-len })
+							elif ss.x >= first-char-idx size-i32()
+								new-selected <= Just(ss { x: first-char-idx size-i32() })
+							else
+								new-selected <= Just(ss)
+			else
+				first-char-idx = ed get-row(rowid) take-while(is-whitespace) count()
+				s = '\(comment-char) ' StrBuilder.mk-dyn-str(ed&.al)
+				ed do-action({ prim: PrimInsert({ x: first-char-idx size-i32(), y: rowid }, s), selected: False, before-pos: Just(before-pos) }, dims)
+				move-len = s count() size-i32()
+				if rowid == saved-cursor.y
+					if saved-cursor.x >= first-char-idx size-i32()
+						new-cursor <= saved-cursor { x: saved-cursor.x + move-len }
+					else
+						new-cursor <= saved-cursor
+				case saved-selected
+					None
+						pass
+					Just(ss)
+						if ss.y == rowid
+							if ss.x >= first-char-idx size-i32()
+								new-selected <= Just(ss { x: ss.x + move-len })
+							else
+								new-selected <= Just(ss)
+	ed end-changeset()
+	ed <&.cursor= new-cursor
+	ed <&.selected= new-selected
+
+
 al = Alloc.idc()
 fn load-file (filename, al)
 	file =& filename File.read-contents(al)
@@ -1040,6 +1117,15 @@ fn run-cmd(ed Ptr (Editor al), s Str, dim Dims, al al) <= Allocator al
 			None
 				return
 
+# NOTE: when we add unions, we can make it take in a list of functions
+# fn start-option-box () -> OptionBox
+# 	pass
+
+# fn end-option-box (box OptionBox)
+# 	pass
+
+
+
 # alternatively, when it's not stdout, force stdout and return the result to the original thing
 if not Term.is-terminal()
 	panic('not running in a terminal!')
@@ -1130,6 +1216,9 @@ while ed&.running
 
 									if c == 'i'
 										ed enter-insert-mode()
+									
+									if c == 'g'
+										pass
 
 									if c == 'v'
 										if mode == Select
@@ -1319,6 +1408,9 @@ while ed&.running
 						if c == 'd'
 							ed <&.screen-top= Math.max(0, ed&.screen-top + 15)
 							ed move-to-row(ed&.cursor.y + 15, ed screen-dims(tui))
+
+						if c == 'c'
+							ed toggle-comment-on-selection(ed screen-dims(tui))
 
 
 					Tui.Escape
