@@ -1,0 +1,12 @@
+#!/bin/env kkc
+
+al = Alloc.idc()
+if 'kd' deps(['src'])
+	'kkc --backend c --dontRun src/kd.kkc' Sh.run(al)
+	'cc -O2 kd.c -o kd' Sh.run(al)
+	
+if Args.get() Slice.try-get(0) == Just('install')
+	home = Env.get('HOME') or-fail('no $HOME defined!?')
+	target = '\(home)/.local/bin'
+	'cp kd \(target)' Sh.run(al)
+	println('copied executable to \(target)')

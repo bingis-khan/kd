@@ -10,8 +10,9 @@ use Str2
 	is-alphanumeric
 use Mem
 	cast
-use DynStr
-	DynStr
+use StrView
+use Misc
+	fmap-maybe
 
 
 fn char-len (c Char)
@@ -24,6 +25,7 @@ CharType
 	CharSpace
 	CharWord
 	CharPunctuation
+
 
 inst Eq CharType
 	eq (l, r)
@@ -100,6 +102,7 @@ inst Ord Cursor
 			els
 				return els
 
+
 # cute! so that I don't get confused
 Visual
 	Visual I32
@@ -168,8 +171,8 @@ inst Str Mode
 
 
 Primitive
-	PrimInsert Cursor DynStr
-	PrimDelete Cursor DynStr
+	PrimInsert Cursor StrView
+	PrimDelete Cursor StrView
 
 Pos
 	cur Cursor
@@ -193,28 +196,28 @@ Editor al
 	screen-top I32
 	screen-left I32  # change it to Vec2 (or just Cursor)?
 	goal-x Visual  # when moving up-down, try to move it to this. it'll get reset with any horizontal movement.
-	current-file List al (List al Cnile.Char)
+	current-file List al (List al U8)
 	filename Maybe ConstStr
 	mode (Mode al)
 	anim Maybe Cnile.Timespec
 	selected Maybe Cursor
 	theme Ptr Theme
 	search-term Maybe (StrBuilder al)
-	msg Maybe DynStr
-	clipboard Maybe DynStr
+	msg Maybe StrView
+	clipboard Maybe StrView
 	actions Actions al
 	insert-start Maybe Cursor
 	delete-acc Maybe (StrBuilder al)
 
 
-fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al Cnile.Char):
+fn get-row (ed Ptr (Editor al), y I32) -> Ptr (List al U8):
 	(&ed&.current-file) List.get-ptr(y i32-size())
 
-fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al Cnile.Char):
+fn cursor-row (ed Ptr (Editor al)) -> Ptr (List al U8):
 	(&ed&.current-file) List.get-ptr(ed&.cursor.y i32-size())
 
 fn indent-on-row (ed Ptr (Editor al), y I32):
-	ed get-row(y) take-while(is-whitespace)
+	ed get-row(y) map(Char.from-u8) take-while(is-whitespace)
 
 fn num-rows (ed Ptr (Editor al)): List.size(&ed&.current-file)
 
@@ -228,22 +231,22 @@ fn remove-row(ed Ptr (Editor Allocator), y I32)
 	(&ed&.current-file) List.remove(y i32-size())
 
 fn is-row-empty(ed Ptr (Editor Allocator), y I32):
-	ed get-row(y) all(is-whitespace)
+	ed get-row(y) map(Char.from-u8) all(is-whitespace)
 
 fn char-at (ed Ptr (Editor al), cur Cursor) -> Maybe Char:
-	ed get-row(cur.y) List.try-get(cur.x i32-size())
+	ed get-row(cur.y) List.try-get(cur.x i32-size()) Misc.fmap-maybe(Char.from-u8)
 	
 fn char-at-cursor (ed Ptr (Editor al)) -> Maybe Char:
-	ed cursor-row() List.try-get(ed&.cursor.x i32-size())
+	ed cursor-row() List.try-get(ed&.cursor.x i32-size()) Misc.fmap-maybe(Char.from-u8)
 
 fn x-to-visual-x (ed Ptr (Editor al), x I32, y I32) -> Visual:
-	ed get-row(y) take(x i32-size()) map(char-len) sum() Visual()
+	ed get-row(y) take(x i32-size()) map(Char.from-u8) map(char-len) sum() Visual()
 
 fn visual-x-to-x (ed Ptr (Editor al), Visual(vx), y I32) -> I32
 	sum-x = 0
 	chars = ed get-row(y)
 	for x in 0 to (chars&.count size-i32() - 1) # we first convert size to i32 to handle the case when count = 0.
-		sum-x <= sum-x + chars[x i32-size()] char-len()
+		sum-x <= sum-x + chars[x i32-size()] Char.from-u8() char-len()
 		if vx < sum-x
 			return x
 
@@ -357,7 +360,7 @@ fn cursor-is-at-line-end (ed Ptr (Editor al)):
 	ed&.cursor.x == ed cursor-row() List.size() size-i32()
 
 
-fn set-clipboard (ed Ptr (Editor Allocator), clip Maybe DynStr)
+fn set-clipboard (ed Ptr (Editor Allocator), clip Maybe StrView)
 	case ed&.clipboard
 		None
 			pass
@@ -365,7 +368,7 @@ fn set-clipboard (ed Ptr (Editor Allocator), clip Maybe DynStr)
 			ed&.al Alloc.free(cp.contents)
 	ed <&.clipboard= clip
 
-fn copy-selection (ed Ptr (Editor Allocator)) -> Maybe DynStr
+fn copy-selection (ed Ptr (Editor Allocator)) -> Maybe StrView
 	case ed&.selected
 		None
 			case ed char-at-cursor()
@@ -424,7 +427,8 @@ fn apply-primitive(ed Ptr (Editor Allocator), prim Primitive, dims Dims)
 			y = cur.y
 			if y i32-size() >= ed num-rows()
 				List.add(&ed&.current-file, List.mk(ed&.al))
-			for c in text.contents
+			for b in text.contents
+				c = b Char.from-u8()
 				if c == '\n'
 					cur-line = ed get-row(y)
 					nurow =& List.mk(ed&.al)
@@ -434,7 +438,7 @@ fn apply-primitive(ed Ptr (Editor Allocator), prim Primitive, dims Dims)
 					y <= y + 1
 					x <= 0
 				else
-					ed get-row(y) List.insert(x i32-size(), c)
+					ed get-row(y) List.insert(x i32-size(), b)
 					x <= x + 1
 			ed <&.goal-x= ed x-to-visual-x(x, y)
 			ed move-to(x, y, dims)
@@ -523,7 +527,7 @@ fn flush-insert (ed Ptr (Editor Allocator))
 						del-count <= del-text.contents.count size-i32()
 						rev-sb =& StrBuilder.mk(ed&.al)
 						for i in 0 to (del-count - 1)
-							rev-sb StrBuilder.write-char(del-text.contents[(del-count - 1 - i) i32-size()])
+							rev-sb StrBuilder.write-char(del-text.contents[(del-count - 1 - i) i32-size()] Char.from-u8())
 						ed&.al Alloc.free(del-text.contents)
 						rev-text = rev-sb StrBuilder.as-str()
 						del-pos = { x: start.x - del-count, y: start.y }
@@ -620,13 +624,13 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 	before-sel = ed&.selected
 	before-pos = { cur: before-cursor, sel: before-sel }
 
-	does-it-end-in-newline = cp.contents[cp.contents.count - 1] == '\n'
+	does-it-end-in-newline = cp.contents[cp.contents.count - 1] Char.from-u8() == '\n'
 	if does-it-end-in-newline
 		from-y =
 			(case pastepos)
 				PasteAfter: ed&.selected Misc.maybe(fn s: Math.max(s, ed&.cursor), ed&.cursor).y + 1
 				_: ed&.selected Misc.maybe(fn s: Math.min(s, ed&.cursor), ed&.cursor).y
-		prim = PrimInsert({ x: 0, y: from-y }, cp DynStr.clone(ed&.al))
+		prim = PrimInsert({ x: 0, y: from-y }, cp StrView.clone(ed&.al))
 		ed do-action({ prim, selected: True, before-pos: Just(before-pos) }, dims)
 		last-pasted-y = ed&.cursor.y - 1
 		ed move-to(ed get-row(last-pasted-y)&.count size-i32(), last-pasted-y, dims)
@@ -651,7 +655,7 @@ fn paste-clipboard-at-cursor (ed Ptr (Editor al), pastepos PastePos, dims Dims) 
 				from-x <= from-cur.x i32-size()
 				from-y <= from-cur.y
 
-		prim = PrimInsert({ x: from-x size-i32(), y: from-y }, cp DynStr.clone(ed&.al))
+		prim = PrimInsert({ x: from-x size-i32(), y: from-y }, cp StrView.clone(ed&.al))
 		ed do-action({ prim, selected: True, before-pos: Just(before-pos) }, dims)
 		ed move-left(dims)
 		ed <&.selected= Just({ x: from-x size-i32(), y: from-y })
@@ -679,7 +683,7 @@ fn delete-selected (ed Ptr (Editor al), dims Dims) <= Allocator al
 				ed set-mode-normal()
 			ed <&.selected= None
 			del <= text
-			ed set-clipboard(Just(text DynStr.clone(ed&.al)))
+			ed set-clipboard(Just(text StrView.clone(ed&.al)))
 
 	ed do-action({ prim: PrimDelete(cfrom, del), selected: True, before-pos: Just(before-pos) }, dims)
 
@@ -688,7 +692,7 @@ fn insert-empty-row-at (ed Ptr (Editor al), y I32, al al) <= Allocator al
 	nurow =& List.mk(al)
 	rowws = ed indent-on-row(ed&.cursor.y)
 	offchars = rowws count() size-i32()
-	nurow List.add-all(rowws)
+	nurow List.add-all(rowws map(Char.char-u8))
 	(&ed&.current-file) List.insert(y i32-size(), nurow&)
 
 
@@ -701,7 +705,7 @@ fn is-in-selection (ed Ptr (Editor al), c Cursor):
 
 # TODO: maybe I should just return the two cursor positions and set pos in the calling code?
 # TODO: line should center when we move the cursor outside of the screen.
-fn find-next-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <= Allocator al
+fn find-next-occurence (ed Ptr (Editor al), needle Slice U8) -> Maybe Cursor <= Allocator al
 	from = Math.max(ed&.cursor, ed&.selected or-else({ x: 0, y: 0 }))
 	curline = ed get-row(from.y)& List.to-slice()
 
@@ -737,7 +741,7 @@ fn find-next-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <
 			return None
 
 
-fn find-prev-occurence (ed Ptr (Editor al), needle Slice Char) -> Maybe Cursor <= Allocator al
+fn find-prev-occurence (ed Ptr (Editor al), needle Slice U8) -> Maybe Cursor <= Allocator al
 	from = ed&.selected Misc.maybe(fn s: Math.min(ed&.cursor, s), ed&.cursor)
 	curline = ed get-row(from.y)& List.to-slice()
 
@@ -829,7 +833,7 @@ fn toggle-comment-on-selection (ed Ptr (Editor Allocator), dims Dims)
 	ed start-changeset()
 	remove-comments = True
 	for rowid in from-y to (to-y)
-		case ed get-row(rowid) drop-while(is-whitespace) head()
+		case ed get-row(rowid) map(Char.from-u8) drop-while(is-whitespace) head()
 			None
 				pass # empty row.
 			Just(c)
@@ -841,11 +845,11 @@ fn toggle-comment-on-selection (ed Ptr (Editor Allocator), dims Dims)
 		if not ed is-row-empty(rowid)
 			if remove-comments
 				row = ed get-row(rowid)
-				first-char-idx = row take-while(is-whitespace) count()
+				first-char-idx = row map(Char.from-u8) take-while(is-whitespace) count()
 				# asume first char is `comment-char`
 				# also possibly remove one space
 				s = @undefined
-				if List.try-get(row, first-char-idx + 1) == Just(' ')
+				if List.try-get(row, first-char-idx + 1) fmap-maybe(Char.from-u8) == Just(' ')
 					s <= '\(comment-char) ' StrBuilder.mk-dyn-str(ed&.al)
 				else
 					s <= '\(comment-char)' StrBuilder.mk-dyn-str(ed&.al)
@@ -872,7 +876,7 @@ fn toggle-comment-on-selection (ed Ptr (Editor Allocator), dims Dims)
 							else
 								new-selected <= Just(ss)
 			else
-				first-char-idx = ed get-row(rowid) take-while(is-whitespace) count()
+				first-char-idx = ed get-row(rowid) map(Char.from-u8) take-while(is-whitespace) count()
 				s = '\(comment-char) ' StrBuilder.mk-dyn-str(ed&.al)
 				ed do-action({ prim: PrimInsert({ x: first-char-idx size-i32(), y: rowid }, s), selected: False, before-pos: Just(before-pos) }, dims)
 				move-len = s count() size-i32()
@@ -899,8 +903,8 @@ al = Alloc.idc()
 fn load-file (filename, al)
 	file =& filename File.read-contents(al)
 		lines()
-		# append('' DynStr.from-const-str())  # add a single empty line just like all the other editors...?
-		map(fn line: line to-list(al))
+		# append('' StrView.from-const-str())  # add a single empty line just like all the other editors...?
+		map(fn line: line.contents to-list(al))
 		to-list(al)
 
 	if file null()
@@ -911,7 +915,7 @@ fn load-file (filename, al)
 fn save-file (cf, filename)
 	sb =& StrBuilder.mk(al)
 	for row in cf
-		row for-each(fn c: sb StrBuilder.write-char(c))
+		row List.to-slice() StrView.from-bytes() for-each(fn c: sb StrBuilder.write-char(c))
 		sb StrBuilder.write-char('\n')
 
 	File.write-contents(filename, sb StrBuilder.as-str())
@@ -959,6 +963,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 				cp <&.bg= ed&.theme&.line-num-hi-bg
 
 		for (char, cx) in row zip(from(0)) drop(from-x i32-size())
+			char = char Char.from-u8()
 			in-selection = ed is-in-selection({ x: cx, y: cy })
 			if in-selection
 				screen Tui.set-screen-colors(ed&.theme&.selection-text, ed&.theme&.selection-bg)
@@ -997,7 +1002,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 			len = ed
 				get-row(sel.y)
 				List.try-get(sel.x i32-size())
-				Misc.maybe(char-len, 1)
+				Misc.maybe(fn c: c Char.from-u8() char-len(), 1)
 				
 			for x in 0 to (len - 1)
 				case screen Tui.get-cell-ptr(left-off - ed&.screen-left + vx + x, sel.y - from-y)
@@ -1013,7 +1018,7 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	len = ed
 		cursor-row()
 		List.try-get(cur.x i32-size())
-		Misc.maybe(char-len, 1)
+		Misc.maybe(fn c: c Char.from-u8() char-len(), 1)
 	for x in 0 to (len - 1)
 		cursor-cell = screen Tui.get-cell-ptr(left-off - ed&.screen-left + vx + x, ed&.cursor.y - from-y) or-fail('cursor out of screen')
 		cursor-cell <&.fg= ed&.theme&.cursor-text
@@ -1166,12 +1171,10 @@ tui =& Tui.mk()
 al = Alloc.idc()
 screen =& tui Tui.mk-screen(al)
 
-
 counter = 0 as U32
-first-draw = True
 while ed&.running
 	events = 0
-	for ev in Iter.from-function(Tui.read-key)
+	for ev in Iter.from-function(fn: Tui.read-event(tui))
 		# like Helix, reset the message for new input. be sure to do it once per a stream of events.
 		if events == 0
 			ed reset-msg()
@@ -1184,14 +1187,14 @@ while ed&.running
 					Tui.Char(c)
 						case &ed&.mode
 							Ptr(Insert)
-								ed cursor-row() List.insert(ed&.cursor.x i32-size(), c)
+								ed cursor-row() List.insert(ed&.cursor.x i32-size(), Char.ascii-u8(c))
 								ed move-to-col(ed&.cursor.x + 1, ed screen-dims(tui))
 
 							Ptr(Cmd(sb))
-								StrBuilder.write-char(&sb, c)
+								StrBuilder.write-char(&sb, Char.ascii-char(c))
 							
 							Ptr(SearchBox(sb))
-								StrBuilder.write-char(&sb, c)
+								StrBuilder.write-char(&sb, Char.ascii-char(c))
 
 							Ptr(mode)
 								if mode == Normal or mode == Select
@@ -1466,7 +1469,7 @@ while ed&.running
 																ed <&.delete-acc= Just(StrBuilder.mk(ed&.al))
 															case &ed&.delete-acc
 																Ptr(Just(acc))
-																	(&acc) StrBuilder.write-char(text.contents[0])
+																	(&acc) StrBuilder.write-char(text.contents[0] Char.from-u8())
 																_
 																	pass
 												ed apply-primitive(PrimDelete(ed&.cursor, text), dims)
@@ -1493,7 +1496,7 @@ while ed&.running
 								nurow =& List.mk(al)
 								rowws = ed indent-on-row(ed&.cursor.y)
 								offchars = rowws count() size-i32()
-								nurow List.add-all(rowws)
+								nurow List.add-all(rowws map(Char.char-u8))
 								cur-row = ed cursor-row()
 								nurow List.add-all(cur-row& List.to-slice() Slice.subslice(cx i32-size(), cur-row&.count))
 								cur-row List.trim(cx i32-size())
@@ -1554,13 +1557,11 @@ while ed&.running
 			_
 				unreachable()
 
-	resized = screen Tui.resize-screen-if-needed()
+	screen Tui.resize-screen-if-needed()
 
 	# fyi: when just sleeping and not rendering without events, we reduce CPU usage to 1% compared to 5-8% on idle with continuous rendering.
 	# add it in the future.
-	if resized or events > 0 or first-draw or ed&.anim is-just()
-		first-draw <= False
-
+	if tui Tui.should-redraw() or ed&.anim is-just()
 		screen Tui.clear-screen()
 		screen Tui.set-screen-fg(ed&.theme&.text)
 		screen Tui.set-screen-bg(ed&.theme&.bg)
@@ -1575,7 +1576,7 @@ while ed&.running
 			screen Tui.draw-str-right('fps: \(tui&.actual-fps)', 0, 1)
 			charcode = List.try-get(&ed&.current-file, ed&.cursor.y i32-size())
 				and-maybe(fn l: List.try-get(&l, ed&.cursor.x i32-size()))
-				fmap-maybe(fn(c): (c, c Str.char-i32()))
+				fmap-maybe(fn(b): (Char.from-u8(b), b))
 			screen Tui.draw-str-right('CURRENT CHAR CODE: \(charcode)', 0, 2)
 			screen Tui.draw-str-right('pos: \(ed&.cursor.x),\(ed&.cursor.y)', 0, 3)
 

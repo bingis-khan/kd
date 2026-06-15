@@ -14,11 +14,14 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 
 ## todo
 
-- [x] searching + wrapping (fwd and bwd)
-- [x] editor messages (send message Str -> () which allocates and frees n stuff)
+- [x] w,e,b jumping
+- [ ] basic cmds
+- [ ] line numbers
+- [ ] searching + wrapping (fwd and bwd)
+- [ ] editor messages (send message Str -> () which allocates and frees n stuff)
 - [x] SELECT mode
 - [x] copy-paste (at deletion + when pressed y)
-- [x] indent dedent
+- [ ] indent dedent
 - [ ] `g` and `<space>` submenu
 - [x] undo/redo
 - ...
@@ -29,10 +32,15 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [ ] hex edit mode (this requires file type detection)
 - ...
 - [ ] nice UI and animations
-- [ ] UTF8 handling
+- [x] UTF8 handling
 - [ ] multipane
 - [ ] multicursor
 - ...
 - [ ] nice themes
 - [ ] cmd autocomplete
 - [ ] wq (i didn't add it on purpose. due to my muscle memory, i use it automatically,  but I don't want to overwrite important files accidentally)
+
+
+## ideas from gay nigger
+
+- [ ] earlier/later commands (undo 5 mins)

@@ -1,0 +1,281 @@
+use Tui
+	Screen
+
+use Pos
+	Pos
+use TextBuf
+	TextBuf
+use CharType
+	char-type
+	is-word-boundary
+
+Mode
+	Normal
+	Insert
+	Select
+
+inst Eq Mode
+	eq (l _, r _):
+		(case (l, r))
+			(Normal, Normal): True
+			(Insert, Insert): True
+			(Select, Select): True
+			_: False
+
+inst Str Mode
+	chars (self _): (case self) chars()
+		Normal: 'Normal'
+		Insert: 'Insert'
+		Select: 'Select'
+		_: todo()
+
+Pane al
+	buf Ptr (TextBuf al)
+	cursor Pos
+	vi I32
+	sel Maybe Pos
+	mode Mode
+
+fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
+	{ buf
+	, cursor: Pos.mk(0, 0)
+	, vi: 0
+	, sel: None
+	, mode: Normal
+	}
+
+
+# line processing
+# bi = byte index
+# ci = char index (char index from chars())
+# vi = visual index (number of char cells)
+
+# (fyi, i think they should be here, because they don't deal with the inner implementation of TextBuf (which we should later replace for a piece table.))
+fn pos-ci (self Ptr (TextBuf al), pos Pos) -> I32
+	line = self TextBuf.line(pos.line)
+	line-ptr = line.contents.ptr
+	bi = 0 as I64
+	ci = 0 as I32
+	while bi Mem.i64-size() < line StrView.num-bytes()
+		off = line-ptr Mem.offset-ptr(bi) Char.next-char()
+		bi <= bi + off Mem.size-i64()
+		if bi Mem.i64-i32() > pos.bi
+			return ci
+		ci <= ci + 1
+	return line StrView.num-bytes() Mem.size-i32()
+
+fn vi-bi (self Ptr (TextBuf al), ln I32, vx I32) -> I32
+	bi = 0 as I32
+	vi = 0
+	for c in self TextBuf.line(ln) chars()
+		vi <= vi + c Tui.rendered-wcwidth()
+		if vx < vi
+			break
+
+		bi <= bi + c.num-bytes Mem.size-i32()
+
+	return bi
+
+# basically bi-vi, put we also need the line, so it's the same as pos.
+fn pos-vi (self Ptr (TextBuf al), pos Pos) -> I32
+	bi = 0 as I32
+	vi = 0
+	for c in self TextBuf.line(pos.line) chars()
+		bi <= bi + c.num-bytes Mem.size-i32()
+		if pos.bi < bi
+			break
+
+		vi <= vi + c Tui.rendered-wcwidth()
+
+	return vi
+
+
+fn is-in-selection (pane Ptr (Pane al), pos Pos):
+	(case pane&.sel)
+		Just(sel): pos Math.between(pane&.cursor, sel)
+		_: False
+
+fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al))
+	for line-num in 1 to (pane&.buf TextBuf.num-lines())
+		y = line-num - 1
+		line-content = pane&.buf TextBuf.line(y)
+		xbi = 0
+		for (c, x) in line-content chars() append(' ') zip(from(0))
+			if x > screen&.tui&.width Mem.u32-i32()
+				break
+
+			in-selection = pane is-in-selection(Pos.mk(y, xbi))
+			if in-selection
+				screen <&.default-bg= Term.Color8(Term.Cyan8)
+			screen Tui.put-char(c, x, y)
+			if in-selection
+				screen <&.default-bg= Term.ColorDefault
+
+			xbi <= xbi + c.num-bytes Mem.size-i32()
+
+	cursor = pane&.cursor
+	cursor-ci = pane&.buf pos-ci(cursor)
+	screen Tui.get-cell-ptr(cursor-ci, pane&.cursor.line) if-just(fn (curcell) )
+		curcell <&.fg= Term.Color8(Term.Black8)
+		curcell <&.bg= Term.Color8(Term.White8)
+
+
+
+fn set-sel (self Ptr (Pane al), sel Maybe Pos)
+	if self&.mode /= Select
+		self <&.sel= sel
+
+fn move-right (self Ptr (Pane al))
+	self <&.cursor= TextBuf.right-pos(self&.buf, self&.cursor)
+	self <&.vi= self&.buf pos-vi(self&.cursor)
+	self set-sel(None)
+
+fn move-left (self Ptr (Pane al))
+	self <&.cursor= TextBuf.left-pos(self&.buf, self&.cursor)
+	self <&.vi= self&.buf pos-vi(self&.cursor)
+	self set-sel(None)
+
+fn move-down (self Ptr (Pane al))
+	cur = self&.cursor
+	if cur.line + 1 >= self&.buf TextBuf.num-lines()
+		return
+
+	vci = self&.vi
+	bi = self&.buf vi-bi(cur.line + 1, vci)
+	self <&.cursor= { line: cur.line + 1, bi }
+	self set-sel(None)
+
+fn move-up (self Ptr (Pane al))
+	cur = self&.cursor
+	if cur.line <= 0
+		return
+
+	vci = self&.vi
+	bi = self&.buf vi-bi(cur.line - 1, vci)
+	self <&.cursor= { line: cur.line - 1, bi }
+	self set-sel(None)
+
+fn set-cursors (self Ptr (Pane al), cur Pos, sel Pos)  # if you don't want to set sel, just use cur as the second arg.
+	self <&.cursor= cur
+	if cur == sel
+		self <&.sel = None
+	else
+		self <&.sel = Just(sel)
+
+fn cursor-is-at-line-end (pane Ptr (Pane al))
+	cur = pane&.cursor
+	return cur.bi Mem.i32-size() == pane&.buf TextBuf.line(cur.line) StrView.num-bytes()
+
+fn char-at(pane Ptr (Pane al), pos Pos)
+	line = pane&.buf TextBuf.line(pos.line)
+	return line
+		StrView.byte-substr(pos.bi Mem.i32-size(), line StrView.num-bytes())
+		chars()
+		head()
+		or-else('\n')
+
+MoveDirection
+	MoveFwd
+	MoveBwd
+
+MoveTarget
+	NextWordStart
+	NextWordEnd
+
+fn reached-target (pane Ptr (Pane al), target MoveTarget, prev Pos):
+	(case target)
+		NextWordStart:
+			is-word-boundary(pane char-at(prev), pane char-at(pane&.cursor))
+			  and not pane char-at(pane&.cursor) char-type() == CharType.CharSpace
+		NextWordEnd:
+			is-word-boundary(pane char-at(prev), pane char-at(pane&.cursor))
+			  and not pane char-at(prev) char-type() == CharType.CharSpace
+		_: todo()
+
+# todo: maybe make it stateless. this will allow me to not accidentally end up setting stuff.
+fn advance-word (pane Ptr (Pane al), dir MoveDirection, target MoveTarget) <= Allocator al
+	prev =& pane&.cursor Misc.own()
+	fn advance()
+		prev <&= pane&.cursor
+		case dir
+			MoveFwd
+				pane move-right()
+			MoveBwd
+				pane move-left()
+
+	# skip newlines
+	sel = pane&.cursor
+	advance()
+	while pane cursor-is-at-line-end()
+		if pane&.cursor == prev&
+			return  # at the end of the file!
+		advance()
+		sel <= pane&.cursor
+
+	# check first word boundary
+	if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor))
+		sel <= pane&.cursor
+	while True
+		advance()
+		if pane cursor-is-at-line-end() or pane reached-target(target, prev&)
+			case dir
+				MoveFwd
+					pane move-left()
+				MoveBwd
+					pane move-right()
+			break
+
+		# when moving backwards, we might get to the start of the file. this line breaks us out.
+		if prev& == pane&.cursor
+			break
+
+	pane set-sel(Just(sel))
+
+
+fn min-pos (pane Ptr (Pane al)):
+	(case pane&.sel)
+		Just(sel): Math.min(pane&.cursor, sel)
+		_: pane&.cursor
+
+fn max-pos (pane Ptr (Pane al)):
+	(case pane&.sel)
+		Just(sel): Math.max(pane&.cursor, sel)
+		_: pane&.cursor
+
+
+
+# modification
+
+fn add-str-at-char (self Ptr (Pane al), s StrView) <= Allocator al
+	cur = self&.cursor
+	self&.buf TextBuf.change(cur, cur, s, None)
+
+fn backspace (self Ptr (Pane Allocator))
+	prev-cur = self&.cursor
+	self move-left()
+	self&.buf TextBuf.change(self&.cursor, prev-cur, '', None)
+
+fn undo (self Ptr (Pane al)) <= Allocator al
+	mcursors = self&.buf TextBuf.undo()
+	mcursors if-just(fn(cursors))
+		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+
+fn redo (self Ptr (Pane al)) <= Allocator al
+	mcursors = self&.buf TextBuf.redo()
+	mcursors if-just(fn(cursors))
+		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+
+
+# selection in a textbuf format (with the later position being moved by one.)
+fn selection (self Ptr (Pane al)) -> (Pos, Pos)
+	from-to = Math.minmax(self&.sel or-else(self&.cursor), self&.cursor)
+	from = from-to fst()
+	to = self&.buf TextBuf.right-pos(from-to snd())
+	return (from, to)
+
+fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Allocator al
+	self&.buf TextBuf.change(pos's fst(), pos's snd(), cp, Just({ cur: self&.cursor, sel: self&.sel }))
+	to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
+	if cp StrView.num-bytes() > 0
+		to <= TextBuf.left-pos(self&.buf, to)
+	self set-cursors(to, pos's fst())

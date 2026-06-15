@@ -1,0 +1,247 @@
+
+# this is the text buffer implementation.
+# it does NOT contain actions or whatever. it's supposed to store TEXT!
+# this whole module can later be replaced by a proper data structure like a Rope!
+# interface (inspired by ropey):
+# line (index from 0 yo)
+# change (both inserts and deletes)
+
+# also uses I32 indexes to make math easier :)
+
+
+use Pos
+	Pos
+
+
+Cursors
+	cur Pos
+	sel Maybe Pos
+
+Action
+	from Pos
+
+	fwd StrView  # what we added
+	to-fwd Pos   # this could be removed (if we have a nice way to compute it from bwd)
+
+	bwd StrView  # what we removed
+	to-bwd Pos   # this could ALSO be removed.
+
+	# instead of before-cursors, use an enum to specify where a cursor should end up.
+	before-cursors Cursors
+
+fn free-action (action Action, al Allocator)
+	action.fwd StrView.free(al)
+	action.bwd StrView.free(al)
+
+# ChangeSet = Slice Action
+Actions al
+	list List al Action
+	cur Size
+	# changeset Maybe (List al Action)
+
+fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0 }
+
+
+
+TextBuf al
+	buf List al (List al U8)
+	actions Actions al
+
+
+fn mk (al Allocator)
+	return TextBuf { buf: List.from-iter([List.mk(al)], al), actions: mk-actions(al) }
+
+fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
+	List.get(li Mem.i32-size())
+	List.to-slice()
+	StrView.from-bytes()
+
+fn add-to-spot (self Ptr (TextBuf Allocator), p Pos, bytes StrView) -> I32
+	al = self&.buf.al
+	buf = &self&.buf
+	extracted-line-buf = buf List.get(p.line Mem.i32-size())
+	remaining = extracted-line-buf
+		List.to-slice()
+		Slice.from(p.bi Mem.i32-size())
+
+	buf List.set(p.line Mem.i32-size(), List.from-iter(extracted-line-buf List.to-slice() Slice.subslice(0, p.bi Mem.i32-size()), al))
+
+	last-line = buf List.get-ptr(p.line Mem.i32-size())
+	last-line List.add-all(bytes lines() head() or-else('') .contents)
+
+	lines-added = 0
+	for (cline, i) in bytes StrView.split-by-each('\n') drop(1) zip(Iter.from(1))
+		nuline =& cline.contents List.from-iter(al)
+		next-line = Mem.i32-size(p.line + i)
+		buf List.insert(next-line, nuline&)
+		last-line <= buf List.get-ptr(next-line)
+		lines-added <= lines-added + 1
+
+	last-line List.add-all(remaining)
+	List.free(&extracted-line-buf)
+	return lines-added
+
+# this one is used by the action thing.
+fn change-no-action (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView)
+	if to == from
+		# if empty buffer, we can add text.
+		al = self&.buf.al
+		if List.size(&self&.buf) == Mem.i32-size(from.line) and from.bi == 0  # when we want to insert a new line.
+			(&self&.buf) List.add(List.mk(al))
+			
+		_ = self add-to-spot(from, bytes)
+
+	else
+		from = Math.min(from, to)
+		to = Math.max(from, to)
+		
+		lines-buf = &self&.buf
+		first-line = lines-buf List.get-ptr(Mem.i32-size(from.line))
+		
+		if from.line == to.line and to.bi < Mem.size-i32(List.size(first-line)) + 1
+			first-line List.remove-range(Mem.i32-size(from.bi), Mem.i32-size(to.bi))
+			_ = self add-to-spot(from, bytes)
+		else
+			# first, append first line to last line yahh.
+			first-line List.trim(Mem.i32-size(from.bi))
+			
+			last-line = lines-buf List.get-ptr(Mem.i32-size(to.line))
+			to <.bi= Math.min(to.bi, Mem.size-i32(last-line List.size()) + 1)  # idk, im trimming the index just cuz
+			if to.bi == Mem.size-i32(last-line List.size()) + 1
+				to <.line= to.line + 1
+				to <.bi= 0
+				
+			# NOTE(15.06.26): i haven't tested it yet btw
+			lines-added = self add-to-spot(from, bytes)
+			to <.line= to.line + lines-added
+			from <.line= from.line + lines-added
+
+			last-line = lines-buf List.try-get(Mem.i32-size(to.line)) fmap-maybe(List.to-slice) or-else(Slice.empty())
+			first-line List.add-all(last-line Slice.from(Mem.i32-size(to.bi)))
+		
+			# remove second to last lines completely now.
+			assert(to.line > from.line, 'there must be a line difference yo')
+			(&self&.buf) List.remove-range(Mem.i32-size(from.line + 1), Mem.i32-size(to.line) + 1)
+
+fn action-bwd (self Ptr (TextBuf Allocator), action Action) -> Pos
+	self change-no-action(action.from, action.to-fwd, action.bwd)
+	return action.to-bwd
+
+fn action-fwd (self Ptr (TextBuf Allocator), action Action) -> Pos
+	self change-no-action(action.from, action.to-bwd, action.fwd)
+	return action.to-fwd
+
+
+fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+	actions = &self&.actions
+	if actions&.cur == 0
+		return None
+
+	actions <&.cur= actions&.cur - 1
+	action = actions&.list[actions&.cur]
+	self action-bwd(action)
+	return action.before-cursors Just()
+
+fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+	actions = &self&.actions
+	if actions&.cur >= List.size(&actions&.list)
+		return None
+
+	action = actions&.list[actions&.cur]
+	self action-fwd(action)
+	actions <&.cur= actions&.cur + 1
+	return Cursors { cur: action.to-fwd, sel: Just(action.from) } Just()
+
+
+fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
+	lines = bytes StrView.split-by-each('\n')
+	first-line = lines head() or-else('')
+
+	headless = lines drop(1)
+	if headless Iter.null()
+		next-pos = Pos.mk(from.line, from.bi + first-line StrView.num-bytes() Mem.size-i32())
+		return next-pos
+	else
+		last-line = headless zip(Iter.from(from.line + 1)) last() or-fail('should not happen')
+		return Pos.mk(last-line snd(), last-line fst() StrView.num-bytes() Mem.size-i32())
+
+fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
+	al = self&.buf.al
+	if from.line == to.line
+		from-bi = Math.min(from.bi, to.bi) Mem.i32-size()
+		to-bi = Math.max(from.bi, to.bi) Mem.i32-size()
+		return self line(from.line)
+			StrView.byte-substr(from-bi, to-bi)
+			StrView.clone(al)
+	else
+		from-pos = Math.min(from, to)
+		to-pos = Math.max(from, to)
+
+		sb =& List.mk(al)
+		first-line = self line(from-pos.line)
+		sb List.add-all(first-line StrView.byte-substr(from-pos.bi Mem.i32-size(), first-line StrView.num-bytes()) .contents)
+		for i in (from-pos.line + 1) Iter.to (to-pos.line - 1)
+			sb List.add-all(self line(i) .contents)
+		sb List.add-all(self line(to-pos.line) StrView.byte-substr(0, to-pos.bi Mem.i32-size()) .contents)
+		return sb& List.to-slice() StrView.from-bytes()
+
+fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before-cursors Maybe Cursors)
+	from-pos = Math.min(from, to)
+	to-pos = Math.max(from, to)
+
+	actions = &self&.actions
+	al = actions&.list.al
+	cur = actions&.cur
+	for action in actions&.list drop(cur)
+		action free-action(al)
+	List.trim(&actions&.list, cur)
+
+	List.add(&actions&.list,
+		{ from: from
+
+		, fwd: bytes StrView.clone(al)
+		, to-fwd: self pos-after-str(bytes, from-pos)
+
+		, bwd: self str-between(from-pos, to-pos)
+		, to-bwd: to-pos
+
+		, before-cursors: before-cursors or-else({ cur: from, sel: if from == to: None else Just(to) })
+		})
+
+	# after a new action is added, moves it forward to apply it to the current buffer.
+	self redo()
+
+
+fn num-lines (self Ptr (TextBuf al)): List.size(&self&.buf) Mem.size-i32()
+
+
+# should they be in TextBuf or here?? I guess here?
+fn right-pos (self Ptr (TextBuf al), pos Pos) -> Pos
+	if pos.line >= self num-lines()
+		return Pos.mk(self num-lines(), 0)
+	line = self line(pos.line)
+
+	bi = pos.bi Mem.i32-i64()
+	if bi >= line StrView.num-bytes() Mem.size-i64()
+		if pos.line + 1 >= self num-lines()
+			return Pos.mk(pos.line, line StrView.num-bytes() Mem.size-i32())  # when on last line and last char.
+		return Pos.mk(pos.line + 1, 0) # when on last char but not last line
+
+	# on line
+	off = Char.next-char(line.contents.ptr Mem.offset-ptr(bi)) Mem.size-i32()
+	return Pos.mk(pos.line, pos.bi + off)
+
+fn left-pos (self Ptr (TextBuf al), pos Pos) -> Pos
+	if pos == Pos.mk(0, 0)
+		return Pos.mk(0, 0)
+
+	if pos.bi == 0
+		assert(pos.line > 0, 'previous condition should have eliminated this possibility')
+		return Pos.mk(pos.line - 1, self line(pos.line - 1) StrView.num-bytes() Mem.size-i32())
+
+	line = self line(pos.line)
+	pos-bi = pos.bi Mem.i32-size() Math.clamp(0, line StrView.num-bytes())
+	off = Char.previous-char(line.contents.ptr Mem.offset-ptr(Mem.size-i64(pos-bi)))
+	return Pos.mk(pos.line, Mem.size-i32(pos-bi - off))
+
+

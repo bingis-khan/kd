@@ -1,0 +1,185 @@
+use Tui
+	Screen
+use Str2
+	is-alphanumeric
+
+use TextBuf
+	TextBuf
+use Pos
+	Pos
+use Pane
+	Pane
+
+# some structure:
+# Editor
+#   |
+# [Pane]
+#   |  <- panes can have the same textbuf open. (and have different cursor positions on them and stuff);
+#   |     opening a new file should go through the map first.
+# [Filename -> TextBuf]
+
+
+Editor al
+	al al
+	running Bool
+	pane Pane al
+	clipboard Maybe StrView
+	# mode Mode al
+	# theme and stuff.
+
+
+# use this to get the current pane.
+fn pane (ed Ptr (Editor al)) -> Ptr (Pane al): &ed&.pane
+
+fn copy-selection-to-clipboard (ed Ptr (Editor al)) <= Allocator al
+	from-to = Pane.selection(ed pane())
+	cpd = ed&.pane.buf TextBuf.str-between(from-to fst(), from-to snd())
+	ed&.clipboard if-just(fn(cp))
+		cp StrView.free(ed&.al)
+
+	ed <&.clipboard= Just(cpd)
+
+fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
+	case key
+		Tui.Char(c)
+			if c == 'q'
+				ed <&.running= False
+
+			elif c == 'h'
+				Pane.move-left(ed pane())
+			elif c == 'l'
+				Pane.move-right(ed pane())
+			elif c == 'j'
+				Pane.move-down(ed pane())
+			elif c == 'k'
+				Pane.move-up(ed pane())
+			elif c == 'i'
+				ed <&.pane.mode= Pane.Insert
+
+			elif c == 'w'
+				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordStart)
+			elif c == 'e'
+				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordEnd)
+			elif c == 'b'
+				(ed pane()) Pane.advance-word(Pane.MoveBwd, Pane.NextWordEnd)
+
+
+			elif c == 'U'
+				Pane.redo(ed pane())
+			elif c == 'u'
+				Pane.undo(ed pane())
+
+			elif c == 'd'
+				ed copy-selection-to-clipboard()
+				Pane.replace-selection(ed pane(), ed pane() Pane.selection(), '')
+			elif c == 'c'
+				ed copy-selection-to-clipboard()
+				Pane.replace-selection(ed pane(), ed pane() Pane.selection(), '')
+				ed <&.pane.mode= Pane.Insert
+
+			elif c == 'y'
+				ed copy-selection-to-clipboard()
+			elif c == 'p'
+				ed&.clipboard if-just(fn(cp))
+					start = TextBuf.right-pos(ed&.pane.buf, ed pane() Pane.max-pos())
+					ed pane() Pane.replace-selection((start, start), cp)
+			elif c == 'P'
+				ed&.clipboard if-just(fn(cp))
+					start = ed pane() Pane.min-pos()
+					ed pane() Pane.replace-selection((start, start), cp)
+			elif c == 'R'
+				ed&.clipboard if-just(fn(cp))
+					start = ed pane() Pane.min-pos()
+					ed pane() Pane.replace-selection((start, start), cp)
+
+			elif c == 'v'
+				ed <&.pane.mode= Pane.Select
+				if ed&.pane.sel is-none()
+					ed <&.pane.sel= Just(ed&.pane.cursor)
+
+		Tui.Escape
+			ed <&.pane.mode= Pane.Normal
+
+		_
+			pass
+
+
+fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
+	case ed&.pane.mode
+		Pane.Normal
+			ed handle-normal-key(key)
+		Pane.Select
+			ed handle-normal-key(key)
+
+		Pane.Insert
+			case key
+				Tui.Escape
+					ed <&.pane.mode= Pane.Normal
+
+				Tui.Enter
+					ed pane() Pane.add-str-at-char('\n')
+					ed pane() Pane.move-right()
+
+				Tui.Backspace
+					ed pane() Pane.backspace()
+
+				Tui.Char(c)
+					s = Array.as-slice(&[c]) StrView.from-ascii-slice()
+					ed pane() Pane.add-str-at-char(s)
+					ed pane() Pane.move-right()
+
+
+fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
+	screen Pane.render(ed pane())
+
+	# debug stuff.
+	curline =& 0
+	fn ann(s)
+		screen Tui.draw-str-right(s, 0, curline&)
+		curline <&= curline& + 1
+
+	ann('mode: \(ed&.pane.mode)')
+	cur-ty = (ed pane()) Pane.char-at(ed&.pane.cursor) CharType.char-type()
+	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
+	ann('sel: \(ed&.pane.sel)')
+	ann('cp: \(ed&.clipboard)')
+
+
+
+al = Alloc.idc()
+tb =& TextBuf.mk(al)
+args = Args.get()
+if args.count > 0
+	fname = args[0]
+	tb TextBuf.change-no-action(Pos.mk(0, 0), Pos.mk(0, 0), fname File.read-contents(al))
+
+ed =& Editor
+	{ running: True
+	, al: al
+	, pane: Pane.mk(al, tb)
+	, clipboard: None
+	}
+
+# screen shit
+tui =& Tui.mk()
+screen =& tui Tui.mk-screen(al)
+while ed&.running
+	for ev in Iter.from-function(fn: Tui.read-event(tui))
+		case ev
+			Tui.Key(k)
+				ed handle-key(k)
+
+			_
+				pass
+
+	screen Tui.resize-screen-if-needed()
+	if tui Tui.should-redraw()
+		screen Tui.clear-screen()
+		screen render-editor(ed)
+
+		screen Tui.render-screen()
+
+	tui Tui.sync()
+
+screen Tui.free-screen()
+tui Tui.deinit()

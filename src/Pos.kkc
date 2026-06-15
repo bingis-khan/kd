@@ -1,0 +1,20 @@
+Pos
+	line I32
+	bi I32  # should this be chars or bytes? bytes for now!
+
+inst Eq Pos
+	eq (l _, r _): l.line == r.line and l.bi == r.bi
+
+inst Ord Pos
+	cmp (l _, r_ )
+		case l.line cmp (r.line)
+			EQ
+				return l.bi cmp (r.bi)
+			els
+				return els
+
+fn mk (line, bi): Pos { line, bi }
+
+inst Str Pos
+	chars (self _): '(\(self.line), \(self.bi))' chars()
+	print-str (self _): todo()

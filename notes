@@ -1,0 +1,41 @@
+
+src/ ???
+
+- text buffer
+	- input text (bytes)
+	- get row
+	- undo/redo
+	- track cursor position (cursor x and visual x n stuff) - cursor per text buffer obv.
+	- --
+	- validate utf8?? nope. i should do it only when pastin'
+	- highlight syntax?? dunno
+
+- editor window (multi pane stuff!)
+	
+
+------
+
+in helix's source, there's a function called "char_is_line_ending"
+
+```
+/// Represents one of the valid Unicode line endings.
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub enum LineEnding {
+    Crlf, // CarriageReturn followed by LineFeed
+    LF,   // U+000A -- LineFeed
+    #[cfg(feature = "unicode-lines")]
+    VT, // U+000B -- VerticalTab
+    #[cfg(feature = "unicode-lines")]
+    FF, // U+000C -- FormFeed
+    #[cfg(feature = "unicode-lines")]
+    CR, // U+000D -- CarriageReturn
+    #[cfg(feature = "unicode-lines")]
+    Nel, // U+0085 -- NextLine
+    #[cfg(feature = "unicode-lines")]
+    LS, // U+2028 -- Line Separator
+    #[cfg(feature = "unicode-lines")]
+    PS, // U+2029 -- ParagraphSeparator
+}
+```
+
+interesting, these ones are the separators. when do we encounter them irl? is there a le blaug paust online? (maybe I should write one ekekke)

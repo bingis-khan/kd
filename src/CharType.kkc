@@ -1,0 +1,40 @@
+use Str2
+	is-alphanumeric
+
+
+
+CharType
+	CharSpace
+	CharWord
+	CharPunctuation
+
+inst Eq CharType
+	eq (l, r)
+		case (l, r)
+			(CharSpace, CharSpace)
+				return True
+			(CharWord, CharWord)
+				return True
+			(CharPunctuation, CharPunctuation)
+				return True
+			_
+				return False
+
+fn char-type (c Char)
+	if c is-alphanumeric() or c == '-' or c == '_'
+		return CharWord
+	elif c is-whitespace()
+		return CharSpace
+	else
+		return CharPunctuation
+
+fn is-word-boundary (l Char, r Char): char-type(l) /= char-type(r)
+
+
+inst Str CharType
+	chars (self _):
+		(case self) chars()
+			CharPunctuation: 'Punct'
+			CharWord: 'Word'
+			CharSpace: 'Space'
+			_: todo()
