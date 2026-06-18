@@ -15,6 +15,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 ## todo
 
 - [x] w,e,b jumping
+- [ ] x line selection
 - [ ] basic cmds
 - [ ] line numbers
 - [ ] searching + wrapping (fwd and bwd)

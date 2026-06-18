@@ -47,22 +47,28 @@ fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
 
 # line processing
 # bi = byte index
-# ci = char index (char index from chars())
+# si = index on screen
 # vi = visual index (number of char cells)
 
+# later make it configurable.
+fn tab-width (): 2
+
 # (fyi, i think they should be here, because they don't deal with the inner implementation of TextBuf (which we should later replace for a piece table.))
-fn pos-ci (self Ptr (TextBuf al), pos Pos) -> I32
+# ci - index on screen!!!!
+fn pos-si (self Ptr (TextBuf al), pos Pos) -> I32
 	line = self TextBuf.line(pos.line)
 	line-ptr = line.contents.ptr
 	bi = 0 as I64
-	ci = 0 as I32
+	si = 0 as I32
 	while bi Mem.i64-size() < line StrView.num-bytes()
-		off = line-ptr Mem.offset-ptr(bi) Char.next-char()
+		cptr = line-ptr Mem.offset-ptr(bi)
+		off = cptr Char.next-char()
 		bi <= bi + off Mem.size-i64()
 		if bi Mem.i64-i32() > pos.bi
-			return ci
-		ci <= ci + 1
-	return line StrView.num-bytes() Mem.size-i32()
+			return si
+		c = cptr Char.scan-from-mem()
+		si <= si + (if c == '\t': tab-width() else 1)
+	return si
 
 fn vi-bi (self Ptr (TextBuf al), ln I32, vx I32) -> I32
 	bi = 0 as I32
@@ -89,6 +95,14 @@ fn pos-vi (self Ptr (TextBuf al), pos Pos) -> I32
 
 	return vi
 
+fn char-at(pane Ptr (Pane al), pos Pos)
+	line = pane&.buf TextBuf.line(pos.line)
+	return line
+		StrView.byte-substr(pos.bi Mem.i32-size(), line StrView.num-bytes())
+		chars()
+		head()
+		or-else('\n')
+
 
 fn is-in-selection (pane Ptr (Pane al), pos Pos):
 	(case pane&.sel)
@@ -100,24 +114,38 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al))
 		y = line-num - 1
 		line-content = pane&.buf TextBuf.line(y)
 		xbi = 0
-		for (c, x) in line-content chars() append(' ') zip(from(0))
-			if x > screen&.tui&.width Mem.u32-i32()
+		xs = 0
+		for c in line-content chars() append(' ')
+			if xs > screen&.tui&.width Mem.u32-i32()
 				break
 
 			in-selection = pane is-in-selection(Pos.mk(y, xbi))
 			if in-selection
 				screen <&.default-bg= Term.Color8(Term.Cyan8)
-			screen Tui.put-char(c, x, y)
+			if c /= '\t'
+				screen Tui.put-char(c, xs, y)
+				xs <= xs + 1
+			else
+				for off in 0 to (tab-width() - 1)
+					screen Tui.put-char(' ', xs + off, y)
+				xs <= xs + tab-width()
 			if in-selection
 				screen <&.default-bg= Term.ColorDefault
 
 			xbi <= xbi + c.num-bytes Mem.size-i32()
 
 	cursor = pane&.cursor
-	cursor-ci = pane&.buf pos-ci(cursor)
-	screen Tui.get-cell-ptr(cursor-ci, pane&.cursor.line) if-just(fn (curcell) )
-		curcell <&.fg= Term.Color8(Term.Black8)
-		curcell <&.bg= Term.Color8(Term.White8)
+	cursor-char = pane char-at(cursor)
+	cursor-si = pane&.buf pos-si(cursor)
+	if cursor-char /= '\t'
+		screen Tui.get-cell-ptr(cursor-si, pane&.cursor.line) if-just(fn (curcell) )
+			curcell <&.fg= Term.Color8(Term.Black8)
+			curcell <&.bg= Term.Color8(Term.White8)
+	else
+		for off in 0 to (tab-width() - 1)
+			screen Tui.get-cell-ptr(cursor-si + off, pane&.cursor.line) if-just(fn (curcell) )
+				curcell <&.fg= Term.Color8(Term.Black8)
+				curcell <&.bg= Term.Color8(Term.White8)
 
 
 
@@ -165,14 +193,6 @@ fn set-cursors (self Ptr (Pane al), cur Pos, sel Pos)  # if you don't want to se
 fn cursor-is-at-line-end (pane Ptr (Pane al))
 	cur = pane&.cursor
 	return cur.bi Mem.i32-size() == pane&.buf TextBuf.line(cur.line) StrView.num-bytes()
-
-fn char-at(pane Ptr (Pane al), pos Pos)
-	line = pane&.buf TextBuf.line(pos.line)
-	return line
-		StrView.byte-substr(pos.bi Mem.i32-size(), line StrView.num-bytes())
-		chars()
-		head()
-		or-else('\n')
 
 MoveDirection
 	MoveFwd
