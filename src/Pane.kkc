@@ -294,8 +294,10 @@ fn selection (self Ptr (Pane al)) -> (Pos, Pos)
 	return (from, to)
 
 fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Allocator al
-	self&.buf TextBuf.change(pos's fst(), pos's snd(), cp, Just({ cur: self&.cursor, sel: self&.sel }))
-	to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
-	if cp StrView.num-bytes() > 0
-		to <= TextBuf.left-pos(self&.buf, to)
-	self set-cursors(to, pos's fst())
+	mcursors = self&.buf TextBuf.change(pos's fst(), pos's snd(), cp, Just({ cur: self&.cursor, sel: self&.sel }))
+	mcursors if-just(fn(cursors))
+		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+	# to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
+	# if cp StrView.num-bytes() > 0
+	# 	to <= TextBuf.left-pos(self&.buf, to)
+	# self set-cursors(to, pos's fst())

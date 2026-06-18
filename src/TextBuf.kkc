@@ -56,6 +56,38 @@ fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
 	List.to-slice()
 	StrView.from-bytes()
 
+fn num-lines (self Ptr (TextBuf al)): List.size(&self&.buf) Mem.size-i32()
+
+# should they be in TextBuf or here?? I guess here?
+fn right-pos (self Ptr (TextBuf al), pos Pos) -> Pos
+	if pos.line >= self num-lines()
+		return Pos.mk(self num-lines(), 0)
+	line = self line(pos.line)
+
+	bi = pos.bi Mem.i32-i64()
+	if bi >= line StrView.num-bytes() Mem.size-i64()
+		if pos.line + 1 >= self num-lines()
+			return Pos.mk(pos.line, line StrView.num-bytes() Mem.size-i32())  # when on last line and last char.
+		return Pos.mk(pos.line + 1, 0) # when on last char but not last line
+
+	# on line
+	off = Char.next-char(line.contents.ptr Mem.offset-ptr(bi)) Mem.size-i32()
+	return Pos.mk(pos.line, pos.bi + off)
+
+fn left-pos (self Ptr (TextBuf al), pos Pos) -> Pos
+	if pos == Pos.mk(0, 0)
+		return Pos.mk(0, 0)
+
+	if pos.bi == 0
+		assert(pos.line > 0, 'previous condition should have eliminated this possibility')
+		return Pos.mk(pos.line - 1, self line(pos.line - 1) StrView.num-bytes() Mem.size-i32())
+
+	line = self line(pos.line)
+	pos-bi = pos.bi Mem.i32-size() Math.clamp(0, line StrView.num-bytes())
+	off = Char.previous-char(line.contents.ptr Mem.offset-ptr(Mem.size-i64(pos-bi)))
+	return Pos.mk(pos.line, Mem.size-i32(pos-bi - off))
+
+
 fn add-to-spot (self Ptr (TextBuf Allocator), p Pos, bytes StrView) -> I32
 	al = self&.buf.al
 	buf = &self&.buf
@@ -148,9 +180,16 @@ fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
 		return None
 
 	action = actions&.list[actions&.cur]
-	self action-fwd(action)
+	to-fwd = self action-fwd(action)
 	actions <&.cur= actions&.cur + 1
-	return Cursors { cur: action.to-fwd, sel: Just(action.from) } Just()
+
+	# TEMP(smol hack):
+	# we don't track the future position of the cursors. so, we have to decide where we're gonna put the cursor.
+	# so, when we're redoing single chars, we want to put the cursor after chars (makes writing nicer). this is what this if statement checks
+	# so, we don't differentiate between a character insertion and paste, unlike Helix. fix it sometime later.
+	if action.fwd StrView.num-bytes() > 1  
+		to-fwd <= left-pos(self, to-fwd)
+	return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
 
 
 fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
@@ -185,6 +224,9 @@ fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
 		sb List.add-all(self line(to-pos.line) StrView.byte-substr(0, to-pos.bi Mem.i32-size()) .contents)
 		return sb& List.to-slice() StrView.from-bytes()
 
+
+
+
 fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before-cursors Maybe Cursors)
 	from-pos = Math.min(from, to)
 	to-pos = Math.max(from, to)
@@ -209,39 +251,4 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 		})
 
 	# after a new action is added, moves it forward to apply it to the current buffer.
-	self redo()
-
-
-fn num-lines (self Ptr (TextBuf al)): List.size(&self&.buf) Mem.size-i32()
-
-
-# should they be in TextBuf or here?? I guess here?
-fn right-pos (self Ptr (TextBuf al), pos Pos) -> Pos
-	if pos.line >= self num-lines()
-		return Pos.mk(self num-lines(), 0)
-	line = self line(pos.line)
-
-	bi = pos.bi Mem.i32-i64()
-	if bi >= line StrView.num-bytes() Mem.size-i64()
-		if pos.line + 1 >= self num-lines()
-			return Pos.mk(pos.line, line StrView.num-bytes() Mem.size-i32())  # when on last line and last char.
-		return Pos.mk(pos.line + 1, 0) # when on last char but not last line
-
-	# on line
-	off = Char.next-char(line.contents.ptr Mem.offset-ptr(bi)) Mem.size-i32()
-	return Pos.mk(pos.line, pos.bi + off)
-
-fn left-pos (self Ptr (TextBuf al), pos Pos) -> Pos
-	if pos == Pos.mk(0, 0)
-		return Pos.mk(0, 0)
-
-	if pos.bi == 0
-		assert(pos.line > 0, 'previous condition should have eliminated this possibility')
-		return Pos.mk(pos.line - 1, self line(pos.line - 1) StrView.num-bytes() Mem.size-i32())
-
-	line = self line(pos.line)
-	pos-bi = pos.bi Mem.i32-size() Math.clamp(0, line StrView.num-bytes())
-	off = Char.previous-char(line.contents.ptr Mem.offset-ptr(Mem.size-i64(pos-bi)))
-	return Pos.mk(pos.line, Mem.size-i32(pos-bi - off))
-
-
+	return self redo()
