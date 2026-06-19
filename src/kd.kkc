@@ -2,6 +2,8 @@ use Tui
 	Screen
 use Str2
 	is-alphanumeric
+use StrBuilder
+	StrBuilder
 
 use TextBuf
 	TextBuf
@@ -19,12 +21,32 @@ use Pane
 # [Filename -> TextBuf]
 
 
+EditorMode al
+	Normal
+	Cmd (StrBuilder al)
+	# Search (StrBuilder al)
+
+inst Str EditorMode
+	chars (self _)
+		c = @undefined
+		case self
+			Normal
+				c <= 'Normal' StrCase1()
+			Cmd(sb)
+				c <= 'Cmd(\(sb))' StrCase2()
+			_
+				return todo()
+		return c chars()
+
 Editor al
 	al al
 	running Bool
 	pane Pane al
 	clipboard Maybe StrView
-	# mode Mode al
+
+	mode EditorMode al
+
+	msg Maybe StrView
 	# theme and stuff.
 
 
@@ -38,6 +60,31 @@ fn copy-selection-to-clipboard (ed Ptr (Editor al)) <= Allocator al
 		cp StrView.free(ed&.al)
 
 	ed <&.clipboard= Just(cpd)
+
+fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
+	sc =& Scan.mk-from-strview(s)
+	cmd = sc Scan.take-str-while(is-not-whitespace)
+	sc Scan.drop-str-while(is-whitespace)
+
+	if cmd == 'q'
+		ed <&.running= False
+	elif cmd == 'wq'
+		pass
+	elif cmd == 'o'
+		todo()
+		pass
+	elif cmd == 'theme'
+		pass
+
+fn reset-msg (ed Ptr (Editor al)) <= Allocator al
+	ed&.msg if-just(fn(msg))
+		StrView.free(msg, ed&.al)
+	ed <&.msg= None
+
+fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
+	ed reset-msg()
+	ed <&.msg = s StrBuilder.mk-dyn-str(ed&.al) Just()
+
 
 fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 	case key
@@ -79,6 +126,8 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 
 			elif c == 'y'
 				ed copy-selection-to-clipboard()
+				bytes-yanked = ed&.clipboard or-else('') StrView.num-bytes()
+				ed set-msg('yanked \(bytes-yanked) bytes :)')
 			elif c == 'p'
 				ed&.clipboard if-just(fn(cp))
 					start = TextBuf.right-pos(ed&.pane.buf, ed pane() Pane.max-pos())
@@ -97,6 +146,9 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				if ed&.pane.sel is-none()
 					ed <&.pane.sel= Just(ed&.pane.cursor)
 
+			elif c == ':'
+				ed <&.mode= Cmd(StrBuilder.mk(ed&.al))
+
 		Tui.Escape
 			ed <&.pane.mode= Pane.Normal
 
@@ -105,28 +157,49 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 
 
 fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
-	case ed&.pane.mode
-		Pane.Normal
-			ed handle-normal-key(key)
-		Pane.Select
-			ed handle-normal-key(key)
+	case &ed&.mode
+		Ptr(Normal)
+			case ed&.pane.mode
+				Pane.Normal
+					ed handle-normal-key(key)
+				Pane.Select
+					ed handle-normal-key(key)
 
-		Pane.Insert
+				Pane.Insert
+					case key
+						Tui.Escape
+							ed <&.pane.mode= Pane.Normal
+
+						Tui.Enter
+							ed pane() Pane.add-str-at-char('\n')
+							ed pane() Pane.move-right()
+
+						Tui.Backspace
+							ed pane() Pane.backspace()
+
+						Tui.Char(c)
+							s = Array.as-slice(&[c]) StrView.from-ascii-slice()
+							ed pane() Pane.add-str-at-char(s)
+							ed pane() Pane.move-right()
+
+		Ptr(Cmd(sb))
 			case key
 				Tui.Escape
-					ed <&.pane.mode= Pane.Normal
+					ed <&.mode= Normal
 
 				Tui.Enter
-					ed pane() Pane.add-str-at-char('\n')
-					ed pane() Pane.move-right()
-
-				Tui.Backspace
-					ed pane() Pane.backspace()
+					ed run-cmd(StrBuilder.as-str(&sb))
+					StrBuilder.free(&sb)
+					ed <&.mode= Normal
 
 				Tui.Char(c)
-					s = Array.as-slice(&[c]) StrView.from-ascii-slice()
-					ed pane() Pane.add-str-at-char(s)
-					ed pane() Pane.move-right()
+					StrBuilder.write-char(&sb, c Char.ascii-char())
+
+				_
+					pass
+
+		_
+			todo()
 
 
 fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
@@ -143,6 +216,8 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
 	ann('sel: \(ed&.pane.sel)')
 	ann('cp: \(ed&.clipboard)')
+	ann('edmode: \(ed&.mode)')
+	ann('msg: \(ed&.msg)')
 
 
 
@@ -158,6 +233,9 @@ ed =& Editor
 	, al: al
 	, pane: Pane.mk(al, tb)
 	, clipboard: None
+
+	, mode: Normal
+	, msg: None
 	}
 
 # screen shit
@@ -167,6 +245,7 @@ while ed&.running
 	for ev in Iter.from-function(fn: Tui.read-event(tui))
 		case ev
 			Tui.Key(k)
+				ed reset-msg()
 				ed handle-key(k)
 
 			_
