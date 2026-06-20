@@ -11,7 +11,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 ## todo
 
 - [x] w,e,b jumping
-- [ ] scrolling and cursor jumping.
+- [x] scrolling and cursor jumping.
 - [ ] x line selection
 - [x] cmd system
 - [ ] line numbers

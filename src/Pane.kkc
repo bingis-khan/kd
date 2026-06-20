@@ -29,12 +29,19 @@ inst Str Mode
 		Select: 'Select'
 		_: todo()
 
+
+# all of them are `si` (screen index shit)
+ScreenCursorOffset
+	screen-top I32
+	screen-left I32
+
 Pane al
 	buf Ptr (TextBuf al)
 	cursor Pos
 	vi I32
 	sel Maybe Pos
 	mode Mode
+	sc-off ScreenCursorOffset
 
 fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
 	{ buf
@@ -42,39 +49,30 @@ fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
 	, vi: 0
 	, sel: None
 	, mode: Normal
+	, sc-off: { screen-top: 0, screen-left: 0 }
 	}
 
 
 # line processing
 # bi = byte index
-# si = index on screen
-# vi = visual index (number of char cells)
+# vi = visual index (uses wcwidth)
+# si = screen index (coordinates for Tui, ignores wcwidth) (to convert to it, just convert to vi. then just iterate over chars.)
 
 # later make it configurable.
-fn tab-width (): 2
+fn char-replacement (c Char) -> Maybe StrView
+	if c == '\t'
+		return 'TABBY' Just()
+	else
+		return None
 
-# (fyi, i think they should be here, because they don't deal with the inner implementation of TextBuf (which we should later replace for a piece table.))
-# ci - index on screen!!!!
-fn pos-si (self Ptr (TextBuf al), pos Pos) -> I32
-	line = self TextBuf.line(pos.line)
-	line-ptr = line.contents.ptr
-	bi = 0 as I64
-	si = 0 as I32
-	while bi Mem.i64-size() < line StrView.num-bytes()
-		cptr = line-ptr Mem.offset-ptr(bi)
-		off = cptr Char.next-char()
-		bi <= bi + off Mem.size-i64()
-		if bi Mem.i64-i32() > pos.bi
-			return si
-		c = cptr Char.scan-from-mem()
-		si <= si + (if c == '\t': tab-width() else 1)
-	return si
+fn char-screen-width (c Char) -> I32: char-replacement(c) Misc.maybe(fn s: s chars() count() Mem.size-i32(), Tui.rendered-wcwidth(c))
+
 
 fn vi-bi (self Ptr (TextBuf al), ln I32, vx I32) -> I32
 	bi = 0 as I32
 	vi = 0
 	for c in self TextBuf.line(ln) chars()
-		vi <= vi + c Tui.rendered-wcwidth()
+		vi <= vi + c char-screen-width()
 		if vx < vi
 			break
 
@@ -91,7 +89,7 @@ fn pos-vi (self Ptr (TextBuf al), pos Pos) -> I32
 		if pos.bi < bi
 			break
 
-		vi <= vi + c Tui.rendered-wcwidth()
+		vi <= vi + c char-screen-width()
 
 	return vi
 
@@ -109,43 +107,92 @@ fn is-in-selection (pane Ptr (Pane al), pos Pos):
 		Just(sel): pos Math.between(pane&.cursor, sel)
 		_: False
 
-fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al))
-	for line-num in 1 to (pane&.buf TextBuf.num-lines())
-		y = line-num - 1
-		line-content = pane&.buf TextBuf.line(y)
-		xbi = 0
-		xs = 0
-		for c in line-content chars() append(' ')
-			if xs > screen&.tui&.width Mem.u32-i32()
+
+# maybe this should not be here?
+# note: also when i make a proper rendered version, i'll be able to pass negative numbers to display even more text?
+ScreenDims
+	from-sx I32
+	to-sx   I32  # ie. last possible index
+	from-sy I32
+	to-sy   I32  # ie. last possible index
+
+fn screen-width (sd ScreenDims): sd.to-sx - sd.from-sx + 1
+fn screen-height (sd ScreenDims): sd.to-sy - sd.from-sy + 1
+
+fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
+	cur = pane&.cursor
+	cur-sx = pane&.buf pos-vi(cur)
+	sc-off = pane&.sc-off
+
+	# not really width/height, sort of "offset so that the cursor arrives at right/lower-most position"
+	sw = sd screen-width() - 1
+	sh = sd screen-height() - 1
+
+	margin = 5  # default margin.
+	# idea. if screen is really small, reduce margin to 1
+	# if still smaller (3 cells only :]), just center the cursor.
+	# but it's so smol it's pointless. helix does not care.
+
+	csi = pane&.buf pos-vi(cur)  # this takes into account screen tab len n shii
+	csx = csi - sc-off.screen-left
+	csy = cur.line - sc-off.screen-top
+
+	nu-screen-left = sc-off.screen-left
+	if csx < margin
+		nu-screen-left <= csi - margin
+	elif csx > sw - margin
+		nu-screen-left <= csi - sw + margin
+	nu-screen-left = Math.max(nu-screen-left, 0)
+
+	nu-screen-top = sc-off.screen-top
+	if csy < margin
+		nu-screen-top <= cur.line - margin
+	elif csy > sh - margin
+		nu-screen-top <= cur.line - sh + margin
+	nu-screen-top = Math.max(nu-screen-top, 0)
+
+	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
+
+
+fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
+	# moves the window "in position" of the cursor.
+	pane update-screen-offset(sd)
+
+	sc-off = pane&.sc-off
+	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
+		ybi = line-num - 1
+		xbi = pane&.buf vi-bi(ybi, sc-off.screen-left)
+		line-content = pane&.buf TextBuf.line(ybi)
+
+		ys = sd.from-sy + line-num - sc-off.screen-top - 1
+		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left
+		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
+		for c in line-content StrView.byte-substr-from(xbi Mem.i32-size()) chars() append(' ')
+			if vx > sd.to-sx
 				break
 
-			in-selection = pane is-in-selection(Pos.mk(y, xbi))
-			if in-selection
+			curpos = Pos.mk(ybi, xbi)
+			is-cursor = curpos == pane&.cursor
+			in-selection = pane is-in-selection(Pos.mk(ybi, xbi))
+			if is-cursor
+				screen <&.default-fg= Term.Color8(Term.Black8)
+				screen <&.default-bg= Term.Color8(Term.White8)
+			elif in-selection
 				screen <&.default-bg= Term.Color8(Term.Cyan8)
-			if c /= '\t'
-				screen Tui.put-char(c, xs, y)
-				xs <= xs + 1
-			else
-				for off in 0 to (tab-width() - 1)
-					screen Tui.put-char(' ', xs + off, y)
-				xs <= xs + tab-width()
-			if in-selection
-				screen <&.default-bg= Term.ColorDefault
+			case c char-replacement()
+				None
+					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
+						screen Tui.put-char(c, vx, ys)  # ah fuck, we are modifying the underlying buffer.
+					vx <= vx + c char-screen-width()
+				Just(s)
+					for c in s chars()
+						if vx >= 0
+							screen Tui.put-char(c, vx, ys)
+						vx <= vx + c char-screen-width()
 
+			screen <&.default-fg= Term.ColorDefault
+			screen <&.default-bg= Term.ColorDefault
 			xbi <= xbi + c.num-bytes Mem.size-i32()
-
-	cursor = pane&.cursor
-	cursor-char = pane char-at(cursor)
-	cursor-si = pane&.buf pos-si(cursor)
-	if cursor-char /= '\t'
-		screen Tui.get-cell-ptr(cursor-si, pane&.cursor.line) if-just(fn (curcell) )
-			curcell <&.fg= Term.Color8(Term.Black8)
-			curcell <&.bg= Term.Color8(Term.White8)
-	else
-		for off in 0 to (tab-width() - 1)
-			screen Tui.get-cell-ptr(cursor-si + off, pane&.cursor.line) if-just(fn (curcell) )
-				curcell <&.fg= Term.Color8(Term.Black8)
-				curcell <&.bg= Term.Color8(Term.White8)
 
 
 

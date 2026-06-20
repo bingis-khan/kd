@@ -66,6 +66,7 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	cmd = sc Scan.take-str-while(is-not-whitespace)
 	sc Scan.drop-str-while(is-whitespace)
 
+	# use 'case' in the future :)
 	if cmd == 'q'
 		ed <&.running= False
 	elif cmd == 'wq'
@@ -203,7 +204,13 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 
 
 fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
-	screen Pane.render(ed pane())
+	screen-dims = 
+		{ from-sx: 0
+		, to-sx: screen&.tui&.width Mem.u32-i32() -1
+		, from-sy: 0
+		, to-sy: screen&.tui&.height Mem.u32-i32() -1
+		}
+	screen Pane.render(ed pane(), screen-dims)
 
 	# debug stuff.
 	curline =& 0
@@ -211,13 +218,17 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		screen Tui.draw-str-right(s, 0, curline&)
 		curline <&= curline& + 1
 
+	if True
+		return
 	ann('mode: \(ed&.pane.mode)')
-	cur-ty = (ed pane()) Pane.char-at(ed&.pane.cursor) CharType.char-type()
+	cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
 	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
 	ann('sel: \(ed&.pane.sel)')
 	ann('cp: \(ed&.clipboard)')
 	ann('edmode: \(ed&.mode)')
 	ann('msg: \(ed&.msg)')
+	ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
+	ann('dims: { \(screen-dims.to-sx), \(screen-dims.to-sy) }')
 
 
 
@@ -241,6 +252,7 @@ ed =& Editor
 # screen shit
 tui =& Tui.mk()
 screen =& tui Tui.mk-screen(al)
+last-redraw-changes = 0
 while ed&.running
 	for ev in Iter.from-function(fn: Tui.read-event(tui))
 		case ev
@@ -253,10 +265,19 @@ while ed&.running
 
 	screen Tui.resize-screen-if-needed()
 	if tui Tui.should-redraw()
-		screen Tui.clear-screen()
-		screen render-editor(ed)
+		# we are modifying the underlying buffer, so the underlying repr of Chars stored in screen changes
+		# This is real bad, but it will be changed when we use an immutable structure like a piece table.
+		#  (technically, it's not that easy. whenether the append string in a piece table reallocates, we'll need to discard the screen.previous...)
+		# more thoughts in Tui. that's where I'll solve it.
+		screen <&.requires-full-redraw= True
 
-		screen Tui.render-screen()
+		screen Tui.clear-screen()
+		screen Tui.set-screen-fg(Term.ColorDefault)
+		screen Tui.set-screen-bg(Term.ColorDefault)
+		screen render-editor(ed)
+		screen Tui.draw-str('REDRAWS[\(last-redraw-changes)]', 0, screen&.tui&.height Mem.u32-i32() - 1)
+
+		last-redraw-changes <= screen Tui.render-screen()
 
 	tui Tui.sync()
 
