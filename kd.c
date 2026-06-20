@@ -6139,7 +6139,7 @@ static  int32_t   maybe923 (    struct Maybe_115  x1282 ,    int32_t (*  fun1284
 
 static  struct Maybe_115   char_dash_replacement924 (    struct Char_47  c3741 ) {
     if ( (  eq366 ( (  c3741 ) , ( (  from_dash_charlike188 ) ( ( "\t" ) ,  ( 1 ) ) ) ) ) ) {
-        return ( ( Maybe_115_Just ) ( ( (  from_dash_string187 ) ( ( "TABBY" ) ,  ( 5 ) ) ) ) );
+        return ( ( Maybe_115_Just ) ( ( (  from_dash_string187 ) ( ( "  " ) ,  ( 2 ) ) ) ) );
     } else {
         return ( (struct Maybe_115) { .tag = Maybe_115_None_t } );
     }

@@ -61,7 +61,7 @@ fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
 # later make it configurable.
 fn char-replacement (c Char) -> Maybe StrView
 	if c == '\t'
-		return 'TABBY' Just()
+		return '  ' Just()
 	else
 		return None
 
