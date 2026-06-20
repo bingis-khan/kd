@@ -218,8 +218,6 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 		screen Tui.draw-str-right(s, 0, curline&)
 		curline <&= curline& + 1
 
-	if True
-		return
 	ann('mode: \(ed&.pane.mode)')
 	cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
 	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
