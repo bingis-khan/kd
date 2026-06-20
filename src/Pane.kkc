@@ -200,15 +200,36 @@ fn set-sel (self Ptr (Pane al), sel Maybe Pos)
 	if self&.mode /= Select
 		self <&.sel= sel
 
+
+CursorMovement
+	NoChanges
+	UpdateVI
+	OverrideSelect # includes update vi
+
+inst Eq CursorMovement
+	eq (l _, r _):
+		(case (l, r))
+			(NoChanges, NoChanges): True
+			(UpdateVI, UpdateVI): True
+			(OverrideSelect, OverrideSelect): True
+			_: False
+
+
+fn set-cursors (self Ptr (Pane al), cur Pos, sel Maybe Pos, cursor-movement-type CursorMovement)  # todo: change flags to a readable enum.
+	if cursor-movement-type /= NoChanges and cur.bi /= self&.cursor.bi
+		self <&.vi= self&.buf pos-vi(cur)
+	self <&.cursor= cur
+	if cursor-movement-type /= OverrideSelect
+		self set-sel(sel)
+	else
+		self <&.sel= sel
+
+
 fn move-right (self Ptr (Pane al))
-	self <&.cursor= TextBuf.right-pos(self&.buf, self&.cursor)
-	self <&.vi= self&.buf pos-vi(self&.cursor)
-	self set-sel(None)
+	self set-cursors(TextBuf.right-pos(self&.buf, self&.cursor), None, UpdateVI)
 
 fn move-left (self Ptr (Pane al))
-	self <&.cursor= TextBuf.left-pos(self&.buf, self&.cursor)
-	self <&.vi= self&.buf pos-vi(self&.cursor)
-	self set-sel(None)
+	self set-cursors(TextBuf.left-pos(self&.buf, self&.cursor), None, UpdateVI)
 
 fn move-down (self Ptr (Pane al))
 	cur = self&.cursor
@@ -217,8 +238,7 @@ fn move-down (self Ptr (Pane al))
 
 	vci = self&.vi
 	bi = self&.buf vi-bi(cur.line + 1, vci)
-	self <&.cursor= { line: cur.line + 1, bi }
-	self set-sel(None)
+	self set-cursors({ line: cur.line + 1, bi }, None, NoChanges)
 
 fn move-up (self Ptr (Pane al))
 	cur = self&.cursor
@@ -227,15 +247,7 @@ fn move-up (self Ptr (Pane al))
 
 	vci = self&.vi
 	bi = self&.buf vi-bi(cur.line - 1, vci)
-	self <&.cursor= { line: cur.line - 1, bi }
-	self set-sel(None)
-
-fn set-cursors (self Ptr (Pane al), cur Pos, sel Pos)  # if you don't want to set sel, just use cur as the second arg.
-	self <&.cursor= cur
-	if cur == sel
-		self <&.sel = None
-	else
-		self <&.sel = Just(sel)
+	self set-cursors({ line: cur.line - 1, bi }, None, NoChanges)
 
 fn cursor-is-at-line-end (pane Ptr (Pane al))
 	cur = pane&.cursor
@@ -325,12 +337,12 @@ fn backspace (self Ptr (Pane Allocator))
 fn undo (self Ptr (Pane al)) <= Allocator al
 	mcursors = self&.buf TextBuf.undo()
 	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
 
 fn redo (self Ptr (Pane al)) <= Allocator al
 	mcursors = self&.buf TextBuf.redo()
 	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
 
 
 # selection in a textbuf format (with the later position being moved by one.)
@@ -343,7 +355,7 @@ fn selection (self Ptr (Pane al)) -> (Pos, Pos)
 fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Allocator al
 	mcursors = self&.buf TextBuf.change(pos's fst(), pos's snd(), cp, Just({ cur: self&.cursor, sel: self&.sel }))
 	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel or-else(cursors.cur))
+		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
 	# to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
 	# if cp StrView.num-bytes() > 0
 	# 	to <= TextBuf.left-pos(self&.buf, to)
