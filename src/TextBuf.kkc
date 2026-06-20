@@ -219,8 +219,10 @@ fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
 		sb =& List.mk(al)
 		first-line = self line(from-pos.line)
 		sb List.add-all(first-line StrView.byte-substr(from-pos.bi Mem.i32-size(), first-line StrView.num-bytes()) .contents)
+		sb List.add-all(('\n' as StrView).contents)
 		for i in (from-pos.line + 1) Iter.to (to-pos.line - 1)
 			sb List.add-all(self line(i) .contents)
+			sb List.add-all(('\n' as StrView).contents)
 		sb List.add-all(self line(to-pos.line) StrView.byte-substr(0, to-pos.bi Mem.i32-size()) .contents)
 		return sb& List.to-slice() StrView.from-bytes()
 
