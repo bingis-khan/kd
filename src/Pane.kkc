@@ -292,7 +292,7 @@ fn advance-word (pane Ptr (Pane al), dir MoveDirection, target MoveTarget) <= Al
 		sel <= pane&.cursor
 
 	# check first word boundary
-	if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor))
+	if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor)) and pane char-at(pane&.cursor) CharType.char-type() /= CharType.CharSpace
 		sel <= pane&.cursor
 	while True
 		advance()

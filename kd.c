@@ -6616,7 +6616,7 @@ static  enum Unit_6   advance_dash_word964 (    struct Pane_110 *  pane3885 ,   
         ( temp974.fun ( &temp974.env ) );
         sel3893 = ( ( * (  pane3885 ) ) .f_cursor );
     }
-    if ( ( (  is_dash_word_dash_boundary976 ) ( ( (  char_dash_at988 ) ( (  pane3885 ) ,  ( * (  prev3890 ) ) ) ) ,  ( (  char_dash_at988 ) ( (  pane3885 ) ,  ( ( * (  pane3885 ) ) .f_cursor ) ) ) ) ) ) {
+    if ( ( ( (  is_dash_word_dash_boundary976 ) ( ( (  char_dash_at988 ) ( (  pane3885 ) ,  ( * (  prev3890 ) ) ) ) ,  ( (  char_dash_at988 ) ( (  pane3885 ) ,  ( ( * (  pane3885 ) ) .f_cursor ) ) ) ) ) && ( !  eq977 ( ( (  char_dash_type980 ) ( ( (  char_dash_at988 ) ( (  pane3885 ) ,  ( ( * (  pane3885 ) ) .f_cursor ) ) ) ) ) , ( CharType_978_CharSpace ) ) ) ) ) {
         sel3893 = ( ( * (  pane3885 ) ) .f_cursor );
     }
     while ( ( true ) ) {
