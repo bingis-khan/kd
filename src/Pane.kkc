@@ -254,9 +254,11 @@ fn move-up (self Ptr (Pane al))
 	bi = self&.buf vi-bi(cur.line - 1, vci)
 	self set-cursors({ line: cur.line - 1, bi }, None, NoChanges)
 
-fn cursor-is-at-line-end (pane Ptr (Pane al))
-	cur = pane&.cursor
-	return cur.bi Mem.i32-size() == pane&.buf TextBuf.line(cur.line) StrView.num-bytes()
+fn is-at-line-end (pane Ptr (Pane al), pos Pos):
+	pos.bi Mem.i32-size() == pane&.buf TextBuf.line(pos.line) StrView.num-bytes()
+
+fn cursor-is-at-line-end (pane Ptr (Pane al)):
+	pane is-at-line-end(pane&.cursor)
 
 MoveDirection
 	MoveFwd
@@ -330,6 +332,23 @@ fn max-pos (pane Ptr (Pane al)):
 		Just(sel): Math.max(pane&.cursor, sel)
 		_: pane&.cursor
 
+# helix's 'x' cmd. 
+# 1. if the ends are not already expanded, then expand current selection to ends of screen.
+# 2. if it's already expanded, select next line.
+fn expand(pane Ptr (Pane al))
+	min-pos = pane min-pos()
+	max-pos = pane max-pos()
+	max-pos-max = pane&.buf TextBuf.line(max-pos.line) StrView.num-bytes() Mem.size-i32()
+	if not (min-pos.bi == 0 and max-pos.bi == max-pos-max)
+		pane <&.sel= min-pos { bi: 0 } Just()
+		pane <&.cursor= max-pos { bi: max-pos-max }
+	else
+		if max-pos.line + 1 >= pane&.buf TextBuf.num-lines()
+			return
+
+		pane <&.sel= min-pos { bi: 0 } Just()
+		next-line = max-pos.line + 1
+		pane <&.cursor= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
 
 
 # modification

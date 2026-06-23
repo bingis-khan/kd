@@ -12,7 +12,8 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 
 - [x] w,e,b jumping
 - [x] scrolling and cursor jumping.
-- [ ] x line selection
+- [x] x line selection
+  - [x] pasting whole lines (exact condition: ends in newline) does not paste them between characters.
 - [x] cmd system
 - [ ] line numbers
 - [ ] jump to line number

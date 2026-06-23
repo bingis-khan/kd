@@ -62,6 +62,15 @@ fn copy-selection-to-clipboard (ed Ptr (Editor al)) <= Allocator al
 
 	ed <&.clipboard= Just(cpd)
 
+fn reset-msg (ed Ptr (Editor al)) <= Allocator al
+	ed&.msg if-just(fn(msg))
+		StrView.free(msg, ed&.al)
+	ed <&.msg= None
+
+fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
+	ed reset-msg()
+	ed <&.msg = s StrBuilder.mk-dyn-str(ed&.al) Just()
+
 fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	sc =& Scan.mk-from-strview(s)
 	cmd = sc Scan.take-str-while(is-not-whitespace)
@@ -77,15 +86,8 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 		pass
 	elif cmd == 'theme'
 		pass
-
-fn reset-msg (ed Ptr (Editor al)) <= Allocator al
-	ed&.msg if-just(fn(msg))
-		StrView.free(msg, ed&.al)
-	ed <&.msg= None
-
-fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
-	ed reset-msg()
-	ed <&.msg = s StrBuilder.mk-dyn-str(ed&.al) Just()
+	else
+		ed set-msg('unknown command')
 
 
 fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
@@ -133,19 +135,32 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				ed set-msg('yanked \(bytes-yanked) bytes :)')
 			elif c == 'p'
 				ed&.clipboard if-just(fn(cp))
-					start = TextBuf.right-pos(ed&.pane.buf, ed pane() Pane.max-pos())
+					start = ed pane() Pane.max-pos()
+
+					# ends in newline? paste after line.
+					if cp.contents Slice.last() == '\n' Char.ascii-u8()
+						start <= { line: (start.line + 1) Math.clamp(0, ed pane()&.buf TextBuf.num-lines()), bi: 0 }
+					else
+						start <= TextBuf.right-pos(ed&.pane.buf, start)
 					ed pane() Pane.replace-selection((start, start), cp)
 			elif c == 'P'
 				ed&.clipboard if-just(fn(cp))
 					start = ed pane() Pane.min-pos()
+
+					# ends in newline? paste before the line.
+					if cp.contents Slice.last() == '\n' Char.ascii-u8()
+						start <= start { bi: 0 }
 					ed pane() Pane.replace-selection((start, start), cp)
 			elif c == 'R'
 				ed&.clipboard if-just(fn(cp))
 					start = ed pane() Pane.min-pos()
 					ed pane() Pane.replace-selection((start, start), cp)
 
+			elif c == 'x'
+				ed pane() Pane.expand()
+
 			elif c == 'v'
-				ed pane() set-mode( Pane.Select)
+				ed pane() set-mode(Pane.Select)
 				if ed&.pane.sel is-none()
 					ed <&.pane.sel= Just(ed&.pane.cursor)
 
