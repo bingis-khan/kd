@@ -155,7 +155,7 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 
 
 fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
-	display-line-numbers = False  # put this in the config.
+	display-line-numbers = True  # put this in the config.
 
 	# moves the window "in position" of the cursor.
 	pane update-screen-offset(sd)
@@ -402,3 +402,49 @@ fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Alloc
 	# if cp StrView.num-bytes() > 0
 	# 	to <= TextBuf.left-pos(self&.buf, to)
 	# self set-cursors(to, pos's fst())
+
+
+
+## search
+
+# note: currently does not search between the lines.
+fn search-from (pane Ptr (Pane al), pos Pos, query StrView) -> Maybe (Pos, Pos)
+	fn search-on-line (pos Pos): pane&.buf TextBuf.line(pos.line) StrView.byte-substr-from(pos.bi Mem.i32-size()).contents Slice.find-slice(query.contents)
+	case search-on-line(pos)
+		Just(idx)
+			sel-pos = pos { bi: pos.bi + idx Mem.size-i32() }
+			cur-pos = pos { bi: pos.bi + (idx + query StrView.num-bytes()) Mem.size-i32() - 1 }
+			return Just((sel-pos, cur-pos))
+		None
+			num-lines = pane&.buf TextBuf.num-lines()
+			for i in 1 to (num-lines)
+				line = (pos.line + i) Math.mod(num-lines)
+				case search-on-line({ line, bi: 0 })
+					Just(idx)
+						sel-pos = { line, bi: idx Mem.size-i32() }
+						cur-pos = { line, bi: (idx + query StrView.num-bytes()) Mem.size-i32() - 1 }
+						return Just((sel-pos, cur-pos))
+					None
+						pass
+
+			return None
+
+fn search-back (pane Ptr (Pane al), pos Pos, query StrView) -> Maybe (Pos, Pos)
+	case pane&.buf TextBuf.line(pos.line) StrView.byte-substr(0, pos.bi Mem.i32-size()).contents Slice.find-last-occurence-of-slice(query.contents)
+		Just(idx)
+			sel-pos = pos { bi: idx Mem.size-i32() }
+			cur-pos = pos { bi: (idx + query StrView.num-bytes()) Mem.size-i32() - 1 }
+			return Just((sel-pos, cur-pos))
+		None
+			num-lines = pane&.buf TextBuf.num-lines()
+			for i in 1 to (num-lines)
+				line = (pos.line - i) Math.mod(num-lines)
+				case pane&.buf TextBuf.line(line).contents Slice.find-last-occurence-of-slice(query.contents)
+					Just(idx)
+						sel-pos = { line, bi: idx Mem.size-i32() }
+						cur-pos = { line, bi: (idx + query StrView.num-bytes()) Mem.size-i32() - 1 }
+						return Just((sel-pos, cur-pos))
+					None
+						pass
+
+			return None

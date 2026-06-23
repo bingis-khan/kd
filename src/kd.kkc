@@ -25,7 +25,7 @@ use Pane
 EditorMode al
 	Normal
 	Cmd Pos (StrBuilder al)
-	# Search (StrBuilder al)
+	Search Pos (StrBuilder al)
 
 inst Str EditorMode
 	chars (self _)
@@ -34,7 +34,9 @@ inst Str EditorMode
 			Normal
 				c <= 'Normal' StrCase1()
 			Cmd(pos, sb)
-				c <= 'Cmd(\(pos), \(sb))' StrCase2()
+				c <= 'Cmd(\(pos)|\(sb))' StrCase2()
+			Search(pos, sb)
+				c <= 'Search(\(pos)|\(sb))' StrCase2()
 			_
 				return todo()
 		return c chars()
@@ -44,6 +46,7 @@ Editor al
 	running Bool
 	pane Pane al
 	clipboard Maybe StrView
+	search-term Maybe StrView
 
 	mode EditorMode al
 
@@ -99,6 +102,44 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 		pass  # handled in live-cmd()
 	else
 		ed set-msg('unknown command')
+
+
+fn live-search (ed Ptr (Editor al), begin-pos Pos, query StrView)
+	if not query null()
+		case ed pane() Pane.search-from(begin-pos, query)
+			Just((sel, cur))
+				ed pane() Pane.set-cursors(cur, Just(sel), Pane.NoChanges)
+
+			None
+				ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
+	else
+		ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
+
+fn next-match (ed Ptr (Editor al))
+	case ed&.search-term
+		None
+			return
+
+		Just(st)
+			case ed pane() Pane.search-from(ed pane() Pane.max-pos(), st)
+				None
+					pass
+
+				Just((sel, cur))
+					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
+
+fn prev-match (ed Ptr (Editor al))
+	case ed&.search-term
+		None
+			return
+
+		Just(st)
+			case ed pane() Pane.search-back(ed pane() Pane.min-pos(), st)
+				None
+					pass
+				Just((sel, cur))
+					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
+
 
 
 fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
@@ -178,6 +219,15 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == ':'
 				ed <&.mode= Cmd(ed pane()&.cursor, StrBuilder.mk(ed&.al))
 
+
+			elif c == '/'
+				ed <&.mode= Search(ed pane()&.cursor, StrBuilder.mk(ed&.al))
+
+			elif c == 'n'
+				ed next-match()
+			elif c == 'N'
+				ed prev-match()
+
 		Tui.Escape
 			ed pane() set-mode( Pane.Normal)
 
@@ -240,6 +290,42 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 					pass
 
 
+		Ptr(Search(prev-cur, sb))
+			case key
+				Tui.Escape
+					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
+					ed <&.mode= Normal
+
+				Tui.Enter
+					# assume we are already in the correct place.
+					# we're really just setting the vi
+					ed pane() Pane.set-cursors(ed pane()&.cursor, ed pane()&.sel, Pane.UpdateVI)
+
+					ed&.search-term if-just(fn(st))
+						StrView.free(st, ed&.al)
+
+					if not sb null()
+						to = ed pane()&.cursor
+						from = ed pane()&.sel or-else(to)
+						ed <&.search-term= Just(StrBuilder.as-str(&sb))
+					else
+						ed <&.search-term= None
+
+					ed <&.mode= Normal
+
+				Tui.Char(c)
+					StrBuilder.write-char(&sb, c Char.ascii-char())
+					ed live-search(prev-cur, StrBuilder.as-str(&sb))
+
+				Tui.Backspace
+					if not sb null()
+						StrBuilder.pop(&sb)
+					ed live-search(prev-cur, StrBuilder.as-str(&sb))
+
+				_
+					pass
+
+
 		_
 			todo()
 
@@ -276,6 +362,8 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 
 	cp = ed&.clipboard Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
 	ann('cp: \(cp)')
+	st = ed&.search-term Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
+	ann('st: \(st)')
 	ann('edmode: \(ed&.mode)')
 	ann('msg: \(ed&.msg)')
 	ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
@@ -296,6 +384,7 @@ ed =& Editor
 	, al: al
 	, pane: Pane.mk(al, tb)
 	, clipboard: None
+	, search-term: None
 
 	, mode: Normal
 	, msg: None

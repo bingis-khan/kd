@@ -17,7 +17,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] cmd system
 - [x] line numbers
 - [x] jump to line number
-- [ ] searching + wrapping (fwd and bwd)
+- [x] searching + wrapping (fwd and bwd)
 - [x] SELECT mode
 - [x] copy-paste (at deletion + when pressed y)
 - [ ] indent dedent

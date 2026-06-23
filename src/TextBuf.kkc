@@ -144,6 +144,9 @@ fn add-to-spot (self Ptr (TextBuf Allocator), p Pos, bytes StrView) -> I32
 	return lines-added
 
 # this one is used by the action thing.
+# NOTE(24.06.26): i just realized. when we want to select something between cursors, including cursors, we have to move the cursor right.
+#                 but, should i move it right by one character or by one *byte*??
+#                 currently, the implementation suggests it's one byte!
 fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, bytes StrView)
 	from = Math.min(from-pos, to-pos)
 	to = Math.max(from-pos, to-pos)
