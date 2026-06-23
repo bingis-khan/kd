@@ -403,6 +403,24 @@ fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Alloc
 	# 	to <= TextBuf.left-pos(self&.buf, to)
 	# self set-cursors(to, pos's fst())
 
+fn indent-selection (self Ptr (Pane al)) <= Allocator al
+	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
+	for line in self min-pos().line to (self max-pos().line)
+		self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 0 }, '\t', None)
+	self&.buf TextBuf.end-changeset()
+
+	self set-cursors(self&.cursor { bi: self&.cursor.bi + 1 }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: sel.bi + 1 }), UpdateVI)
+
+fn dedent-selection (self Ptr (Pane al)) <= Allocator al
+	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
+	first-char-was-tab = self char-at(self min-pos() { bi: 0 }) == '\t'
+	last-char-was-tab = self char-at(self max-pos() { bi: 0 }) == '\t'
+	for line in self min-pos().line to (self max-pos().line)
+		if self char-at({ line, bi: 0 }) == '\t'
+			self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 1 }, '', None)
+	self&.buf TextBuf.end-changeset()
+
+	self set-cursors(self&.cursor { bi: if first-char-was-tab: self&.cursor.bi - 1 else self&.cursor.bi }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: if last-char-was-tab: sel.bi - 1 else sel.bi }), UpdateVI)
 
 
 ## search

@@ -228,6 +228,11 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'N'
 				ed prev-match()
 
+			elif c == '>'
+				ed pane() Pane.indent-selection()
+			elif c == '<'
+				ed pane() Pane.dedent-selection()
+
 		Tui.Escape
 			ed pane() set-mode( Pane.Normal)
 

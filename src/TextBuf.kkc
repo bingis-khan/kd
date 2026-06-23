@@ -41,13 +41,27 @@ fn free-changeset (chs Changeset al, al al) <= Allocator al
 	chs.parts for-each(fn a: a free-action(al))
 	List.free(&chs.parts)
 
+
+ChangesetInputType
+	NoChangeset
+	InputChangeset
+	CustomChangeset
+
+inst Eq ChangesetInputType
+	eq (l _, r _):
+		(case (l, r))
+			(NoChangeset, NoChangeset): True
+			(InputChangeset, InputChangeset): True
+			(CustomChangeset, CustomChangeset): True
+			_: False
+
 # ChangeSet = Slice Action
 Actions al
 	list List al (Changeset al)
 	cur Size
-	input-changeset Bool
+	input-changeset ChangesetInputType
 
-fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0, input-changeset: False }
+fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0, input-changeset: NoChangeset }
 fn trim-actions (actions Ptr (Actions Allocator))
 	al = actions&.list.al
 	cur = actions&.cur
@@ -211,7 +225,7 @@ fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
 
 fn flush-insert-action (self Ptr (TextBuf Allocator))
 	# this will force a new action to be added.
-	self <&.actions.input-changeset= False
+	self <&.actions.input-changeset= NoChangeset
 
 fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
 	self flush-insert-action()
@@ -305,14 +319,14 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 		}
 	al = actions&.list.al
 	is-typed-in = before-cursors is-none()
-	if self&.actions.input-changeset and is-typed-in
+	if self&.actions.input-changeset == CustomChangeset or (self&.actions.input-changeset == InputChangeset and is-typed-in)
 		last-changeset = actions&.list List.to-slice() Slice.last-ptr()
 		List.add(&last-changeset&.parts, action)
 	else
 		changeset =& { parts: List.mk(al), before-cursors: before-cursors or-else({ cur: from, sel: if from == to: None else Just(to) }) }
 		List.add(&changeset&.parts, action)
 		List.add(&actions&.list, changeset&)
-		actions <&.input-changeset = is-typed-in
+		actions <&.input-changeset = if is-typed-in: InputChangeset else NoChangeset
 		actions <&.cur= actions&.cur + 1
 
 	to-fwd = self action-fwd(action)
@@ -322,3 +336,25 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 		return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
 	else
 		return Cursors { cur: to-fwd, sel: None } Just()
+
+fn begin-changeset (self Ptr (TextBuf Allocator), before-cursors Cursors)
+	actions = &self&.actions
+	actions trim-actions()
+	self flush-insert-action()
+	assert(self&.actions.input-changeset == NoChangeset, 'expect no changeset bruh')
+
+	al = self&.al
+	changeset =& { parts: List.mk(al), before-cursors }
+	List.add(&actions&.list, changeset&)
+	actions <&.input-changeset = CustomChangeset
+	actions <&.cur= actions&.cur + 1
+
+fn end-changeset (self Ptr (TextBuf Allocator))
+	# yeahh. that's basically the only thing we have to do.
+	self flush-insert-action()
+
+	actions = &self&.actions
+	if actions&.list List.to-slice() Slice.last-ptr()&.parts null()  # empty changeset - discard it.
+		actions <&.cur= actions&.cur - 1
+		actions <&.input-changeset = NoChangeset
+		actions trim-actions()

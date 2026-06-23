@@ -20,7 +20,8 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] searching + wrapping (fwd and bwd)
 - [x] SELECT mode
 - [x] copy-paste (at deletion + when pressed y)
-- [ ] indent dedent
+- [x] indent dedent
+- [ ] autoindent
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
 - [ ] `g` and `<space>` submenu
