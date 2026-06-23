@@ -21,7 +21,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] SELECT mode
 - [x] copy-paste (at deletion + when pressed y)
 - [x] indent dedent
-- [ ] autoindent
+- [x] autoindent
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
 - [ ] `g` and `<space>` submenu
