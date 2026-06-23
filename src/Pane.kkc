@@ -289,7 +289,11 @@ fn advance-word (pane Ptr (Pane al), dir MoveDirection, target MoveTarget) <= Al
 
 	# skip newlines
 	sel = pane&.cursor
+	was-at-line-end = pane cursor-is-at-line-end()
 	advance()
+	if was-at-line-end or pane reached-target(target, prev&)
+		sel <= pane&.cursor
+
 	while pane cursor-is-at-line-end()
 		if pane&.cursor == prev&
 			return  # at the end of the file!
@@ -297,8 +301,8 @@ fn advance-word (pane Ptr (Pane al), dir MoveDirection, target MoveTarget) <= Al
 		sel <= pane&.cursor
 
 	# check first word boundary
-	if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor)) and pane char-at(pane&.cursor) CharType.char-type() /= CharType.CharSpace
-		sel <= pane&.cursor
+	# if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor)) and pane char-at(pane&.cursor) CharType.char-type() /= CharType.CharSpace
+	# 	sel <= pane&.cursor
 	while True
 		advance()
 		if pane cursor-is-at-line-end() or pane reached-target(target, prev&)
