@@ -159,14 +159,25 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 	pane update-screen-offset(sd)
 
 	sc-off = pane&.sc-off
+	max-line-num-chars = pane&.buf TextBuf.num-lines() chars() count() Mem.size-i32()
+
+	num-front-margin = 2
+	num-back-margin = 2
+	total-margin = max-line-num-chars + num-front-margin + num-back-margin
 	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
 		ybi = line-num - 1
 		xbi = pane&.buf vi-bi(ybi, sc-off.screen-left)
 		line-content = pane&.buf TextBuf.line(ybi)
 
+
 		ys = sd.from-sy + line-num - sc-off.screen-top - 1
+
+		# first draw line number
+		screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
+
 		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left
 		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
+		left-offset = sd.from-sx + total-margin
 		for c in line-content StrView.byte-substr-from(xbi Mem.i32-size()) chars() append(' ')
 			if vx > sd.to-sx
 				break
@@ -182,12 +193,12 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 			case c char-replacement()
 				None
 					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
-						screen Tui.put-char(c, vx, ys)  # ah fuck, we are modifying the underlying buffer.
+						screen Tui.put-char(c, left-offset + vx, ys)  # ah fuck, we are modifying the underlying buffer.
 					vx <= vx + c char-screen-width()
 				Just(s)
 					for c in s chars()
 						if vx >= 0
-							screen Tui.put-char(c, vx, ys)
+							screen Tui.put-char(c, left-offset + vx, ys)
 						vx <= vx + c char-screen-width()
 
 			screen <&.default-fg= Term.ColorDefault

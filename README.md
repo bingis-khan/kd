@@ -15,7 +15,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] x line selection
   - [x] pasting whole lines (exact condition: ends in newline) does not paste them between characters.
 - [x] cmd system
-- [ ] line numbers
+- [x] line numbers
 - [ ] jump to line number
 - [ ] searching + wrapping (fwd and bwd)
 - [x] SELECT mode
