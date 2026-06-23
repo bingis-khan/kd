@@ -24,7 +24,7 @@ use Pane
 
 EditorMode al
 	Normal
-	Cmd (StrBuilder al)
+	Cmd Pos (StrBuilder al)
 	# Search (StrBuilder al)
 
 inst Str EditorMode
@@ -33,8 +33,8 @@ inst Str EditorMode
 		case self
 			Normal
 				c <= 'Normal' StrCase1()
-			Cmd(sb)
-				c <= 'Cmd(\(sb))' StrCase2()
+			Cmd(pos, sb)
+				c <= 'Cmd(\(pos), \(sb))' StrCase2()
 			_
 				return todo()
 		return c chars()
@@ -71,6 +71,15 @@ fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
 	ed reset-msg()
 	ed <&.msg = s StrBuilder.mk-dyn-str(ed&.al) Just()
 
+fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
+	case cmd parse-int()
+		Just(line)
+			line = line Mem.i64-i32() Math.clamp(0, ed pane()&.buf TextBuf.num-lines() - 1)
+			ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
+		None
+			pass
+	pass
+
 fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	sc =& Scan.mk-from-strview(s)
 	cmd = sc Scan.take-str-while(is-not-whitespace)
@@ -86,6 +95,8 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 		pass
 	elif cmd == 'theme'
 		pass
+	elif cmd all(is-digit)
+		pass  # handled in live-cmd()
 	else
 		ed set-msg('unknown command')
 
@@ -165,7 +176,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 					ed <&.pane.sel= Just(ed&.pane.cursor)
 
 			elif c == ':'
-				ed <&.mode= Cmd(StrBuilder.mk(ed&.al))
+				ed <&.mode= Cmd(ed pane()&.cursor, StrBuilder.mk(ed&.al))
 
 		Tui.Escape
 			ed pane() set-mode( Pane.Normal)
@@ -200,21 +211,34 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 							ed pane() Pane.add-str-at-char(s)
 							ed pane() Pane.move-right()
 
-		Ptr(Cmd(sb))
+		Ptr(Cmd(prev-cur, sb))
 			case key
 				Tui.Escape
+					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
 					ed <&.mode= Normal
 
 				Tui.Enter
 					ed run-cmd(StrBuilder.as-str(&sb))
 					StrBuilder.free(&sb)
+
+					# assume we are already in the correct place.
+					# we're really just setting the vi
+					ed pane() Pane.set-cursors(ed pane()&.cursor, None, Pane.UpdateVI)
+
 					ed <&.mode= Normal
 
 				Tui.Char(c)
 					StrBuilder.write-char(&sb, c Char.ascii-char())
+					ed live-cmd(StrBuilder.as-str(&sb))
+
+				Tui.Backspace
+					if not sb null()
+						StrBuilder.pop(&sb)
+					ed live-cmd(StrBuilder.as-str(&sb))
 
 				_
 					pass
+
 
 		_
 			todo()

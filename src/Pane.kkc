@@ -155,6 +155,8 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 
 
 fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
+	display-line-numbers = False  # put this in the config.
+
 	# moves the window "in position" of the cursor.
 	pane update-screen-offset(sd)
 
@@ -163,7 +165,7 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 
 	num-front-margin = 2
 	num-back-margin = 2
-	total-margin = max-line-num-chars + num-front-margin + num-back-margin
+	total-margin = if display-line-numbers: max-line-num-chars + num-front-margin + num-back-margin else 0
 	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
 		ybi = line-num - 1
 		xbi = pane&.buf vi-bi(ybi, sc-off.screen-left)
@@ -173,7 +175,8 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 		ys = sd.from-sy + line-num - sc-off.screen-top - 1
 
 		# first draw line number
-		screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
+		if display-line-numbers
+			screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
 		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left
 		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
@@ -232,7 +235,7 @@ inst Eq CursorMovement
 
 
 fn set-cursors (self Ptr (Pane al), cur Pos, sel Maybe Pos, cursor-movement-type CursorMovement)  # todo: change flags to a readable enum.
-	if cursor-movement-type /= NoChanges and cur.bi /= self&.cursor.bi
+	if cursor-movement-type /= NoChanges
 		self <&.vi= self&.buf pos-vi(cur)
 	self <&.cursor= cur
 	if cursor-movement-type /= OverrideSelect
