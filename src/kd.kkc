@@ -255,8 +255,14 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 							ed pane() set-mode( Pane.Normal)
 
 						Tui.Enter
+							indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.line)
 							ed pane() Pane.add-str-at-char('\n')
 							ed pane() Pane.move-right()
+							for _ in 1 to (indent) # slow but whatever.
+								ed pane() Pane.add-str-at-char('\t')
+								ed pane() Pane.move-right()
+
+							# i also expect 'o' and 'O' to do all those things. how would I generalize it? start-indented-at-line()?
 
 						Tui.Backspace
 							ed pane() Pane.backspace()
