@@ -11,6 +11,7 @@ use Pos
 	Pos
 use Pane
 	Pane
+	set-mode
 
 # some structure:
 # Editor
@@ -102,7 +103,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'k'
 				Pane.move-up(ed pane())
 			elif c == 'i'
-				ed <&.pane.mode= Pane.Insert
+				ed pane() set-mode( Pane.Insert)
 
 			elif c == 'w'
 				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordStart)
@@ -120,10 +121,11 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'd'
 				ed copy-selection-to-clipboard()
 				Pane.replace-selection(ed pane(), ed pane() Pane.selection(), '')
+				ed pane() set-mode(Pane.Normal)
 			elif c == 'c'
 				ed copy-selection-to-clipboard()
 				Pane.replace-selection(ed pane(), ed pane() Pane.selection(), '')
-				ed <&.pane.mode= Pane.Insert
+				ed pane() set-mode( Pane.Insert)
 
 			elif c == 'y'
 				ed copy-selection-to-clipboard()
@@ -143,7 +145,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 					ed pane() Pane.replace-selection((start, start), cp)
 
 			elif c == 'v'
-				ed <&.pane.mode= Pane.Select
+				ed pane() set-mode( Pane.Select)
 				if ed&.pane.sel is-none()
 					ed <&.pane.sel= Just(ed&.pane.cursor)
 
@@ -151,7 +153,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				ed <&.mode= Cmd(StrBuilder.mk(ed&.al))
 
 		Tui.Escape
-			ed <&.pane.mode= Pane.Normal
+			ed pane() set-mode( Pane.Normal)
 
 		_
 			pass
@@ -169,7 +171,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				Pane.Insert
 					case key
 						Tui.Escape
-							ed <&.pane.mode= Pane.Normal
+							ed pane() set-mode( Pane.Normal)
 
 						Tui.Enter
 							ed pane() Pane.add-str-at-char('\n')
@@ -222,16 +224,29 @@ fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
 	cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
 	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
 	ann('sel: \(ed&.pane.sel)')
-	ann('cp: \(ed&.clipboard)')
+
+	# (21.06.26): it breaks for some reason.
+	# fn abbreviate-str (s Str)
+	# 	len = 10
+	# 	if s chars() take(len + 1) count() > len
+	# 		ss = s chars() take(len)
+	# 		return '\(ss)...' StrCase1()
+	# 	else
+	# 		return s StrCase2()
+	# cp = ed&.clipboard Misc.fmap-maybe(abbreviate-str)
+
+	cp = ed&.clipboard Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
+	ann('cp: \(cp)')
 	ann('edmode: \(ed&.mode)')
 	ann('msg: \(ed&.msg)')
 	ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
 	ann('dims: { \(screen-dims.to-sx), \(screen-dims.to-sy) }')
+	ann('num actions: \(ed&.pane.buf&.actions.list.count)')
 
 
 
 al = Alloc.idc()
-tb =& TextBuf.mk(al)
+tb =& TextBuf.mk(al, Pos.mk(0, 0))
 args = Args.get()
 if args.count > 0
 	fname = args[0]

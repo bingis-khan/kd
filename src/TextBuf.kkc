@@ -1,6 +1,5 @@
 
 # this is the text buffer implementation.
-# it does NOT contain actions or whatever. it's supposed to store TEXT!
 # this whole module can later be replaced by a proper data structure like a Rope!
 # interface (inspired by ropey):
 # line (index from 0 yo)
@@ -8,6 +7,8 @@
 
 # also uses I32 indexes to make math easier :)
 
+use StrBuilder
+	StrBuilder
 
 use Pos
 	Pos
@@ -26,6 +27,9 @@ Action
 	bwd StrView  # what we removed
 	to-bwd Pos   # this could ALSO be removed.
 
+Changeset al
+	parts List al Action
+
 	# instead of before-cursors, use an enum to specify where a cursor should end up.
 	before-cursors Cursors
 
@@ -33,23 +37,40 @@ fn free-action (action Action, al Allocator)
 	action.fwd StrView.free(al)
 	action.bwd StrView.free(al)
 
+fn free-changeset (chs Changeset al, al al) <= Allocator al
+	chs.parts for-each(fn a: a free-action(al))
+	List.free(&chs.parts)
+
 # ChangeSet = Slice Action
 Actions al
-	list List al Action
+	list List al (Changeset al)
 	cur Size
-	# changeset Maybe (List al Action)
+	input-changeset Bool
 
-fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0 }
-
+fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0, input-changeset: False }
+fn trim-actions (actions Ptr (Actions Allocator))
+	al = actions&.list.al
+	cur = actions&.cur
+	for action in actions&.list drop(cur)
+		action free-changeset(al)
+	List.trim(&actions&.list, cur)
 
 
 TextBuf al
+	al al
 	buf List al (List al U8)
 	actions Actions al
 
+	# insert-action InsertAction al
 
-fn mk (al Allocator)
-	return TextBuf { buf: List.from-iter([List.mk(al)], al), actions: mk-actions(al) }
+
+fn mk (al Allocator, cursor-pos Pos)
+	return TextBuf
+		{ al: al
+		, buf: List.from-iter([List.mk(al)], al)
+		, actions: mk-actions(al)
+		# , insert-action: { sb: List.mk(al), is-insert: True, from-pos: cursor-pos, last-pos: cursor-pos }
+		}
 
 fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
 	List.get(li Mem.i32-size())
@@ -57,6 +78,15 @@ fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
 	StrView.from-bytes()
 
 fn num-lines (self Ptr (TextBuf al)): List.size(&self&.buf) Mem.size-i32()
+
+fn last-changeset (self Ptr (TextBuf al)) -> Maybe (Ptr (Changeset al))
+	cur = self&.actions.cur
+	if cur == 0
+		return None
+	else
+		p = List.get-ptr(&self&.actions.list, cur)
+		return Just(p)
+
 
 # should they be in TextBuf or here?? I guess here?
 fn right-pos (self Ptr (TextBuf al), pos Pos) -> Pos
@@ -114,7 +144,9 @@ fn add-to-spot (self Ptr (TextBuf Allocator), p Pos, bytes StrView) -> I32
 	return lines-added
 
 # this one is used by the action thing.
-fn change-no-action (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView)
+fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, bytes StrView)
+	from = Math.min(from-pos, to-pos)
+	to = Math.max(from-pos, to-pos)
 	if to == from
 		# if empty buffer, we can add text.
 		al = self&.buf.al
@@ -124,9 +156,6 @@ fn change-no-action (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrVi
 		_ = self add-to-spot(from, bytes)
 
 	else
-		from = Math.min(from, to)
-		to = Math.max(from, to)
-		
 		lines-buf = &self&.buf
 		first-line = lines-buf List.get-ptr(Mem.i32-size(from.line))
 		
@@ -164,34 +193,6 @@ fn action-fwd (self Ptr (TextBuf Allocator), action Action) -> Pos
 	return action.to-fwd
 
 
-fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
-	actions = &self&.actions
-	if actions&.cur == 0
-		return None
-
-	actions <&.cur= actions&.cur - 1
-	action = actions&.list[actions&.cur]
-	self action-bwd(action)
-	return action.before-cursors Just()
-
-fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
-	actions = &self&.actions
-	if actions&.cur >= List.size(&actions&.list)
-		return None
-
-	action = actions&.list[actions&.cur]
-	to-fwd = self action-fwd(action)
-	actions <&.cur= actions&.cur + 1
-
-	# TEMP(smol hack):
-	# we don't track the future position of the cursors. so, we have to decide where we're gonna put the cursor.
-	# so, when we're redoing single chars, we want to put the cursor after chars (makes writing nicer). this is what this if statement checks
-	# so, we don't differentiate between a character insertion and paste, unlike Helix. fix it sometime later.
-	if action.fwd StrView.num-bytes() > 1  
-		to-fwd <= left-pos(self, to-fwd)
-	return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
-
-
 fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
 	lines = bytes StrView.split-by-each('\n')
 	first-line = lines head() or-else('')
@@ -203,6 +204,49 @@ fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
 	else
 		last-line = headless zip(Iter.from(from.line + 1)) last() or-fail('should not happen')
 		return Pos.mk(last-line snd(), last-line fst() StrView.num-bytes() Mem.size-i32())
+
+
+fn flush-insert-action (self Ptr (TextBuf Allocator))
+	# this will force a new action to be added.
+	self <&.actions.input-changeset= False
+
+fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+	self flush-insert-action()
+
+	actions = &self&.actions
+	if actions&.cur == 0
+		return None
+
+	actions <&.cur= actions&.cur - 1
+	changeset = actions&.list[actions&.cur]
+	for action in changeset.parts List.to-slice() Slice.reversed()
+		self action-bwd(action)
+	return changeset.before-cursors Just()
+
+fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+	self flush-insert-action()
+
+	actions = &self&.actions
+	if actions&.cur >= List.size(&actions&.list)
+		return None
+
+	changeset = actions&.list[actions&.cur]
+	to-fwd = @undefined
+	for action in changeset.parts
+		to-fwd <= self action-fwd(action)
+	actions <&.cur= actions&.cur + 1
+
+	# TEMP(smol hack):
+	# we don't track the future position of the cursors. so, we have to decide where we're gonna put the cursor.
+	# so, when we're redoing single chars, we want to put the cursor after chars (makes writing nicer). this is what this if statement checks
+	# so, we don't differentiate between a character insertion and paste, unlike Helix. fix it sometime later.
+	last-action = changeset.parts List.to-slice() Slice.last()
+	if last-action.fwd StrView.num-bytes() > 1  
+		to-fwd = left-pos(self, to-fwd)
+		return Cursors { cur: to-fwd, sel: Just(last-action.from) } Just()
+	else
+		return Cursors { cur: to-fwd, sel: None } Just()
+
 
 fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
 	al = self&.buf.al
@@ -226,7 +270,19 @@ fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
 		sb List.add-all(self line(to-pos.line) StrView.byte-substr(0, to-pos.bi Mem.i32-size()) .contents)
 		return sb& List.to-slice() StrView.from-bytes()
 
+fn num-bytes-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> Size
+	if from.line == to.line
+		return (Math.max(from.bi, to.bi) - Math.min(from.bi, to.bi)) Mem.i32-size()
+	else
+		from-pos = Math.max(from, to)
+		to-pos = Math.min(from, to)
+		fbi = self line(from-pos.line) StrView.byte-substr-from(from-pos.bi Mem.i32-size()) StrView.num-bytes()
+		tbi = self line(to-pos.line) StrView.byte-substr(0, to-pos.bi Mem.i32-size()) StrView.num-bytes()
+		bbi = (from-pos.line + 1) Iter.to (to-pos.line - 1)
+			map(fn li: self line(li) StrView.num-bytes())
+			sum()
 
+		return fbi + tbi + bbi
 
 
 fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before-cursors Maybe Cursors)
@@ -234,23 +290,32 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 	to-pos = Math.max(from, to)
 
 	actions = &self&.actions
-	al = actions&.list.al
-	cur = actions&.cur
-	for action in actions&.list drop(cur)
-		action free-action(al)
-	List.trim(&actions&.list, cur)
+	actions trim-actions()
 
-	List.add(&actions&.list,
+	action =
 		{ from: from
-
-		, fwd: bytes StrView.clone(al)
+		, fwd: bytes StrView.clone(self&.al)
 		, to-fwd: self pos-after-str(bytes, from-pos)
 
 		, bwd: self str-between(from-pos, to-pos)
 		, to-bwd: to-pos
+		}
+	al = actions&.list.al
+	is-typed-in = before-cursors is-none()
+	if self&.actions.input-changeset and is-typed-in
+		last-changeset = actions&.list List.to-slice() Slice.last-ptr()
+		List.add(&last-changeset&.parts, action)
+	else
+		changeset =& { parts: List.mk(al), before-cursors: before-cursors or-else({ cur: from, sel: if from == to: None else Just(to) }) }
+		List.add(&changeset&.parts, action)
+		List.add(&actions&.list, changeset&)
+		actions <&.input-changeset = is-typed-in
+		actions <&.cur= actions&.cur + 1
 
-		, before-cursors: before-cursors or-else({ cur: from, sel: if from == to: None else Just(to) })
-		})
+	to-fwd = self action-fwd(action)
 
-	# after a new action is added, moves it forward to apply it to the current buffer.
-	return self redo()
+	if action.fwd StrView.num-bytes() > 1  
+		to-fwd = left-pos(self, to-fwd)
+		return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
+	else
+		return Cursors { cur: to-fwd, sel: None } Just()

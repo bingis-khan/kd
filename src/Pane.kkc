@@ -200,6 +200,11 @@ fn set-sel (self Ptr (Pane al), sel Maybe Pos)
 	if self&.mode /= Select
 		self <&.sel= sel
 
+fn set-mode (self Ptr (Pane al), mode Mode) <= Allocator al
+	if mode == Normal
+		self&.buf TextBuf.flush-insert-action()
+	self <&.mode= mode
+
 
 CursorMovement
 	NoChanges
