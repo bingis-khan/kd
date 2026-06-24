@@ -23,7 +23,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] copy-paste (at deletion + when pressed y)
 - [x] indent dedent
 - [x] autoindent
-- [ ] `o` and `O`
+- [x] `o` and `O`
 - [ ] `ctrl+u` and `ctrl+d` moving around
 - [ ] `ctrl+c` comment out
 - [x] undo/redo

@@ -160,11 +160,29 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'i'
 				ed pane() set-mode(Pane.Insert)
 			elif c == 'I'
-				ed pane() Pane.move-to-beginning()
+				ed pane() Pane.move-to-beginning-indented()
 				ed pane() set-mode(Pane.Insert)
 			elif c == 'A'
 				ed pane() Pane.move-to-end()
 				ed pane() set-mode(Pane.Insert)
+
+			elif c == 'o'
+				# NOTE(24.06.26): slower compile times with this block on. bruh. what.
+				pane = ed pane()
+				indent = pane Pane.indent-at-line(pane&.cursor.line)
+				pane Pane.move-to-end()
+				pane Pane.add-str-at-char('\n')
+				pane Pane.move-right()
+				pane Pane.indent-at-current(indent)
+				pane set-mode(Pane.Insert)
+			elif c == 'O'
+				# NOTE(24.06.26): also slower due to this. we're reached 300ms. wtffff is going on.
+				pane = ed pane()
+				indent = pane Pane.indent-at-line(pane&.cursor.line)
+				pane Pane.move-to-beginning()
+				pane Pane.add-str-at-char('\n')
+				pane Pane.indent-at-current(indent)
+				pane set-mode(Pane.Insert)
 
 			elif c == 'w'
 				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordStart)
@@ -265,11 +283,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 							indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.line)
 							ed pane() Pane.add-str-at-char('\n')
 							ed pane() Pane.move-right()
-							for _ in 1 to (indent) # slow but whatever.
-								ed pane() Pane.add-str-at-char('\t')
-								ed pane() Pane.move-right()
-
-							# i also expect 'o' and 'O' to do all those things. how would I generalize it? start-indented-at-line()?
+							ed pane() Pane.indent-at-current(indent)
 
 						Tui.Backspace
 							ed pane() Pane.backspace()

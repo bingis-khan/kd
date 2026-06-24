@@ -368,6 +368,9 @@ fn expand(pane Ptr (Pane al))
 		pane <&.cursor= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
 
 fn move-to-beginning (self Ptr (Pane al))
+	self set-cursors(self&.cursor { bi: 0 }, None, OverrideSelect)
+
+fn move-to-beginning-indented (self Ptr (Pane al))
 	cur = self&.cursor
 	indent = self indent-at-line(cur.line)
 	self set-cursors(cur { bi: indent }, None, OverrideSelect)
@@ -415,10 +418,13 @@ fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Alloc
 	# 	to <= TextBuf.left-pos(self&.buf, to)
 	# self set-cursors(to, pos's fst())
 
+fn indent-at (self Ptr (Pane Allocator), line I32)
+	self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 0 }, '\t', None)
+
 fn indent-selection (self Ptr (Pane al)) <= Allocator al
 	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
 	for line in self min-pos().line to (self max-pos().line)
-		self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 0 }, '\t', None)
+		self indent-at(line)
 	self&.buf TextBuf.end-changeset()
 
 	self set-cursors(self&.cursor { bi: self&.cursor.bi + 1 }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: sel.bi + 1 }), UpdateVI)
@@ -433,6 +439,12 @@ fn dedent-selection (self Ptr (Pane al)) <= Allocator al
 	self&.buf TextBuf.end-changeset()
 
 	self set-cursors(self&.cursor { bi: if first-char-was-tab: self&.cursor.bi - 1 else self&.cursor.bi }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: if last-char-was-tab: sel.bi - 1 else sel.bi }), UpdateVI)
+
+fn indent-at-current (self Ptr (Pane Allocator), indent I32)
+	for _ in 1 to (indent)
+		self indent-at(self&.cursor.line)
+		self move-right()
+
 
 
 ## search
