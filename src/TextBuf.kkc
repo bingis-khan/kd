@@ -423,7 +423,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 		# intrinsics
 		elif sc Scan.try-char('@')
 			if sc Scan.char-satisfies(Str2.is-alpha)
-				sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
+				sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
 				cur-off = sc&.byte-offset Mem.size-i32()
 				hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident3 })
 			else
@@ -440,19 +440,19 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 		# 		# none for now. maybe later when single @ gets a meaning?
 		# 		pass
 
-		elif ['<&', '=' as StrView, '&', '->', ':'] any(fn sym: sc Scan.matches-str(sym))
-			cur-off = sc&.byte-offset Mem.size-i32()
-			type = Highlight.Special1
-			hls List.add({ from: from-off, to: cur-off, type })
-
 		elif ['==', '/='] any(fn sym: sc Scan.matches-str(sym))
 			cur-off = sc&.byte-offset Mem.size-i32()
 			type = Highlight.Special2
 			hls List.add({ from: from-off, to: cur-off, type })
 
+		elif ['<&', '=' as StrView, '&', '->', ':'] any(fn sym: sc Scan.matches-str(sym))
+			cur-off = sc&.byte-offset Mem.size-i32()
+			type = Highlight.Special1
+			hls List.add({ from: from-off, to: cur-off, type })
+
 		# lowercase and uppercase identifier and word keywords
 		elif sc Scan.char-satisfies(Str2.is-alpha)
-			sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
+			sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
 			cur-off = sc&.byte-offset Mem.size-i32()
 			first-char-uppercase = first-char Misc.maybe(Str2.is-upper, False)
 			type = if first-char-uppercase: Highlight.Ident2 else Highlight.Ident1
@@ -483,6 +483,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 				, 'or'
 				, 'and'
 				, 'not'
+				, 'return'
 				]
 
 			if keywords1 any(fn kw: kw == ident)
