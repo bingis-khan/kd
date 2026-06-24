@@ -156,8 +156,15 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				Pane.move-down(ed pane())
 			elif c == 'k'
 				Pane.move-up(ed pane())
+
 			elif c == 'i'
-				ed pane() set-mode( Pane.Insert)
+				ed pane() set-mode(Pane.Insert)
+			elif c == 'I'
+				ed pane() Pane.move-to-beginning()
+				ed pane() set-mode(Pane.Insert)
+			elif c == 'A'
+				ed pane() Pane.move-to-end()
+				ed pane() set-mode(Pane.Insert)
 
 			elif c == 'w'
 				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordStart)

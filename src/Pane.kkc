@@ -367,6 +367,15 @@ fn expand(pane Ptr (Pane al))
 		next-line = max-pos.line + 1
 		pane <&.cursor= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
 
+fn move-to-beginning (self Ptr (Pane al))
+	cur = self&.cursor
+	indent = self indent-at-line(cur.line)
+	self set-cursors(cur { bi: indent }, None, OverrideSelect)
+
+fn move-to-end (self Ptr (Pane al))
+	cur = self&.cursor
+	self set-cursors(cur { bi: self&.buf TextBuf.line(cur.line) StrView.num-bytes() Mem.size-i32() }, None, OverrideSelect)
+
 
 # modification
 

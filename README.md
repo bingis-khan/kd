@@ -12,6 +12,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 
 - [x] w,e,b jumping
 - [x] scrolling and cursor jumping.
+- [x] `I` and `A`
 - [x] x line selection
   - [x] pasting whole lines (exact condition: ends in newline) does not paste them between characters.
 - [x] cmd system
@@ -22,6 +23,9 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] copy-paste (at deletion + when pressed y)
 - [x] indent dedent
 - [x] autoindent
+- [ ] `o` and `O`
+- [ ] `ctrl+u` and `ctrl+d` moving around
+- [ ] `ctrl+c` comment out
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
 - [ ] `g` and `<space>` submenu
