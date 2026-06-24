@@ -493,14 +493,21 @@ fn indent-at-current (self Ptr (Pane Allocator), indent I32)
 
 
 fn toggle-comment (self Ptr (Pane Allocator))
-	cur = self&.cursor
-	comment-str = '#'
-	case self line-begins-with-comment(cur.line)
-		None
-			self move-to-beginning-indented()
+	from-line = self min-pos().line
+	to-line = self max-pos().line
+	min-indent = from-line to (to-line) map(fn ln: self indent-at-line(ln)) minimum() or-fail('no lines what??')
+	all-have-comment = from-line to (to-line) all(fn ln: self line-begins-with-comment(ln) is-just())
+
+	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
+	for line in from-line to (to-line)
+		comment-str = '#'
+		if not all-have-comment
+			self set-cursors(Pos.mk(line, min-indent), None, NoChanges)
 			self add-str-at-char('# ')
-		Just((from-pos, to-pos))
-			self replace-selection((from-pos, to-pos), '')
+		else
+			tup = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
+			self replace-selection((tup fst(), tup snd()), '')
+	self&.buf TextBuf.end-changeset()
 
 
 
