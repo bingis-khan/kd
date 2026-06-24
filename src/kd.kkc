@@ -261,6 +261,9 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 		Tui.Escape
 			ed pane() set-mode( Pane.Normal)
 
+		Tui.Ctrl(c)
+			if c == 'c'
+				ed pane() Pane.toggle-comment()
 		_
 			pass
 

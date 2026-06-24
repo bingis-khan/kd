@@ -379,6 +379,16 @@ fn move-to-end (self Ptr (Pane al))
 	cur = self&.cursor
 	self set-cursors(cur { bi: self&.buf TextBuf.line(cur.line) StrView.num-bytes() Mem.size-i32() }, None, OverrideSelect)
 
+fn line-begins-with-comment (self Ptr (Pane al), line I32) -> Maybe (Pos, Pos)
+	indent = self indent-at-line(line)
+	if self char-at(Pos.mk(line, indent)) == '#'
+		i = indent + 1
+		while (fn c: c /= '\n' and c is-whitespace())(self char-at(Pos.mk(line, i)))
+			i <= i + 1
+		return Just((Pos.mk(line, indent), Pos.mk(line, i)))
+	else
+		return None
+
 
 # modification
 
@@ -444,6 +454,17 @@ fn indent-at-current (self Ptr (Pane Allocator), indent I32)
 	for _ in 1 to (indent)
 		self indent-at(self&.cursor.line)
 		self move-right()
+
+
+fn toggle-comment (self Ptr (Pane Allocator))
+	cur = self&.cursor
+	comment-str = '#'
+	case self line-begins-with-comment(cur.line)
+		None
+			self move-to-beginning-indented()
+			self add-str-at-char('# ')
+		Just((from-pos, to-pos))
+			self replace-selection((from-pos, to-pos), '')
 
 
 

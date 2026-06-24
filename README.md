@@ -25,12 +25,13 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] autoindent
 - [x] `o` and `O`
 - [ ] `ctrl+u` and `ctrl+d` moving around
-- [ ] `ctrl+c` comment out
+- [x] `ctrl+c` comment out
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
 - [ ] `g` and `<space>` submenu
 - [ ] themes
 - [x] editor messages (send message Str -> () which allocates and frees n stuff)
+- [ ] proper `before-cursors` position for commenting out, moving, `oO` newlines
 - ...
 - [ ] filepicker (which respects .ignore and .gitignore) (will require more std functions.)
 - ...
