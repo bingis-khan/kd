@@ -12,6 +12,8 @@ use Pos
 use Pane
 	Pane
 	set-mode
+use Theme
+	Theme
 
 # some structure:
 # Editor
@@ -51,7 +53,10 @@ Editor al
 	mode EditorMode al
 
 	msg Maybe StrView
+
 	# theme and stuff.
+	theme Ptr Theme
+	og-theme Ptr Theme  # hackish. stores the theme we currently have set (but might not be "trying out" with the :theme command)
 
 
 # use this to get the current pane.
@@ -78,10 +83,17 @@ fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 	case cmd parse-int()
 		Just(line)
 			line = line Mem.i64-i32() Math.clamp(0, ed pane()&.buf TextBuf.num-lines() - 1)
+			line = line - 1  # lines start from 1 on-screen
 			ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
 		None
-			pass
-	pass
+			sc =& Scan.mk-from-strview(cmd)
+			cmd = sc Scan.take-str-while(Str2.is-alpha)
+			if cmd == 'theme'
+				sc Scan.drop-str-while(is-whitespace)
+				theme-name = sc Scan.take-str-while(fn c: not c is-whitespace())
+				ed <&.theme= Theme.match-theme(theme-name) or-else(ed&.og-theme)
+			else
+				pass
 
 fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	sc =& Scan.mk-from-strview(s)
@@ -259,7 +271,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				ed pane() Pane.dedent-selection()
 
 		Tui.Escape
-			ed pane() set-mode( Pane.Normal)
+			ed pane() set-mode(Pane.Normal)
 
 		Tui.Ctrl(c)
 			if c == 'c'
@@ -309,6 +321,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
 					ed <&.mode= Normal
+					ed <&.theme= ed&.og-theme  # reset theme in case it was changed.
 
 				Tui.Enter
 					ed run-cmd(StrBuilder.as-str(&sb))
@@ -319,6 +332,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 					ed pane() Pane.set-cursors(ed pane()&.cursor, None, Pane.UpdateVI)
 
 					ed <&.mode= Normal
+					ed <&.og-theme= ed&.theme  # set the theme if it was modified.
 
 				Tui.Char(c)
 					StrBuilder.write-char(&sb, c Char.ascii-char())
@@ -380,7 +394,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		, from-sy: 0
 		, to-sy: screen&.tui&.height Mem.u32-i32() -1
 		}
-	screen Pane.render(ed pane(), screen-dims)
+	screen Pane.render(ed pane(), screen-dims, ed&.theme)
 
 	# debug stuff.
 	curline =& 0
@@ -412,6 +426,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
 	ann('dims: { \(screen-dims.to-sx), \(screen-dims.to-sy) }')
 	ann('num actions: \(ed&.pane.buf&.actions.list.count)')
+	ann(Time.now().tv-sec)
 
 
 
@@ -431,6 +446,9 @@ ed =& Editor
 
 	, mode: Normal
 	, msg: None
+
+	, theme: Theme.default
+	, og-theme: Theme.default
 	}
 
 # screen shit
@@ -456,8 +474,10 @@ while ed&.running
 		screen <&.requires-full-redraw= True
 
 		screen Tui.clear-screen()
-		screen Tui.set-screen-fg(Term.ColorDefault)
-		screen Tui.set-screen-bg(Term.ColorDefault)
+		screen Tui.set-screen-fg(ed&.theme&.default.fg)
+		screen Tui.set-screen-bg(ed&.theme&.default.bg)
+		screen Tui.fill-default()
+
 		screen render-editor(ed)
 		screen Tui.draw-str('REDRAWS[\(last-redraw-changes)]', 0, screen&.tui&.height Mem.u32-i32() - 1)
 

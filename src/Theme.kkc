@@ -1,0 +1,106 @@
+use Term
+	Color
+
+use Highlight
+	HighlightType
+
+Colors
+	fg   Color
+	bg   Color
+
+HighlightColors
+	type HighlightType
+	fg   Color
+	bg   Maybe Color
+
+fn hlt (type HighlightType, fg Color): HighlightColors { type, fg, bg: None }
+
+Theme
+	default     Colors
+
+	cursor      Colors
+	selection   Colors
+	line-num-hl Colors
+
+	highlights  Slice HighlightColors
+
+
+# I think a proper theme helps an editor a lot. I want to capture the general vibe of the thing.
+fn rgb(x): Term.ColorRGB(Term.rgb-from-hex(x))
+camel        = rgb(0xb38a58)
+olive        = rgb(0x6F732F)
+tea-green    = rgb(0xe2f9b8)
+chocolate    = rgb(0xd16014)
+muted-olive  = rgb(0xbbce8a)
+palm-leaf    = rgb(0x939f5c)
+
+lime-green   = rgb(0x31cb00)
+forest-green = rgb(0x119822)
+green        = rgb(0x2a7221)
+dark-spruce  = rgb(0x1e441e)
+evergreen    = rgb(0x152614)
+
+goblin-ultra =& Theme
+	{ default: { bg: evergreen, fg: lime-green }
+
+	, cursor: { bg: lime-green, fg: evergreen }
+	, selection: { bg: forest-green, fg: evergreen }
+	, line-num-hl: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, highlights: Array.as-slice(&
+		[ hlt(Highlight.Number, green)
+		, hlt(Highlight.String, camel)
+		, hlt(Highlight.Comment, dark-spruce)
+
+		, hlt(Highlight.Ident1, lime-green)
+		, hlt(Highlight.Ident2, muted-olive)
+		, hlt(Highlight.Ident3, tea-green)
+		, hlt(Highlight.Ident4, palm-leaf)
+
+		, hlt(Highlight.Keyword1, tea-green)
+		, hlt(Highlight.Keyword2, chocolate)
+
+		, hlt(Highlight.Special1, olive)
+		, hlt(Highlight.Special2, forest-green)
+		, hlt(Highlight.Special3, camel)
+
+		, { type: Highlight.Invalid, fg: evergreen, bg: Just(Term.Color8(Term.Red8)) }
+		])
+	}
+
+
+dark-theme =& Theme
+	{ default: { bg: Term.Color8(Term.Black8), fg: Term.Color8(Term.White8) }
+
+	, cursor: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, selection: { bg: Term.Color16(Term.BrightWhite16), fg: Term.Color16(Term.Black16) }
+	, line-num-hl: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, highlights: Slice.empty()
+	}
+
+default = goblin-ultra
+all-themes = Array.as-slice(&
+	[ ('default', default)
+	, ('goblin-ultra', goblin-ultra)
+	, ('dark-mono', dark-theme)
+	])
+
+# partially match theme
+fn match-theme (name StrView) -> Maybe (Ptr Theme)
+	if name null()  # empty strings should not match bruh.
+		return None
+
+	return all-themes
+		filter(fn ((theme-name, theme)): theme-name Str2.begins-with(name))
+		map(snd)
+		head()
+
+
+fn find-colors-for-highlight (theme Ptr Theme, hltype HighlightType) -> Colors:
+	theme&.highlights
+	filter(fn hlc: hlc.type == hltype)
+	head()
+	Misc.maybe
+		( fn hlc: { fg: hlc.fg, bg: hlc.bg or-else(theme&.default.bg) }
+		# , { fg: theme&.default.fg, bg: Term.Color8(Term.Red8) }  # error colors for exhaustiveness checking.
+		, theme&.default
+		)

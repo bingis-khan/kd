@@ -452,7 +452,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 			type = Highlight.Special2
 			hls List.add({ from: from-off, to: cur-off, type })
 
-		elif ['<&', '=' as StrView, '&', '->', ':'] any(fn sym: sc Scan.matches-str(sym))
+		elif ['<&', '=' as StrView, '&', '->', ':', '(', ')'] any(fn sym: sc Scan.matches-str(sym))
 			cur-off = sc&.byte-offset Mem.size-i32()
 			type = Highlight.Special1
 			hls List.add({ from: from-off, to: cur-off, type })
@@ -512,6 +512,11 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 							sc Scan.skip-while(Str2.is-hex)
 							cur-off = sc&.byte-offset Mem.size-i32()
 							hls List.add({ from: from-off, to: cur-off, type })
+
+							sc Scan.skip-while(Str2.is-alpha)
+							invalid-off = sc&.byte-offset Mem.size-i32()
+							if cur-off /= invalid-off
+								hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
 						elif sc Scan.try-char('o')
 							sc Scan.skip-while(Str2.is-octal)
 							cur-off = sc&.byte-offset Mem.size-i32()

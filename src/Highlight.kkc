@@ -17,3 +17,7 @@ HighlightType
 	Special3  # annotations????
 
 	Invalid   # special?
+
+inst Eq HighlightType
+	eq (l _, r _):
+		(Mem.cast-on-zeroed(l) as U32) == (Mem.cast-on-zeroed(r))

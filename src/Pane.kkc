@@ -8,6 +8,8 @@ use TextBuf
 use CharType
 	char-type
 	is-word-boundary
+use Theme
+	Theme
 
 Mode
 	Normal
@@ -154,7 +156,11 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
 
 
-fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims) <= Allocator al
+fn set-colors (screen Ptr (Screen Allocator), colors Theme.Colors)
+	screen Tui.set-screen-colors(colors.fg, colors.bg)
+
+
+fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr Theme) <= Allocator al
 	display-line-numbers = True  # put this in the config.
 
 	# moves the window "in position" of the cursor.
@@ -188,52 +194,53 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims) <= Allocat
 			is-cursor = curpos == pane&.cursor
 			in-selection = pane is-in-selection(Pos.mk(ybi, xbi))
 			if is-cursor
-				screen <&.default-fg= Term.Color8(Term.Black8)
-				screen <&.default-bg= Term.Color8(Term.White8)
+				screen set-colors(theme&.cursor)
 			elif in-selection
-				screen <&.default-bg= Term.Color8(Term.Cyan8)
+				screen set-colors(theme&.selection)
 			else
 				# check highlight
 				pane&.buf TextBuf.highlight-at(curpos) if-just(fn(type))
-					case type
-						Highlight.Comment
-							screen <&.default-fg= Term.Color8(Term.Blue8)
+					screen set-colors(theme Theme.find-colors-for-highlight(type))
 
-						Highlight.Number
-							screen <&.default-fg= Term.Color8(Term.Red8)
+					# case type
+					# 	Highlight.Comment
+					# 		screen <&.default-fg= Term.Color8(Term.Blue8)
 
-						Highlight.String
-							screen <&.default-fg= Term.Color8(Term.Green8)
+					# 	Highlight.Number
+					# 		screen <&.default-fg= Term.Color8(Term.Red8)
 
-						Highlight.Ident1
-							screen <&.default-fg= Term.ColorDefault
+					# 	Highlight.String
+					# 		screen <&.default-fg= Term.Color8(Term.Green8)
 
-						Highlight.Ident2
-							screen <&.default-fg= Term.Color8(Term.Magenta8)
+					# 	Highlight.Ident1
+					# 		screen <&.default-fg= Term.ColorDefault
 
-						Highlight.Ident3
-							screen <&.default-fg= Term.Color8(Term.Yellow8)
+					# 	Highlight.Ident2
+					# 		screen <&.default-fg= Term.Color8(Term.Magenta8)
 
-						Highlight.Ident4
-							screen <&.default-fg= Term.Color8(Term.Blue8)
+					# 	Highlight.Ident3
+					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
 
-						Highlight.Keyword1
-							screen <&.default-fg= Term.Color8(Term.Yellow8)
+					# 	Highlight.Ident4
+					# 		screen <&.default-fg= Term.Color8(Term.Blue8)
 
-						Highlight.Keyword2
-							screen <&.default-fg= Term.Color8(Term.Green8)
+					# 	Highlight.Keyword1
+					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
 
-						Highlight.Special1
-							screen <&.default-fg= Term.Color8(Term.Yellow8)
+					# 	Highlight.Keyword2
+					# 		screen <&.default-fg= Term.Color8(Term.Green8)
 
-						Highlight.Special2
-							screen <&.default-fg= Term.Color8(Term.Green8)
+					# 	Highlight.Special1
+					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
 
-						Highlight.Special3
-							screen <&.default-fg= Term.Color8(Term.Green8)
+					# 	Highlight.Special2
+					# 		screen <&.default-fg= Term.Color8(Term.Green8)
 
-						_
-							screen <&.default-bg= Term.Color8(Term.Red8)
+					# 	Highlight.Special3
+					# 		screen <&.default-fg= Term.Color8(Term.Green8)
+
+					# 	_
+					# 		screen <&.default-bg= Term.Color8(Term.Red8)
 			case c char-replacement()
 				None
 					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
@@ -245,8 +252,7 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims) <= Allocat
 							screen Tui.put-char(c, left-offset + vx, ys)
 						vx <= vx + c char-screen-width()
 
-			screen <&.default-fg= Term.ColorDefault
-			screen <&.default-bg= Term.ColorDefault
+			screen set-colors(theme&.default)
 			xbi <= xbi + c.num-bytes Mem.size-i32()
 
 
