@@ -49,10 +49,6 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [ ] wq (i didn't add it on purpose. due to my muscle memory, i use it automatically,  but I don't want to overwrite important files accidentally)
 - ...
 - [ ] graphical backend
-
-
-## ideas from gay nigger
-
 - [ ] earlier/later commands (undo 5 mins)
 
 
