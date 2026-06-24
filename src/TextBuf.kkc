@@ -400,7 +400,14 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 
 		# comment
 		if sc Scan.try-char('#')
-			hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
+			# optionally a tag!
+			if sc Scan.try-char('[')
+				sc Scan.skip-while(fn c: c /= ']')
+				sc drop'(1)
+				to-off = sc&.byte-offset Mem.size-i32()
+				hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Special3 })
+			else
+				hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
 			break
 
 		# string

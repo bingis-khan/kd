@@ -14,5 +14,6 @@ HighlightType
 
 	Special1  # more important symbols like '=', '<=', '<&=' (the last two may be parsed dynamically!), '&', '->'
 	Special2  # more normal symbols like '==', '/=', etc
+	Special3  # annotations????
 
 	Invalid   # special?

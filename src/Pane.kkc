@@ -229,6 +229,9 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims) <= Allocat
 						Highlight.Special2
 							screen <&.default-fg= Term.Color8(Term.Green8)
 
+						Highlight.Special3
+							screen <&.default-fg= Term.Color8(Term.Green8)
+
 						_
 							screen <&.default-bg= Term.Color8(Term.Red8)
 			case c char-replacement()
