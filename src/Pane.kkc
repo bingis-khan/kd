@@ -250,23 +250,21 @@ fn move-right (self Ptr (Pane al))
 fn move-left (self Ptr (Pane al))
 	self set-cursors(TextBuf.left-pos(self&.buf, self&.cursor), None, UpdateVI)
 
-fn move-down (self Ptr (Pane al))
+fn move-down (self Ptr (Pane al), amnt I32)
 	cur = self&.cursor
-	if cur.line + 1 >= self&.buf TextBuf.num-lines()
-		return
+	nu-line = Math.min(cur.line + amnt, self&.buf TextBuf.num-lines())
 
 	vci = self&.vi
-	bi = self&.buf vi-bi(cur.line + 1, vci)
-	self set-cursors({ line: cur.line + 1, bi }, None, NoChanges)
+	bi = self&.buf vi-bi(nu-line, vci)
+	self set-cursors({ line: nu-line, bi }, None, NoChanges)
 
-fn move-up (self Ptr (Pane al))
+fn move-up (self Ptr (Pane al), amnt I32)
 	cur = self&.cursor
-	if cur.line <= 0
-		return
+	nu-line = Math.max(cur.line - amnt, 0)
 
 	vci = self&.vi
-	bi = self&.buf vi-bi(cur.line - 1, vci)
-	self set-cursors({ line: cur.line - 1, bi }, None, NoChanges)
+	bi = self&.buf vi-bi(nu-line, vci)
+	self set-cursors({ line: nu-line, bi }, None, NoChanges)
 
 fn is-at-line-end (pane Ptr (Pane al), pos Pos):
 	pos.bi Mem.i32-size() == pane&.buf TextBuf.line(pos.line) StrView.num-bytes()

@@ -153,9 +153,9 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'l'
 				Pane.move-right(ed pane())
 			elif c == 'j'
-				Pane.move-down(ed pane())
+				Pane.move-down(ed pane(), 1)
 			elif c == 'k'
-				Pane.move-up(ed pane())
+				Pane.move-up(ed pane(), 1)
 
 			elif c == 'i'
 				ed pane() set-mode(Pane.Insert)
@@ -264,6 +264,14 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 		Tui.Ctrl(c)
 			if c == 'c'
 				ed pane() Pane.toggle-comment()
+
+			elif c == 'u'
+				ed pane() Pane.move-up(15)
+			elif c == 'd'
+				ed pane() Pane.move-down(15)
+
+			else
+				pass
 		_
 			pass
 
