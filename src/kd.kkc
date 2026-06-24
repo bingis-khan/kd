@@ -373,7 +373,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			todo()
 
 
-fn render-editor (screen Ptr (Screen Allocator), ed Ptr (Editor al))
+fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	screen-dims = 
 		{ from-sx: 0
 		, to-sx: screen&.tui&.width Mem.u32-i32() -1

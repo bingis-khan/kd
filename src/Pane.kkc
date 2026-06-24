@@ -154,7 +154,7 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
 
 
-fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
+fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims) <= Allocator al
 	display-line-numbers = True  # put this in the config.
 
 	# moves the window "in position" of the cursor.
@@ -170,7 +170,6 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 		ybi = line-num - 1
 		xbi = pane&.buf vi-bi(ybi, sc-off.screen-left)
 		line-content = pane&.buf TextBuf.line(ybi)
-
 
 		ys = sd.from-sy + line-num - sc-off.screen-top - 1
 
@@ -193,6 +192,45 @@ fn render (screen Ptr (Screen Allocator), pane Ptr (Pane al), sd ScreenDims)
 				screen <&.default-bg= Term.Color8(Term.White8)
 			elif in-selection
 				screen <&.default-bg= Term.Color8(Term.Cyan8)
+			else
+				# check highlight
+				pane&.buf TextBuf.highlight-at(curpos) if-just(fn(type))
+					case type
+						Highlight.Comment
+							screen <&.default-fg= Term.Color8(Term.Blue8)
+
+						Highlight.Number
+							screen <&.default-fg= Term.Color8(Term.Red8)
+
+						Highlight.String
+							screen <&.default-fg= Term.Color8(Term.Green8)
+
+						Highlight.Ident1
+							screen <&.default-fg= Term.ColorDefault
+
+						Highlight.Ident2
+							screen <&.default-fg= Term.Color8(Term.Magenta8)
+
+						Highlight.Ident3
+							screen <&.default-fg= Term.Color8(Term.Yellow8)
+
+						Highlight.Ident4
+							screen <&.default-fg= Term.Color8(Term.Blue8)
+
+						Highlight.Keyword1
+							screen <&.default-fg= Term.Color8(Term.Yellow8)
+
+						Highlight.Keyword2
+							screen <&.default-fg= Term.Color8(Term.Green8)
+
+						Highlight.Special1
+							screen <&.default-fg= Term.Color8(Term.Yellow8)
+
+						Highlight.Special2
+							screen <&.default-fg= Term.Color8(Term.Green8)
+
+						_
+							screen <&.default-bg= Term.Color8(Term.Red8)
 			case c char-replacement()
 				None
 					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
@@ -252,7 +290,7 @@ fn move-left (self Ptr (Pane al))
 
 fn move-down (self Ptr (Pane al), amnt I32)
 	cur = self&.cursor
-	nu-line = Math.min(cur.line + amnt, self&.buf TextBuf.num-lines())
+	nu-line = Math.min(cur.line + amnt, self&.buf TextBuf.num-lines() - 1)
 
 	vci = self&.vi
 	bi = self&.buf vi-bi(nu-line, vci)

@@ -1,0 +1,18 @@
+# for kc :)
+HighlightType
+	Number
+	String
+	Comment
+
+	Ident1  # lowercase
+	Ident2  # uppercase
+	Ident3  # for intrinsics (maybe classify as special?)
+	Ident4  # members
+
+	Keyword1
+	Keyword2
+
+	Special1  # more important symbols like '=', '<=', '<&=' (the last two may be parsed dynamically!), '&', '->'
+	Special2  # more normal symbols like '==', '/=', etc
+
+	Invalid   # special?

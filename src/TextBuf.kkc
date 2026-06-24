@@ -12,6 +12,10 @@ use StrBuilder
 
 use Pos
 	Pos
+use Highlight
+	HighlightType
+use CharType
+	char-type
 
 
 Cursors
@@ -69,25 +73,41 @@ fn trim-actions (actions Ptr (Actions Allocator))
 		action free-changeset(al)
 	List.trim(&actions&.list, cur)
 
+Highlight
+	type HighlightType
+	from I32
+	to I32
+
+Line al
+	line List al U8
+	invalidated Bool
+	highlights List al Highlight
+
+fn mk-line (initial List al U8) -> Line al: Line
+	{ line: initial
+	, invalidated: True
+	, highlights: List.mk(initial.al)
+	}
+
+fn free-line (line Ptr (Line al)) <= Allocator al
+	List.free(&line&.line)
 
 TextBuf al
 	al al
-	buf List al (List al U8)
+	buf List al (Line al)
 	actions Actions al
-
-	# insert-action InsertAction al
 
 
 fn mk (al Allocator, cursor-pos Pos)
 	return TextBuf
 		{ al: al
-		, buf: List.from-iter([List.mk(al)], al)
+		, buf: List.from-iter([mk-line(List.mk(al))], al)
 		, actions: mk-actions(al)
-		# , insert-action: { sb: List.mk(al), is-insert: True, from-pos: cursor-pos, last-pos: cursor-pos }
 		}
 
 fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
 	List.get(li Mem.i32-size())
+	.line
 	List.to-slice()
 	StrView.from-bytes()
 
@@ -136,25 +156,25 @@ fn add-to-spot (self Ptr (TextBuf Allocator), p Pos, bytes StrView) -> I32
 	al = self&.buf.al
 	buf = &self&.buf
 	extracted-line-buf = buf List.get(p.line Mem.i32-size())
-	remaining = extracted-line-buf
+	remaining = extracted-line-buf.line
 		List.to-slice()
 		Slice.from(p.bi Mem.i32-size())
 
-	buf List.set(p.line Mem.i32-size(), List.from-iter(extracted-line-buf List.to-slice() Slice.subslice(0, p.bi Mem.i32-size()), al))
+	buf List.set(p.line Mem.i32-size(), mk-line(List.from-iter(extracted-line-buf.line List.to-slice() Slice.subslice(0, p.bi Mem.i32-size()), al)))
 
 	last-line = buf List.get-ptr(p.line Mem.i32-size())
-	last-line List.add-all(bytes lines() head() or-else('') .contents)
+	(&last-line&.line) List.add-all(bytes lines() head() or-else('') .contents)
 
 	lines-added = 0
 	for (cline, i) in bytes StrView.split-by-each('\n') drop(1) zip(Iter.from(1))
-		nuline =& cline.contents List.from-iter(al)
+		nuline =& mk-line(cline.contents List.from-iter(al))
 		next-line = Mem.i32-size(p.line + i)
 		buf List.insert(next-line, nuline&)
 		last-line <= buf List.get-ptr(next-line)
 		lines-added <= lines-added + 1
 
-	last-line List.add-all(remaining)
-	List.free(&extracted-line-buf)
+	(&last-line&.line) List.add-all(remaining)
+	free-line(&extracted-line-buf)
 	return lines-added
 
 # this one is used by the action thing.
@@ -168,24 +188,27 @@ fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, byt
 		# if empty buffer, we can add text.
 		al = self&.buf.al
 		if List.size(&self&.buf) == Mem.i32-size(from.line) and from.bi == 0  # when we want to insert a new line.
-			(&self&.buf) List.add(List.mk(al))
+			(&self&.buf) List.add(mk-line(List.mk(al)))
 			
 		_ = self add-to-spot(from, bytes)
 
 	else
 		lines-buf = &self&.buf
 		first-line = lines-buf List.get-ptr(Mem.i32-size(from.line))
+		first-line <&.invalidated= True
 		
-		if from.line == to.line and to.bi < Mem.size-i32(List.size(first-line)) + 1
-			first-line List.remove-range(Mem.i32-size(from.bi), Mem.i32-size(to.bi))
+		if from.line == to.line and to.bi < Mem.size-i32(List.size(&first-line&.line)) + 1
+			(&first-line&.line) List.remove-range(Mem.i32-size(from.bi), Mem.i32-size(to.bi))
 			_ = self add-to-spot(from, bytes)
 		else
 			# first, append first line to last line yahh.
-			first-line List.trim(Mem.i32-size(from.bi))
+			(&first-line&.line) List.trim(Mem.i32-size(from.bi))
 			
 			last-line = lines-buf List.get-ptr(Mem.i32-size(to.line))
-			to <.bi= Math.min(to.bi, Mem.size-i32(last-line List.size()) + 1)  # idk, im trimming the index just cuz
-			if to.bi == Mem.size-i32(last-line List.size()) + 1
+			last-line <&.invalidated= True
+
+			to <.bi= Math.min(to.bi, Mem.size-i32((&last-line&.line) List.size()) + 1)  # idk, im trimming the index just cuz
+			if to.bi == Mem.size-i32((&last-line&.line) List.size()) + 1
 				to <.line= to.line + 1
 				to <.bi= 0
 				
@@ -194,8 +217,8 @@ fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, byt
 			to <.line= to.line + lines-added
 			from <.line= from.line + lines-added
 
-			last-line = lines-buf List.try-get(Mem.i32-size(to.line)) fmap-maybe(List.to-slice) or-else(Slice.empty())
-			first-line List.add-all(last-line Slice.from(Mem.i32-size(to.bi)))
+			last-line = lines-buf List.try-get(Mem.i32-size(to.line)) fmap-maybe(fn line: line.line List.to-slice()) or-else(Slice.empty())
+			(&first-line&.line) List.add-all(last-line Slice.from(Mem.i32-size(to.bi)))
 		
 			# remove second to last lines completely now.
 			assert(to.line > from.line, 'there must be a line difference yo')
@@ -358,3 +381,168 @@ fn end-changeset (self Ptr (TextBuf Allocator))
 		actions <&.cur= actions&.cur - 1
 		actions <&.input-changeset = NoChangeset
 		actions trim-actions()
+
+
+
+## syntax highlighting
+
+fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= Allocator al
+	if not line&.invalidated
+		return
+
+	hls = &line&.highlights
+	List.trim(hls, 0)
+	line-sv = line&.line List.to-slice() StrView.from-bytes()
+	sc =& Scan.mk-from-str(line-sv)
+	while not sc null()
+		from-off = sc&.byte-offset Mem.size-i32()
+		first-char = sc Scan.peek()
+
+		# comment
+		if sc Scan.try-char('#')
+			hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
+			break
+
+		# string
+		elif sc Scan.try-char('\'')
+			while True
+				sc Scan.skip-while(fn c: c /= '\'' and c /= '\\')
+				if sc Scan.peek() == Just('\\')
+					sc drop'(1)
+					if sc Scan.peek() == Just('\'')
+						sc drop'(1)
+					else
+						# todo for highlighting special sequences and interpolation
+						pass
+				else
+					sc drop'(1)  # drop the ending quote also
+					break
+			cur-off = sc&.byte-offset Mem.size-i32()
+			hls List.add({ from: from-off, to: cur-off, type: Highlight.String })
+
+		# intrinsics
+		elif sc Scan.try-char('@')
+			if sc Scan.char-satisfies(Str2.is-alpha)
+				sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
+				cur-off = sc&.byte-offset Mem.size-i32()
+				hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident3 })
+			else
+				# none for now. maybe later when single @ gets a meaning?
+				pass
+
+		# members (i dont like it, currently cant distinguish between `Module.member` and `struct.member`)
+		# elif sc Scan.try-char('.')
+		# 	if sc Scan.char-satisfies(Str2.is-alpha)
+		# 		sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
+		# 		cur-off = sc&.byte-offset Mem.size-i32()
+		# 		hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident4 })
+		# 	else
+		# 		# none for now. maybe later when single @ gets a meaning?
+		# 		pass
+
+		elif ['<&', '=' as StrView, '&', '->', ':'] any(fn sym: sc Scan.matches-str(sym))
+			cur-off = sc&.byte-offset Mem.size-i32()
+			type = Highlight.Special1
+			hls List.add({ from: from-off, to: cur-off, type })
+
+		elif ['==', '/='] any(fn sym: sc Scan.matches-str(sym))
+			cur-off = sc&.byte-offset Mem.size-i32()
+			type = Highlight.Special2
+			hls List.add({ from: from-off, to: cur-off, type })
+
+		# lowercase and uppercase identifier and word keywords
+		elif sc Scan.char-satisfies(Str2.is-alpha)
+			sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
+			cur-off = sc&.byte-offset Mem.size-i32()
+			first-char-uppercase = first-char Misc.maybe(Str2.is-upper, False)
+			type = if first-char-uppercase: Highlight.Ident2 else Highlight.Ident1
+
+			ident = line-sv StrView.byte-substr(from-off Mem.i32-size(), cur-off Mem.i32-size()) as StrView
+
+			# more important keywords
+			keywords1 = # leave it here or put it in Highlight module?
+				[ 'fn'
+				, 'class'
+				, 'inst'
+				, 'external'
+				, 'use'
+				]
+
+			keywords2 = 
+				[ 'if'
+				, 'elif'
+				, 'else'
+				, 'case'
+				, 'for'
+				, 'in'
+				, 'while'
+				, 'pass'
+				, 'break'
+				, 'continue'
+				, 'as'
+				, 'or'
+				, 'and'
+				, 'not'
+				]
+
+			if keywords1 any(fn kw: kw == ident)
+				type <= Highlight.Keyword1
+			elif keywords2 any(fn kw: kw == ident)
+				type <= Highlight.Keyword2
+			elif not first-char-uppercase and sc Scan.peek() == Just('(')  # check if it's a function call? accept space or not? but then it depends if functions declarations have a space between em.
+				type <= Highlight.Ident4
+			
+			hls List.add({ from: from-off, to: cur-off, type })
+
+		else
+			case sc Scan.int()
+				Just(i)
+					cur-off = sc&.byte-offset Mem.size-i32()
+					type = Highlight.Number
+					if i == 0
+						if sc Scan.try-char('x')
+							sc Scan.skip-while(Str2.is-hex)
+							cur-off = sc&.byte-offset Mem.size-i32()
+							hls List.add({ from: from-off, to: cur-off, type })
+						elif sc Scan.try-char('o')
+							sc Scan.skip-while(Str2.is-octal)
+							cur-off = sc&.byte-offset Mem.size-i32()
+							hls List.add({ from: from-off, to: cur-off, type })
+
+							sc Scan.skip-while(is-digit)  # skip the invalid numbers (or create an invalid highlight :O)
+							invalid-off = sc&.byte-offset Mem.size-i32()
+							if cur-off /= invalid-off
+								hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
+						elif sc Scan.try-char('b')
+							sc Scan.skip-while(Str2.is-binary)
+							cur-off = sc&.byte-offset Mem.size-i32()
+							hls List.add({ from: from-off, to: cur-off, type })
+
+							sc Scan.skip-while(is-digit)  # skip the invalid numbers (or create an invalid highlight :O)
+							invalid-off = sc&.byte-offset Mem.size-i32()
+							if cur-off /= invalid-off
+								hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
+						else
+							hls List.add({ from: from-off, to: cur-off, type })
+					else
+						hls List.add({ from: from-off, to: cur-off, type })
+
+				None
+					# if nothing matched at all, just drop the character.
+					sc drop'(1)
+
+
+	line <&.invalidated= False
+
+fn highlight-at (self Ptr (TextBuf al), pos Pos) -> Maybe HighlightType <= Allocator al
+	line = (&self&.buf) List.get-ptr(pos.line Mem.i32-size())
+	self recompute-highlights-at-line(line)
+
+	for hl in line&.highlights
+		if pos.bi Math.between(hl.from, hl.to - 1)
+			return Just(hl.type)
+
+		if pos.bi < hl.from
+			return None
+
+	return None
