@@ -21,6 +21,7 @@ Theme
 	cursor      Colors
 	selection   Colors
 	line-num-hl Colors
+	overlay     Colors
 
 	highlights  Slice HighlightColors
 
@@ -46,6 +47,7 @@ goblin-ultra =& Theme
 	, cursor: { bg: lime-green, fg: evergreen }
 	, selection: { bg: forest-green, fg: evergreen }
 	, line-num-hl: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, overlay: { bg: dark-spruce, fg: lime-green }
 	, highlights: Array.as-slice(&
 		[ hlt(Highlight.Number, green)
 		, hlt(Highlight.String, camel)
@@ -74,6 +76,7 @@ dark-theme =& Theme
 	, cursor: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
 	, selection: { bg: Term.Color16(Term.BrightWhite16), fg: Term.Color16(Term.Black16) }
 	, line-num-hl: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, overlay: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
 	, highlights: Slice.empty()
 	}
 

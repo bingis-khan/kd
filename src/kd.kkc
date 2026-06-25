@@ -396,16 +396,21 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		}
 	screen Pane.render(ed pane(), screen-dims, ed&.theme)
 
+	# overlay
+	ed&.msg if-just(fn(msg))
+		num-chars = msg chars() count() Mem.size-i32()
+		screen Tui.draw-str(' \(msg) ', (screen&.tui&.width Mem.u32-i32() - num-chars) / 2, screen&.tui&.height Mem.u32-i32() - 1)
+
 	# debug stuff.
 	curline =& 0
 	fn ann(s)
 		screen Tui.draw-str-right(s, 0, curline&)
 		curline <&= curline& + 1
 
-	ann('mode: \(ed&.pane.mode)')
-	cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
-	ann('cur: \(ed&.pane.cursor), \(cur-ty)')
-	ann('sel: \(ed&.pane.sel)')
+	# ann('mode: \(ed&.pane.mode)')
+	# cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
+	# ann('cur: \(ed&.pane.cursor), \(cur-ty)')
+	# ann('sel: \(ed&.pane.sel)')
 
 	# (21.06.26): it breaks for some reason.
 	# fn abbreviate-str (s Str)
@@ -417,16 +422,16 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	# 		return s StrCase2()
 	# cp = ed&.clipboard Misc.fmap-maybe(abbreviate-str)
 
-	cp = ed&.clipboard Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
-	ann('cp: \(cp)')
-	st = ed&.search-term Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
-	ann('st: \(st)')
-	ann('edmode: \(ed&.mode)')
-	ann('msg: \(ed&.msg)')
-	ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
-	ann('dims: { \(screen-dims.to-sx), \(screen-dims.to-sy) }')
-	ann('num actions: \(ed&.pane.buf&.actions.list.count)')
-	ann(Time.now().tv-sec)
+	# cp = ed&.clipboard Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
+	# ann('cp: \(cp)')
+	# st = ed&.search-term Misc.fmap-maybe(fn s: s take(10) StrConcat(if s drop(10) null(): '' else '...'))
+	# ann('st: \(st)')
+	# ann('edmode: \(ed&.mode)')
+	# ann('msg: \(ed&.msg)')
+	# ann('sc-off: (\(ed&.pane.sc-off.screen-top), \(ed&.pane.sc-off.screen-left))')
+	# ann('dims: { \(screen-dims.to-sx), \(screen-dims.to-sy) }')
+	# ann('num actions: \(ed&.pane.buf&.actions.list.count)')
+	# ann(Time.now().tv-sec)
 
 
 
@@ -479,7 +484,7 @@ while ed&.running
 		screen Tui.fill-default()
 
 		screen render-editor(ed)
-		screen Tui.draw-str('REDRAWS[\(last-redraw-changes)]', 0, screen&.tui&.height Mem.u32-i32() - 1)
+		# screen Tui.draw-str('REDRAWS[\(last-redraw-changes)]', 0, screen&.tui&.height Mem.u32-i32() - 1)
 
 		last-redraw-changes <= screen Tui.render-screen()
 

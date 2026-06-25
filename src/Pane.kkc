@@ -31,6 +31,13 @@ inst Str Mode
 		Select: 'Select'
 		_: todo()
 
+fn short-mode-name (mode Mode):
+	(case mode)
+		Normal: 'NOR'
+		Insert: 'INS'
+		Select: 'SEL'
+		_: todo()
+
 
 # all of them are `si` (screen index shit)
 ScreenCursorOffset
@@ -201,46 +208,6 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr 
 				# check highlight
 				pane&.buf TextBuf.highlight-at(curpos) if-just(fn(type))
 					screen set-colors(theme Theme.find-colors-for-highlight(type))
-
-					# case type
-					# 	Highlight.Comment
-					# 		screen <&.default-fg= Term.Color8(Term.Blue8)
-
-					# 	Highlight.Number
-					# 		screen <&.default-fg= Term.Color8(Term.Red8)
-
-					# 	Highlight.String
-					# 		screen <&.default-fg= Term.Color8(Term.Green8)
-
-					# 	Highlight.Ident1
-					# 		screen <&.default-fg= Term.ColorDefault
-
-					# 	Highlight.Ident2
-					# 		screen <&.default-fg= Term.Color8(Term.Magenta8)
-
-					# 	Highlight.Ident3
-					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
-
-					# 	Highlight.Ident4
-					# 		screen <&.default-fg= Term.Color8(Term.Blue8)
-
-					# 	Highlight.Keyword1
-					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
-
-					# 	Highlight.Keyword2
-					# 		screen <&.default-fg= Term.Color8(Term.Green8)
-
-					# 	Highlight.Special1
-					# 		screen <&.default-fg= Term.Color8(Term.Yellow8)
-
-					# 	Highlight.Special2
-					# 		screen <&.default-fg= Term.Color8(Term.Green8)
-
-					# 	Highlight.Special3
-					# 		screen <&.default-fg= Term.Color8(Term.Green8)
-
-					# 	_
-					# 		screen <&.default-bg= Term.Color8(Term.Red8)
 			case c char-replacement()
 				None
 					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
@@ -255,6 +222,10 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr 
 			screen set-colors(theme&.default)
 			xbi <= xbi + c.num-bytes Mem.size-i32()
 
+	# overlay
+	screen set-colors(theme&.overlay)
+	modename = pane&.mode short-mode-name()
+	screen Tui.draw-str(' \(modename) ', sd.from-sx, sd.to-sy)  # idea: make mode appear briefly in the middle/lower-middle of the screen. more dynamic!
 
 
 fn set-sel (self Ptr (Pane al), sel Maybe Pos)
