@@ -84,11 +84,24 @@ dark-theme =& Theme
 	, highlights: Slice.empty()
 	}
 
+light-theme =& Theme
+	{ default: { bg: Term.Color16(Term.BrightWhite16), fg: Term.Color8(Term.Black8) }
+
+	, cursor: { bg: Term.Color8(Term.Black8), fg: Term.Color16(Term.BrightWhite16) }
+	, selection: { bg: Term.Color16(Term.White16), fg: Term.Color16(Term.BrightWhite16) }
+	, line-num: { bg: Term.Color16(Term.BrightWhite16), fg: Term.Color8(Term.Black8) }
+	, line-num-hl: { bg: Term.Color8(Term.Black8), fg: Term.Color16(Term.BrightWhite16) }
+	, overlay: { bg: Term.Color8(Term.Black8), fg: Term.Color16(Term.BrightWhite16) }
+	, highlights: Slice.empty()
+	}
+
+
 default = goblin-ultra
 all-themes = Array.as-slice(&
 	[ ('default', default)
 	, ('goblin-ultra', goblin-ultra)
 	, ('dark-mono', dark-theme)
+	, ('light-mono', light-theme)
 	])
 
 # partially match theme

@@ -195,6 +195,9 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr 
 
 			screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
+			# reset em!
+			screen set-colors(theme&.default)
+
 		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left
 		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
 		left-offset = sd.from-sx + total-margin
