@@ -3,15 +3,18 @@
 al = Alloc.idc()
 args = Args.get()
 
-if args Slice.try-get(0) == Just('clean')
-	'rm kd kd.c' Sh.run(al)
-	return 0
+first-arg = args Slice.try-get(0)
+full-reinstall = first-arg == Just('reinstall')
+if first-arg == Just('clean') or full-reinstall
+	'rm -f kd kd.c' Sh.run(al)
+	if not full-reinstall
+		return 0
 
-if 'kd' deps(['src'])
+if 'kd' deps(['src']) or full-reinstall
 	'kkc --backend c --dontRun src/kd.kkc' Sh.run(al)
 	'cc -O2 kd.c -o kd' Sh.run(al)
 	
-if args Slice.try-get(0) == Just('install')
+if first-arg == Just('install') or full-reinstall
 	home = Env.get('HOME') or-fail('no $HOME defined!?')
 	target = '\(home)/.local/bin'
 	'cp kd \(target)' Sh.run(al)
