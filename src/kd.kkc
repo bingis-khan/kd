@@ -135,6 +135,18 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 			ed <&.cfg&.relative-line-numbers= False
 		elif what chars() count() >= 3 and 'relative' begins-with(what)
 			ed <&.cfg&.relative-line-numbers= True
+	
+	elif cmd == 'ft'
+		type = sc Scan.take-str-while(is-not-whitespace)
+		tb = ed pane()&.buf
+		if type == 'text'
+			tb TextBuf.set-filetype(TextBuf.Text)
+		elif type == 'kc'
+			tb TextBuf.set-filetype(TextBuf.KC)
+		elif type == 'md'
+			tb TextBuf.set-filetype(TextBuf.Markdown)
+		else
+			ed set-msg('unknown file type')
 		
 	# live-cmd()
 	elif cmd == 'theme'

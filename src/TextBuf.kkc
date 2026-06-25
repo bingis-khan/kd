@@ -457,6 +457,11 @@ fn end-changeset (self Ptr (TextBuf Allocator))
 		actions trim-actions()
 
 
+fn set-filetype (self Ptr (TextBuf al), type Filetype)
+	self <&.filetype= type
+	for line in self&.buf List.addresses()
+		line <&.invalidated= True
+
 
 ## syntax highlighting
 
