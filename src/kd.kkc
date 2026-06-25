@@ -409,7 +409,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 			num-chars = sb chars() count() Mem.size-i32()
 			pad = if num-chars Math.mod(2) == 0: '' else ' '
 			num-chars = num-chars + num-chars Math.mod(2)
-			full-str = ' ⌨️ \(sb)\(pad) '
+			full-str = ' ⌨️ \(sb)\(pad) '  # alternate char that looks nice is '#'
 			full-chars = full-str chars() count() Mem.size-i32()
 			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
 

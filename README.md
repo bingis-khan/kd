@@ -29,7 +29,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
 - [ ] `g` and `<space>` submenu
-- [ ] themes
+- [x] themes
 - [x] editor messages (send message Str -> () which allocates and frees n stuff)
 - [ ] proper cursor position and `before-cursors` position for commenting out, moving, `oO` newlines
 - ...
