@@ -97,6 +97,7 @@ fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 
 fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	sc =& Scan.mk-from-strview(s)
+	sc Scan.drop-str-while(is-whitespace)
 	cmd = sc Scan.take-str-while(is-not-whitespace)
 	sc Scan.drop-str-while(is-whitespace)
 
@@ -105,6 +106,19 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 		ed <&.running= False
 	elif cmd == 'wq'
 		pass
+	elif cmd == 'w'
+		filename = sc Scan.take-str-while(is-not-whitespace)
+		filename = if filename null(): None else Just(filename)
+		write-result = ed pane()&.buf TextBuf.write-to-file(filename)
+		case write-result
+			None
+				if filename is-none()
+					ed set-msg('could not save changes (!?)')
+				else
+					ed set-msg('could not write to file \(filename)')
+			Just(bytes-written)
+				ed set-msg('written \(bytes-written) bytes')
+
 	elif cmd == 'o'
 		todo()
 		pass
@@ -409,6 +423,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 			num-chars = sb chars() count() Mem.size-i32()
 			pad = if num-chars Math.mod(2) == 0: '' else ' '
 			num-chars = num-chars + num-chars Math.mod(2)
+			# todo: keyboard emoji has a surrogate pair, which I should theoretically handle, but I'm not doing that.
 			full-str = ' ⌨️ \(sb)\(pad) '  # alternate char that looks nice is '#'
 			full-chars = full-str chars() count() Mem.size-i32()
 			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
@@ -457,11 +472,19 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 
 
 al = Alloc.idc()
-tb =& TextBuf.mk(al, Pos.mk(0, 0))
+tb =& @undefined
 args = Args.get()
+initial-message = None
 if args.count > 0
-	fname = args[0]
-	tb TextBuf.change-no-action(Pos.mk(0, 0), Pos.mk(0, 0), fname File.read-contents(al))
+	fname = args[0] StrView.from-const-str()
+	case TextBuf.mk-from-file(al, fname)
+		None
+			tb <&= TextBuf.mk(al)
+			initial-message <= Just('Could not load file \(fname).' StrView.from-str(al))  # remember to allocate, cuz we free the previous message by default.
+		Just(ftb)
+			tb <&= ftb
+else
+	tb <&= TextBuf.mk(al)
 
 ed =& Editor
 	{ running: True
@@ -471,7 +494,7 @@ ed =& Editor
 	, search-term: None
 
 	, mode: Normal
-	, msg: None
+	, msg: initial-message
 
 	, theme: Theme.default
 	, og-theme: Theme.default

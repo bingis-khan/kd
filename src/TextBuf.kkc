@@ -96,14 +96,9 @@ TextBuf al
 	al al
 	buf List al (Line al)
 	actions Actions al
+	filename Maybe StrView
 
 
-fn mk (al Allocator, cursor-pos Pos)
-	return TextBuf
-		{ al: al
-		, buf: List.from-iter([mk-line(List.mk(al))], al)
-		, actions: mk-actions(al)
-		}
 
 fn line (self Ptr (TextBuf al), li I32): (&self&.buf)
 	List.get(li Mem.i32-size())
@@ -223,6 +218,65 @@ fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, byt
 			# remove second to last lines completely now.
 			assert(to.line > from.line, 'there must be a line difference yo')
 			(&self&.buf) List.remove-range(Mem.i32-size(from.line + 1), Mem.i32-size(to.line) + 1)
+
+
+
+fn write-to-file (self Ptr (TextBuf al), altname Maybe StrView) -> Maybe Size <= Allocator al
+	filename = altname Misc.maybe(Just, self&.filename)
+	if filename is-none()
+		return None  # no filename set!
+
+	al = self&.al
+
+	# TEMP until we can write to a file partially.
+	sb =& StrBuilder.mk(al)
+	for ln in 0 to (self num-lines() - 1)
+		sb StrBuilder.writeln(self line(ln))
+
+	filename0 = filename or-fail('expect filename') StrView.clone-0(al)  # TEMP, untile File supports StrView by default.
+
+	result = filename0 StrView.as-const-str() File.try-write-contents(sb)
+	filename0 StrView.free(al)
+	sb StrBuilder.free()
+	if not result
+		return None
+
+	# if all-iz-well (if we wrote the file successfully saar), save the new altname.
+	if altname is-just()
+		case self&.filename
+			Just(ole-filename)
+				StrView.free(ole-filename, al)
+			None
+				pass
+		self <&.filename= altname
+
+	return Just(sb StrBuilder.as-str() StrView.num-bytes())
+
+
+fn mk (al Allocator): TextBuf
+	{ al: al
+	, buf: List.from-iter([mk-line(List.mk(al))], al)
+	, actions: mk-actions(al)
+	, filename: None
+	}
+
+fn mk-from-file (al Allocator, filename StrView) -> Maybe (TextBuf Allocator)
+	tb =& mk(al)
+	filename0 = filename StrView.clone-0(al)
+	case filename0 StrView.as-const-str() File.try-read-contents(al)
+		None
+			StrView.free(filename0, al)
+			return None
+		Just(read-file)
+			# cut out last newline, cuz our stuff adds it automatically
+			# (currently, we don't have that ~ empty newline.)
+			if read-file.contents Slice.try-get(read-file.contents.count - 1) == Just('\n' Char.ascii-u8())
+				read-file <= read-file StrView.byte-substr(0, read-file.contents.count - 1)
+			tb change-no-action(Pos.mk(0, 0), Pos.mk(0, 0), read-file)
+			tb <&.filename= Just(filename0)
+			return Just(tb&)
+
+
 
 fn action-bwd (self Ptr (TextBuf Allocator), action Action) -> Pos
 	self change-no-action(action.from, action.to-fwd, action.bwd)
@@ -452,7 +506,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 			type = Highlight.Special2
 			hls List.add({ from: from-off, to: cur-off, type })
 
-		elif ['<&', '=' as StrView, '&', '->', ':', '(', ')', '{', '}', ','] any(fn sym: sc Scan.matches-str(sym))
+		elif ['<&', '=' as StrView, '&', '->', ':', '(', ')', '{', '}', '[', ']', ','] any(fn sym: sc Scan.matches-str(sym))
 			cur-off = sc&.byte-offset Mem.size-i32()
 			type = Highlight.Special1
 			hls List.add({ from: from-off, to: cur-off, type })

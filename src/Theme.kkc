@@ -42,6 +42,7 @@ green        = rgb(0x2a7221)
 dark-spruce  = rgb(0x1e441e)
 evergreen    = rgb(0x152614)
 
+# basically, i was going for a minecraft tundra-esque look, but what came out of it looks more like goblin-ultra.
 goblin-ultra =& Theme
 	{ default: { bg: evergreen, fg: lime-green }
 
