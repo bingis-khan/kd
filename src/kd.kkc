@@ -14,6 +14,8 @@ use Pane
 	set-mode
 use Theme
 	Theme
+use Config
+	Config
 
 # some structure:
 # Editor
@@ -55,7 +57,7 @@ Editor al
 	msg Maybe StrView
 
 	# theme and stuff.
-	theme Ptr Theme
+	cfg Ptr Config
 	og-theme Ptr Theme  # hackish. stores the theme we currently have set (but might not be "trying out" with the :theme command)
 
 
@@ -91,7 +93,7 @@ fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 			if cmd == 'theme'
 				sc Scan.drop-str-while(is-whitespace)
 				theme-name = sc Scan.take-str-while(fn c: not c is-whitespace())
-				ed <&.theme= Theme.match-theme(theme-name) or-else(ed&.og-theme)
+				ed <&.cfg&.theme= Theme.match-theme(theme-name) or-else(ed&.og-theme)
 			else
 				pass
 
@@ -122,10 +124,24 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	elif cmd == 'o'
 		todo()
 		pass
+	
+	elif cmd == 'ln'
+		what = sc Scan.take-str-while(is-not-whitespace)
+		if what == 'on'
+			ed <&.cfg&.display-line-numbers= True
+		elif what == 'off'
+			ed <&.cfg&.display-line-numbers= False
+		elif what chars() count() >= 3 and 'absolute' begins-with(what)
+			ed <&.cfg&.relative-line-numbers= False
+		elif what chars() count() >= 3 and 'relative' begins-with(what)
+			ed <&.cfg&.relative-line-numbers= True
+		
+	# live-cmd()
 	elif cmd == 'theme'
 		pass
 	elif cmd all(is-digit)
-		pass  # handled in live-cmd()
+		pass
+
 	else
 		ed set-msg('unknown command')
 
@@ -335,7 +351,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
 					ed <&.mode= Normal
-					ed <&.theme= ed&.og-theme  # reset theme in case it was changed.
+					ed <&.cfg&.theme= ed&.og-theme  # reset theme in case it was changed.
 
 				Tui.Enter
 					ed run-cmd(StrBuilder.as-str(&sb))
@@ -346,7 +362,7 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 					ed pane() Pane.set-cursors(ed pane()&.cursor, None, Pane.UpdateVI)
 
 					ed <&.mode= Normal
-					ed <&.og-theme= ed&.theme  # set the theme if it was modified.
+					ed <&.og-theme= ed&.cfg&.theme  # set the theme if it was modified.
 
 				Tui.Char(c)
 					StrBuilder.write-char(&sb, c Char.ascii-char())
@@ -408,7 +424,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		, from-sy: 0
 		, to-sy: screen&.tui&.height Mem.u32-i32() -1
 		}
-	screen Pane.render(ed pane(), screen-dims, ed&.theme)
+	screen Pane.render(ed pane(), screen-dims, ed&.cfg)
 
 	# overlay
 	ed&.msg if-just(fn(msg))
@@ -486,6 +502,11 @@ if args.count > 0
 else
 	tb <&= TextBuf.mk(al)
 
+cfg =& Config
+	{ theme: Theme.default
+	, display-line-numbers: True
+	, relative-line-numbers: False
+	}
 ed =& Editor
 	{ running: True
 	, al: al
@@ -496,7 +517,7 @@ ed =& Editor
 	, mode: Normal
 	, msg: initial-message
 
-	, theme: Theme.default
+	, cfg: cfg
 	, og-theme: Theme.default
 	}
 
@@ -523,8 +544,9 @@ while ed&.running
 		screen <&.requires-full-redraw= True
 
 		screen Tui.clear-screen()
-		screen Tui.set-screen-fg(ed&.theme&.default.fg)
-		screen Tui.set-screen-bg(ed&.theme&.default.bg)
+		theme = ed&.cfg&.theme
+		screen Tui.set-screen-fg(theme&.default.fg)
+		screen Tui.set-screen-bg(theme&.default.bg)
 		screen Tui.fill-default()
 
 		screen render-editor(ed)

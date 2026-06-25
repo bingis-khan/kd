@@ -1,0 +1,8 @@
+# I hate this file. short and annoying.
+use Theme
+	Theme
+
+Config
+	theme Ptr Theme
+	display-line-numbers Bool
+	relative-line-numbers Bool

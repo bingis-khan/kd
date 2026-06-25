@@ -10,6 +10,8 @@ use CharType
 	is-word-boundary
 use Theme
 	Theme
+use Config
+	Config
 
 Mode
 	Normal
@@ -167,8 +169,10 @@ fn set-colors (screen Ptr (Screen Allocator), colors Theme.Colors)
 	screen Tui.set-screen-colors(colors.fg, colors.bg)
 
 
-fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr Theme) <= Allocator al
-	display-line-numbers = True  # put this in the config.
+fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Config) <= Allocator al
+	theme = cfg&.theme
+	display-line-numbers = cfg&.display-line-numbers
+	relative-line-numbers = cfg&.relative-line-numbers
 
 	# moves the window "in position" of the cursor.
 	pane update-screen-offset(sd)
@@ -193,7 +197,8 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr 
 			else
 				screen set-colors(theme&.line-num)
 
-			screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
+			line-display = if not relative-line-numbers or pane&.cursor.line == ybi: line-num else Math.abs(pane&.cursor.line - ybi)
+			screen Tui.draw-str-right(line-display, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
 			# reset em!
 			screen set-colors(theme&.default)
