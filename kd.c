@@ -12704,7 +12704,7 @@ struct envunion1930 {
 };
 
 struct Array_1932 {
-    struct StrView_30 _arr [7];
+    struct StrView_30 _arr [10];
 };
 
 struct env1933 {
@@ -12740,8 +12740,8 @@ static  struct StrView_30 *   cast_dash_ptr1943 (    struct Array_1932 *  p359 )
 }
 
 static  struct StrView_30 *   get_dash_ptr1942 (    struct Array_1932 *  arr2251 ,    size_t  i2254 ) {
-    if ( ( (  cmp283 ( (  i2254 ) , (  from_dash_integral0 ( 0 ) ) ) == 0 ) || (  cmp283 ( (  i2254 ) , ( (size_t ) ( 7 ) ) ) != 0 ) ) ) {
-        ( (  panic286 ) ( ( ( StrConcat_287_StrConcat ) ( ( ( StrConcat_288_StrConcat ) ( ( ( StrConcat_71_StrConcat ) ( ( ( StrConcat_72_StrConcat ) ( ( (  from_dash_string183 ) ( ( "Access to array at index " ) ,  ( 25 ) ) ) ,  (  i2254 ) ) ) ,  ( (  from_dash_string183 ) ( ( ". (max: " ) ,  ( 8 ) ) ) ) ) ,  ( 7 ) ) ) ,  ( (  from_dash_charlike314 ) ( ( ")" ) ,  ( 1 ) ) ) ) ) ) );
+    if ( ( (  cmp283 ( (  i2254 ) , (  from_dash_integral0 ( 0 ) ) ) == 0 ) || (  cmp283 ( (  i2254 ) , ( (size_t ) ( 10 ) ) ) != 0 ) ) ) {
+        ( (  panic286 ) ( ( ( StrConcat_287_StrConcat ) ( ( ( StrConcat_288_StrConcat ) ( ( ( StrConcat_71_StrConcat ) ( ( ( StrConcat_72_StrConcat ) ( ( (  from_dash_string183 ) ( ( "Access to array at index " ) ,  ( 25 ) ) ) ,  (  i2254 ) ) ) ,  ( (  from_dash_string183 ) ( ( ". (max: " ) ,  ( 8 ) ) ) ) ) ,  ( 10 ) ) ) ,  ( (  from_dash_charlike314 ) ( ( ")" ) ,  ( 1 ) ) ) ) ) ) );
     }
     struct StrView_30 *  p2255 = ( ( (  cast_dash_ptr1943 ) ( (  arr2251 ) ) ) );
     return ( (  offset_dash_ptr1916 ) ( (  p2255 ) ,  ( (int64_t ) (  i2254 ) ) ) );
@@ -12752,7 +12752,7 @@ static  struct StrView_30   get1941 (    struct Array_1932 *  arr2258 ,    size_
 }
 
 static  struct Maybe_229   next1940 (    struct ArrayIter_1938 *  self2330 ) {
-    if ( (  cmp283 ( ( ( * (  self2330 ) ) .f_cur ) , ( (size_t ) ( 7 ) ) ) != 0 ) ) {
+    if ( (  cmp283 ( ( ( * (  self2330 ) ) .f_cur ) , ( (size_t ) ( 10 ) ) ) != 0 ) ) {
         return ( (struct Maybe_229) { .tag = Maybe_229_None_t } );
     }
     struct StrView_30  e2332 = ( (  get1941 ) ( ( & ( ( * (  self2330 ) ) .f_backing ) ) ,  ( ( * (  self2330 ) ) .f_cur ) ) );
@@ -13266,7 +13266,7 @@ static  enum Unit_8   recompute_dash_highlights_dash_at_dash_line1847 (   struct
                         struct env1933 envinst1933 = {
                             .sc3891 =  sc3891 ,
                         };
-                        if ( ( (  any1931 ) ( ( (  from_dash_listlike1949 ) ( ( (struct Array_1932) { ._arr = { ( (  from_dash_string183 ) ( ( "<&" ) ,  ( 2 ) ) ) , ( ( (  from_dash_charlike1169 ) ( ( "=" ) ,  ( 1 ) ) ) ) , ( (  from_dash_charlike1169 ) ( ( "&" ) ,  ( 1 ) ) ) , ( (  from_dash_string183 ) ( ( "->" ) ,  ( 2 ) ) ) , ( (  from_dash_charlike1169 ) ( ( ":" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( "(" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( ")" ) ,  ( 1 ) ) ) } } ) ) ) ,  ( (struct envunion1934){ .fun = (  bool  (*) (  struct env1933*  ,    struct StrView_30  ) )lam1950 , .env =  envinst1933 } ) ) ) ) {
+                        if ( ( (  any1931 ) ( ( (  from_dash_listlike1949 ) ( ( (struct Array_1932) { ._arr = { ( (  from_dash_string183 ) ( ( "<&" ) ,  ( 2 ) ) ) , ( ( (  from_dash_charlike1169 ) ( ( "=" ) ,  ( 1 ) ) ) ) , ( (  from_dash_charlike1169 ) ( ( "&" ) ,  ( 1 ) ) ) , ( (  from_dash_string183 ) ( ( "->" ) ,  ( 2 ) ) ) , ( (  from_dash_charlike1169 ) ( ( ":" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( "(" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( ")" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( "{" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( "}" ) ,  ( 1 ) ) ) , ( (  from_dash_charlike1169 ) ( ( "," ) ,  ( 1 ) ) ) } } ) ) ) ,  ( (struct envunion1934){ .fun = (  bool  (*) (  struct env1933*  ,    struct StrView_30  ) )lam1950 , .env =  envinst1933 } ) ) ) ) {
                             int32_t  cur_dash_off3909 = ( (  size_dash_i32294 ) ( ( ( * (  sc3891 ) ) .f_byte_dash_offset ) ) );
                             enum HighlightType_18  type3910 = ( HighlightType_18_Special1 );
                             struct envunion1952  temp1951 = ( (struct envunion1952){ .fun = (  enum Unit_8  (*) (  struct env35*  ,    struct List_15 *  ,    struct Highlight_17  ) )add1860 , .env =  env->envinst35 } );
