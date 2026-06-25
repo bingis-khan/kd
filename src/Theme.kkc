@@ -28,7 +28,7 @@ Theme
 
 
 # I think a proper theme helps an editor a lot. I want to capture the general vibe of the thing.
-fn rgb(x): Term.ColorRGB(Term.rgb-from-hex(x))
+fn rgb (x): Term.ColorRGB(Term.rgb-from-hex(x))
 camel        = rgb(0xb38a58)
 olive        = rgb(0x6F732F)
 tea-green    = rgb(0xe2f9b8)

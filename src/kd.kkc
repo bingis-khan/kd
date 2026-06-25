@@ -246,7 +246,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'c'
 				ed copy-selection-to-clipboard()
 				Pane.replace-selection(ed pane(), ed pane() Pane.selection(), '')
-				ed pane() set-mode( Pane.Insert)
+				ed pane() set-mode(Pane.Insert)
 
 			elif c == 'y'
 				ed copy-selection-to-clipboard()
@@ -273,7 +273,8 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			elif c == 'R'
 				ed&.clipboard if-just(fn(cp))
 					start = ed pane() Pane.min-pos()
-					ed pane() Pane.replace-selection((start, start), cp)
+					end = ed pane() Pane.max-pos()
+					ed pane() Pane.replace-selection((start, end { bi: end.bi + 1 }), cp)
 
 			elif c == 'x'
 				ed pane() Pane.expand()
@@ -496,7 +497,7 @@ if args.count > 0
 	case TextBuf.mk-from-file(al, fname)
 		None
 			tb <&= TextBuf.mk(al)
-			initial-message <= Just('Could not load file \(fname).' StrView.from-str(al))  # remember to allocate, cuz we free the previous message by default.
+			tb <&.filename= Just(fname StrView.clone-0(al))
 		Just(ftb)
 			tb <&= ftb
 else
