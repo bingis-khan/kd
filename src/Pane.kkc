@@ -188,6 +188,11 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, theme Ptr 
 
 		# first draw line number
 		if display-line-numbers
+			if pane&.cursor.line == ybi  # if cursor is on this line, do special highlight
+				screen set-colors(theme&.line-num-hl)
+			else
+				screen set-colors(theme&.line-num)
+
 			screen Tui.draw-str-right(line-num, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
 		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left

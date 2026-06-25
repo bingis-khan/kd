@@ -401,6 +401,27 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		num-chars = msg chars() count() Mem.size-i32()
 		screen Tui.draw-str(' \(msg) ', (screen&.tui&.width Mem.u32-i32() - num-chars) / 2, screen&.tui&.height Mem.u32-i32() - 1)
 
+	case ed&.mode
+		Normal
+			pass
+
+		Cmd(_, sb)
+			num-chars = sb chars() count() Mem.size-i32()
+			pad = if num-chars Math.mod(2) == 0: '' else ' '
+			num-chars = num-chars + num-chars Math.mod(2)
+			full-str = ' ⌨️ \(sb)\(pad) '
+			full-chars = full-str chars() count() Mem.size-i32()
+			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
+
+		Search(_, sb)
+			num-chars = sb chars() count() Mem.size-i32()
+			pad = if num-chars Math.mod(2) == 0: '' else ' '
+			num-chars = num-chars + num-chars Math.mod(2)
+			full-str = ' 🔎  \(sb)\(pad)  '
+			full-chars = full-str chars() count() Mem.size-i32()
+			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
+
+
 	# debug stuff.
 	curline =& 0
 	fn ann(s)
