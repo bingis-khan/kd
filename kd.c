@@ -12232,7 +12232,7 @@ static  struct Maybe_243   match_dash_theme1829 (   struct env200* env ,    stru
 static  enum Unit_8   live_dash_cmd1787 (   struct env241* env ,    struct Editor_248 *  ed4482 ,    struct StrView_27  cmd4484 ) {
     struct Maybe_967  dref4485 = ( (  parse_dash_int1788 ) ( (  cmd4484 ) ) );
     if ( dref4485.tag == Maybe_967_Just_t ) {
-        int32_t  line4487 = ( (  clamp1482 ) ( ( (  i64_dash_i321009 ) ( ( dref4485 .stuff .Maybe_967_Just_s .field0 ) ) ) ,  (  from_dash_integral56 ( 0 ) ) ,  (  op_dash_sub164 ( ( (  num_dash_lines1137 ) ( ( ( * ( (  pane1134 ) ( (  ed4482 ) ) ) ) .f_buf ) ) ) , (  from_dash_integral56 ( 1 ) ) ) ) ) );
+        int32_t  line4487 = ( (  clamp1482 ) ( ( (  i64_dash_i321009 ) ( ( dref4485 .stuff .Maybe_967_Just_s .field0 ) ) ) ,  (  from_dash_integral56 ( 1 ) ) ,  ( (  num_dash_lines1137 ) ( ( ( * ( (  pane1134 ) ( (  ed4482 ) ) ) ) .f_buf ) ) ) ) );
         int32_t  line4488 = (  op_dash_sub164 ( (  line4487 ) , (  from_dash_integral56 ( 1 ) ) ) );
         ( (  set_dash_cursors1091 ) ( ( (  pane1134 ) ( (  ed4482 ) ) ) ,  ( (struct Pos_26) { .f_line = (  line4488 ) , .f_bi = (  from_dash_integral56 ( 0 ) ) } ) ,  ( (struct Maybe_34) { .tag = Maybe_34_None_t } ) ,  ( CursorMovement_1092_NoChanges ) ) );
     }

@@ -86,7 +86,7 @@ fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
 fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 	case cmd parse-int()
 		Just(line)
-			line = line Mem.i64-i32() Math.clamp(0, ed pane()&.buf TextBuf.num-lines() - 1)
+			line = line Mem.i64-i32() Math.clamp(1, ed pane()&.buf TextBuf.num-lines())  # 1..lines range
 			line = line - 1  # lines start from 1 on-screen
 			ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
 		None
