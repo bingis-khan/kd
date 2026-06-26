@@ -365,6 +365,10 @@ fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
 fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
 	al = self&.buf.al
 	if from.line == to.line
+		# if at the end of file
+		if from.line == self num-lines()
+			return '' StrView.clone(al)
+
 		from-bi = Math.min(from.bi, to.bi) Mem.i32-size()
 		to-bi = Math.max(from.bi, to.bi) Mem.i32-size()
 		return self line(from.line)
