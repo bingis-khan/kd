@@ -96,6 +96,7 @@ Filetype
 	Text  # it makes it a bit easier to set the filetype. I know that the idiomatic way would be Maybe Filetype...
 	KC
 	Markdown
+	GCode
 
 fn detect-filetype-from-filename (filename StrView)
 	mext = filename Path.extension()
@@ -107,6 +108,8 @@ fn detect-filetype-from-filename (filename StrView)
 				return KC
 			elif ext == 'md'
 				return Markdown
+			elif ext == 'gcode'
+				return GCode
 			else
 				return Text
 
@@ -469,6 +472,9 @@ fn set-filetype (self Ptr (TextBuf al), type Filetype)
 
 ## syntax highlighting
 
+# TEMP: there's a compiler bug, which forbids me from defining it inside.
+fn gcode-keyword-char(c Char): c is-not-whitespace() and c /= ';'
+
 fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= Allocator al
 	if not line&.invalidated
 		return
@@ -476,7 +482,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 	hls = &line&.highlights
 	List.trim(hls, 0)
 	line-sv = line&.line List.to-slice() StrView.from-bytes()
-
+	
 	case self&.filetype
 		Text
 			pass
@@ -654,6 +660,44 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 					
 				# todo more
 				pass
+		
+		GCode
+			sc =& Scan.mk-from-str(line-sv)
+			sc Scan.skip-while(is-whitespace)
+			
+			# syntax: instr [arg...] ;?
+			# the gcode-keyword-char function should be defined here, but it breaks in the monomorphiser
+			# fn gcode-keyword-char(c Char): c is-not-whitespace() and c /= ';'
+			first-from-off = sc&.byte-offset Mem.size-i32()
+			if sc Scan.char-satisfies(is-alphanumeric)
+				sc Scan.skip-while(gcode-keyword-char)
+				first-to-off = sc&.byte-offset Mem.size-i32()
+				type = Highlight.Invalid
+				first-char = line-sv StrView.char-at-offset(first-from-off Mem.i32-size()) to-lower()
+				if first-char == 'm'
+					type <= Highlight.Keyword1
+				elif first-char == 'g'
+					type <= Highlight.Ident1
+					
+				hls List.add({ from: first-from-off, to: first-to-off, type })
+				
+				sc Scan.skip-while(is-whitespace)
+				
+				from-off = sc&.byte-offset Mem.size-i32()
+				while sc Scan.char-satisfies(is-alphanumeric)
+					sc Scan.skip-while(gcode-keyword-char)
+					to-off = sc&.byte-offset Mem.size-i32()
+				
+					sc Scan.skip-while(is-whitespace)
+					hls List.add({ from: from-off, to: to-off, type: Highlight.Ident4 })
+			
+			# skip non-comment chars.
+			while sc Scan.char-satisfies(fn c: c /= ';')
+				pass
+			
+			from-off = sc&.byte-offset Mem.size-i32()
+			if sc Scan.try-char(';')
+				hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
 
 
 	line <&.invalidated= False
