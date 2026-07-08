@@ -110,7 +110,7 @@ fn match-theme (name StrView) -> Maybe (Ptr Theme)
 		return None
 
 	return all-themes
-		filter(fn ((theme-name, theme)): theme-name Str2.begins-with(name))
+		filter(fn ((theme-name, theme)): theme-name Str.begins-with(name))
 		map(snd)
 		head()
 

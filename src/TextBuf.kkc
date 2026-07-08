@@ -7,11 +7,9 @@
 
 # also uses I32 indexes to make math easier :)
 
-use StrBuilder
-	StrBuilder
+use StrBuilder (StrBuilder)
 
-use Pos
-	Pos
+use Pos (Pos)
 use Highlight
 	HighlightType
 use CharType
@@ -523,7 +521,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 		
 				# intrinsics
 				elif sc Scan.try-char('@')
-					if sc Scan.char-satisfies(Str2.is-alpha)
+					if sc Scan.char-satisfies(is-alpha)
 						sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
 						cur-off = sc&.byte-offset Mem.size-i32()
 						hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident3 })
@@ -533,7 +531,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 		
 				# members (i dont like it, currently cant distinguish between `Module.member` and `struct.member`)
 				# elif sc Scan.try-char('.')
-				# 	if sc Scan.char-satisfies(Str2.is-alpha)
+				# 	if sc Scan.char-satisfies(is-alpha)
 				# 		sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
 				# 		cur-off = sc&.byte-offset Mem.size-i32()
 				# 		hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident4 })
@@ -552,10 +550,10 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 					hls List.add({ from: from-off, to: cur-off, type })
 		
 				# lowercase and uppercase identifier and word keywords
-				elif sc Scan.char-satisfies(Str2.is-alpha)
+				elif sc Scan.char-satisfies(is-alpha)
 					sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
 					cur-off = sc&.byte-offset Mem.size-i32()
-					first-char-uppercase = first-char Misc.maybe(Str2.is-upper, False)
+					first-char-uppercase = first-char Misc.maybe(is-upper, False)
 					type = if first-char-uppercase: Highlight.Ident2 else Highlight.Ident1
 		
 					ident = line-sv StrView.byte-substr(from-off Mem.i32-size(), cur-off Mem.i32-size()) as StrView
@@ -567,6 +565,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 						, 'inst'
 						, 'external'
 						, 'use'
+						, 'export'
 						]
 		
 					keywords2 = 
@@ -603,16 +602,16 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 							type = Highlight.Number
 							if i == 0
 								if sc Scan.try-char('x')
-									sc Scan.skip-while(Str2.is-hex)
+									sc Scan.skip-while(is-hex)
 									cur-off = sc&.byte-offset Mem.size-i32()
 									hls List.add({ from: from-off, to: cur-off, type })
 		
-									sc Scan.skip-while(Str2.is-alpha)
+									sc Scan.skip-while(is-alpha)
 									invalid-off = sc&.byte-offset Mem.size-i32()
 									if cur-off /= invalid-off
 										hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
 								elif sc Scan.try-char('o')
-									sc Scan.skip-while(Str2.is-octal)
+									sc Scan.skip-while(is-octal)
 									cur-off = sc&.byte-offset Mem.size-i32()
 									hls List.add({ from: from-off, to: cur-off, type })
 		
@@ -621,7 +620,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 									if cur-off /= invalid-off
 										hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
 								elif sc Scan.try-char('b')
-									sc Scan.skip-while(Str2.is-binary)
+									sc Scan.skip-while(is-binary)
 									cur-off = sc&.byte-offset Mem.size-i32()
 									hls List.add({ from: from-off, to: cur-off, type })
 		
@@ -673,7 +672,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 				sc Scan.skip-while(gcode-keyword-char)
 				first-to-off = sc&.byte-offset Mem.size-i32()
 				type = Highlight.Invalid
-				first-char = line-sv StrView.char-at-offset(first-from-off Mem.i32-size()) to-lower()
+				first-char = line-sv StrView.char-at-offset(first-from-off Mem.i32-size()) Char.to-lower()
 				if first-char == 'm'
 					type <= Highlight.Keyword1
 				elif first-char == 'g'

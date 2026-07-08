@@ -127,16 +127,17 @@ ScreenDims
 	from-sy I32
 	to-sy   I32  # ie. last possible index
 
+# screen size for the total pane, including pane's margin. different from total pane area
 fn screen-width (sd ScreenDims): sd.to-sx - sd.from-sx + 1
 fn screen-height (sd ScreenDims): sd.to-sy - sd.from-sy + 1
 
-fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
+fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims, pane-margin-size I32)
 	cur = pane&.cursor
 	cur-sx = pane&.buf pos-vi(cur)
 	sc-off = pane&.sc-off
 
 	# not really width/height, sort of "offset so that the cursor arrives at right/lower-most position"
-	sw = sd screen-width() - 1
+	sw = sd screen-width() - 1 - pane-margin-size
 	sh = sd screen-height() - 1
 
 	margin = 5  # default margin.
@@ -152,14 +153,14 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	if csx < margin
 		nu-screen-left <= csi - margin
 	elif csx > sw - margin
-		nu-screen-left <= csi - sw + margin
+		nu-screen-left <= csi - (sw - margin)
 	nu-screen-left = Math.max(nu-screen-left, 0)
 
 	nu-screen-top = sc-off.screen-top
 	if csy < margin
 		nu-screen-top <= cur.line - margin
 	elif csy > sh - margin
-		nu-screen-top <= cur.line - sh + margin
+		nu-screen-top <= cur.line - (sh - margin)
 	nu-screen-top = Math.max(nu-screen-top, 0)
 
 	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
@@ -174,15 +175,15 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 	display-line-numbers = cfg&.display-line-numbers
 	relative-line-numbers = cfg&.relative-line-numbers
 
-	# moves the window "in position" of the cursor.
-	pane update-screen-offset(sd)
-
-	sc-off = pane&.sc-off
 	max-line-num-chars = pane&.buf TextBuf.num-lines() chars() count() Mem.size-i32()
-
 	num-front-margin = 2
 	num-back-margin = 2
 	total-margin = if display-line-numbers: max-line-num-chars + num-front-margin + num-back-margin else 0
+	
+	# moves the window "in position" of the cursor.
+	pane update-screen-offset(sd, total-margin)
+
+	sc-off = pane&.sc-off
 	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
 		ybi = line-num - 1
 		xbi = pane&.buf vi-bi(ybi, sc-off.screen-left)

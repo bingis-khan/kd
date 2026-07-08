@@ -11,7 +11,7 @@ if first-arg == Just('clean') or full-reinstall
 		return 0
 
 if 'kd' deps(['src']) or full-reinstall
-	'kkc --backend c --dontRun src/kd.kkc' Sh.run(al)
+	'kkc --backend c --dont-compile src/kd.kkc' Sh.run(al)
 	'cc -O2 kd.c -o kd' Sh.run(al)
 	
 if first-arg == Just('install') or full-reinstall

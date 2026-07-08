@@ -1,7 +1,5 @@
 use Tui
 	Screen
-use Str2
-	is-alphanumeric
 use StrBuilder
 	StrBuilder
 use Misc
@@ -27,11 +25,24 @@ use Config
 #   |     opening a new file should go through the map first.
 # [Filename -> TextBuf]
 
+# MenuItem
+# 	key Char
+# 	description StrView
+
+# 	# it freezes the compiler. the reason is an infinite loop when unifying the union.
+# 	# implement an occurs check and DESCRIBE IT SOMEWHERE for reference.
+# 	action (Ptr ()) -> ()  # TEMP!!!
+
+# Menu
+# 	name StrView
+# 	items Slice MenuItem
+
 
 EditorMode al
 	Normal
 	Cmd Pos (StrBuilder al)
 	Search Pos (StrBuilder al)
+	# Menu Menu
 
 inst Str EditorMode
 	chars (self _)
@@ -63,6 +74,7 @@ Editor al
 	og-theme Ptr Theme  # hackish. stores the theme we currently have set (but might not be "trying out" with the :theme command)
 
 
+
 # use this to get the current pane.
 fn pane (ed Ptr (Editor al)) -> Ptr (Pane al): &ed&.pane
 
@@ -91,7 +103,7 @@ fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 			ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
 		None
 			sc =& Scan.mk-from-strview(cmd)
-			cmd = sc Scan.take-str-while(Str2.is-alpha)
+			cmd = sc Scan.take-str-while(is-alpha)
 			if cmd == 'theme'
 				sc Scan.drop-str-while(is-whitespace)
 				theme-name = sc Scan.take-str-while(fn c: not c is-whitespace())
@@ -133,9 +145,9 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 			ed <&.cfg&.display-line-numbers= True
 		elif what == 'off'
 			ed <&.cfg&.display-line-numbers= False
-		elif what chars() count() >= 3 and 'absolute' begins-with(what)
+		elif what chars() count() >= 3 and 'absolute' Str.begins-with(what)
 			ed <&.cfg&.relative-line-numbers= False
-		elif what chars() count() >= 3 and 'relative' begins-with(what)
+		elif what chars() count() >= 3 and 'relative' Str.begins-with(what)
 			ed <&.cfg&.relative-line-numbers= True
 	
 	elif cmd == 'ft'
@@ -197,6 +209,13 @@ fn prev-match (ed Ptr (Editor al))
 					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
 
 
+# fn enmenue (ed Ptr (Editor al), menu)
+# 	ed <&.mode= Menu(menu)
+
+
+# goto-menu = Menu { name: 'goto', items: Array.as-slice(&
+# 	[ MenuItem { key: 'l', description: 'miaumiau', action: fn _: () }
+# 	]) }
 
 fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 	case key
@@ -323,6 +342,13 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				ed pane() Pane.indent-selection()
 			elif c == '<'
 				ed pane() Pane.dedent-selection()
+			
+			elif c == 'g'
+				# ed <&.mode= Menu(goto-menu)
+				# special movement menu
+				# 'goto'
+				# ed enmenue(goto-menu)
+				pass
 
 		Tui.Escape
 			ed pane() set-mode(Pane.Normal)

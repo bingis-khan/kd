@@ -1,7 +1,3 @@
-use Str2
-	is-alphanumeric
-
-
 
 CharType
 	CharSpace
