@@ -131,13 +131,13 @@ ScreenDims
 fn screen-width (sd ScreenDims): sd.to-sx - sd.from-sx + 1
 fn screen-height (sd ScreenDims): sd.to-sy - sd.from-sy + 1
 
-fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims, pane-margin-size I32)
+fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	cur = pane&.cursor
 	cur-sx = pane&.buf pos-vi(cur)
 	sc-off = pane&.sc-off
 
 	# not really width/height, sort of "offset so that the cursor arrives at right/lower-most position"
-	sw = sd screen-width() - 1 - pane-margin-size
+	sw = sd screen-width() - 1
 	sh = sd screen-height() - 1
 
 	margin = 5  # default margin.
@@ -181,7 +181,8 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 	total-margin = if display-line-numbers: max-line-num-chars + num-front-margin + num-back-margin else 0
 	
 	# moves the window "in position" of the cursor.
-	pane update-screen-offset(sd, total-margin)
+	# must operate on total text screen area (excluding margin)
+	pane update-screen-offset(sd { from-sx: sd.from-sx + total-margin })
 
 	sc-off = pane&.sc-off
 	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
