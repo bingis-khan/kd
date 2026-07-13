@@ -79,8 +79,8 @@ Editor al
 fn pane (ed Ptr (Editor al)) -> Ptr (Pane al): &ed&.pane
 
 fn copy-selection-to-clipboard (ed Ptr (Editor al)) <= Allocator al
-	from-to = Pane.selection(ed pane())
-	cpd = ed&.pane.buf TextBuf.str-between(from-to fst(), from-to snd())
+	let (from, to) = Pane.selection(ed pane())
+	cpd = ed&.pane.buf TextBuf.str-between(from, to)
 	ed&.clipboard if-just(fn(cp))
 		cp StrView.free(ed&.al)
 
@@ -129,7 +129,7 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 		case write-result
 			None
 				if filename is-none()
-					ed set-msg('could not save changes (!?)')
+					ed set-msg('could not save changes (filename not set!!)')
 				else
 					ed set-msg('could not write to file \(filename)')
 			Just(bytes-written)

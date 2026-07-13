@@ -95,6 +95,7 @@ Filetype
 	KC
 	Markdown
 	GCode
+	Brainfuck
 
 fn detect-filetype-from-filename (filename StrView)
 	mext = filename Path.extension()
@@ -102,12 +103,14 @@ fn detect-filetype-from-filename (filename StrView)
 		None
 			return Text
 		Just(ext)
-			if ext == 'kc' or ext == 'kkc'
+			if ext one-of(['kc', 'kkc'])
 				return KC
 			elif ext == 'md'
 				return Markdown
 			elif ext == 'gcode'
 				return GCode
+			elif ext one-of(['bf', 'b'])
+				return Brainfuck
 			else
 				return Text
 
@@ -241,26 +244,25 @@ fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, byt
 
 
 fn write-to-file (self Ptr (TextBuf al), altname Maybe StrView) -> Maybe Size <= Allocator al
+	al = self&.al
+
+	nu-filename = altname Misc.fmap-maybe(fn s: s StrView.clone-0(al))  # allocate if setting a new filename.
 	filename = altname Misc.maybe(Just, self&.filename)
 	if filename is-none()
 		return None  # no filename set!
-
-	al = self&.al
 
 	# TEMP until we can write to a file partially.
 	sb =& StrBuilder.mk(al)
 	for ln in 0 to (self num-lines() - 1)
 		sb StrBuilder.writeln(self line(ln))
 
-	filename0 = filename or-fail('expect filename') StrView.clone-0(al)  # TEMP, untile File supports StrView by default.
-
-	result = filename0 StrView.as-const-str() File.try-write-contents(sb)
-	filename0 StrView.free(al)
+	filename0 = filename or-fail('expect filename (we should\'ve quit earlier.)') StrView.as-const-str() 
+	result = filename0 File.try-write-contents(sb)
 	sb StrBuilder.free()
 	if not result
 		return None
 
-	# if all-iz-well (if we wrote the file successfully saar), save the new altname.
+	# if all-iz-well (if we wrote the file successfully(!!) saar), save the new altname.
 	if altname is-just()
 		case self&.filename
 			Just(ole-filename)
@@ -317,8 +319,8 @@ fn pos-after-str (self Ptr (TextBuf Allocator), bytes StrView, from Pos) -> Pos
 		next-pos = Pos.mk(from.line, from.bi + first-line StrView.num-bytes() Mem.size-i32())
 		return next-pos
 	else
-		last-line = headless zip(Iter.from(from.line + 1)) last() or-fail('should not happen')
-		return Pos.mk(last-line snd(), last-line fst() StrView.num-bytes() Mem.size-i32())
+		let (ll-bi, ll-line) = headless zip(Iter.from(from.line + 1)) last() or-fail('should not happen')
+		return Pos.mk(ll-line, ll-bi StrView.num-bytes() Mem.size-i32())
 
 
 fn flush-insert-action (self Ptr (TextBuf Allocator))
@@ -566,6 +568,7 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 						, 'external'
 						, 'use'
 						, 'export'
+						, 'let'
 						]
 		
 					keywords2 = 
@@ -697,6 +700,39 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 			from-off = sc&.byte-offset Mem.size-i32()
 			if sc Scan.try-char(';')
 				hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
+	
+		Brainfuck
+			sc =& Scan.mk-from-str(line-sv)
+			sc Scan.skip-while(is-whitespace)
+			bf-chars =
+				[ ('[', Highlight.Special1)
+				, (']', Highlight.Special1)
+				, ('+', Highlight.Special2)
+				, ('-', Highlight.Special2)
+				, ('<', Highlight.Special3)
+				, ('>', Highlight.Special3)
+				, (',', Highlight.Keyword1)
+				, ('.', Highlight.Keyword2)
+				] as Slice (Char, HighlightType)
+			
+			is-bf-char = fn c: bf-chars map(fst) any(fn eq: eq == c)
+			
+			while not sc null()
+				while True
+					from-off = sc&.byte-offset Mem.size-i32()
+					case sc Scan.char-satisfies'(fn c: bf-chars map(fst) any(fn ec: ec == c))
+						Just(cc)
+							hl = bf-chars filter(fn ((c, _)): c == cc) head() or-fail('could not find matched char (it should not happen)') snd()
+							to-off = sc&.byte-offset Mem.size-i32()
+							hls List.add({ from: from-off, to: to-off, type: hl })
+						None
+							break
+				from-off = sc&.byte-offset Mem.size-i32()
+				sc Scan.skip-while(fn c: not c is-bf-char())
+				to-off = sc&.byte-offset Mem.size-i32()
+				if to-off > from-off
+					hls List.add({ from: from-off, to: to-off, type: Highlight.Comment })
+
 
 
 	line <&.invalidated= False

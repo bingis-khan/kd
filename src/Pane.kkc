@@ -450,8 +450,8 @@ fn selection (self Ptr (Pane al)) -> (Pos, Pos)
 	to = self&.buf TextBuf.right-pos(from-to snd())
 	return (from, to)
 
-fn replace-selection (self Ptr (Pane al), pos's (Pos, Pos), cp StrView) <= Allocator al
-	mcursors = self&.buf TextBuf.change(pos's fst(), pos's snd(), cp, Just({ cur: self&.cursor, sel: self&.sel }))
+fn replace-selection (self Ptr (Pane al), (prev-pos, next-pos) (Pos, Pos), cp StrView) <= Allocator al
+	mcursors = self&.buf TextBuf.change(prev-pos, next-pos, cp, Just({ cur: self&.cursor, sel: self&.sel }))
 	mcursors if-just(fn(cursors))
 		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
 	# to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
@@ -500,8 +500,8 @@ fn toggle-comment (self Ptr (Pane Allocator))
 			self set-cursors(Pos.mk(line, min-indent), None, NoChanges)
 			self add-str-at-char('# ')
 		else
-			tup = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
-			self replace-selection((tup fst(), tup snd()), '')
+			comment-pos = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
+			self replace-selection(comment-pos, '')
 	self&.buf TextBuf.end-changeset()
 
 
