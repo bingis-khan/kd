@@ -4,6 +4,7 @@ use StrBuilder
 	StrBuilder
 use Misc
 	own
+use Cnile (AsciiChar)
 
 use TextBuf
 	TextBuf
@@ -25,24 +26,23 @@ use Config
 #   |     opening a new file should go through the map first.
 # [Filename -> TextBuf]
 
-# MenuItem
-# 	key Char
-# 	description StrView
+MenuItem al
+	key AsciiChar
+	description StrView
 
-# 	# it freezes the compiler. the reason is an infinite loop when unifying the union.
-# 	# implement an occurs check and DESCRIBE IT SOMEWHERE for reference.
-# 	action (Ptr ()) -> ()  # TEMP!!!
+	# cast to Editor, we don't yet have recursive types.
+	action (Ptr (Pane al)) -> ()
 
-# Menu
-# 	name StrView
-# 	items Slice MenuItem
+Menu al
+	name StrView
+	items Slice (MenuItem al)
 
 
 EditorMode al
 	Normal
 	Cmd Pos (StrBuilder al)
 	Search Pos (StrBuilder al)
-	# Menu Menu
+	Menu (Menu al)
 
 inst Str EditorMode
 	chars (self _)
@@ -54,6 +54,8 @@ inst Str EditorMode
 				c <= 'Cmd(\(pos)|\(sb))' StrCase2()
 			Search(pos, sb)
 				c <= 'Search(\(pos)|\(sb))' StrCase2()
+			Menu(menu)
+				c <= 'Menu' StrCase1()
 			_
 				return todo()
 		return c chars()
@@ -161,6 +163,9 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 			tb TextBuf.set-filetype(TextBuf.Markdown)
 		else
 			ed set-msg('unknown file type')
+
+	elif cmd == 'testerror'
+		panic('test error')
 		
 	# live-cmd()
 	elif cmd == 'theme'
@@ -209,15 +214,31 @@ fn prev-match (ed Ptr (Editor al))
 					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
 
 
-# fn enmenue (ed Ptr (Editor al), menu)
-# 	ed <&.mode= Menu(menu)
+fn enmenue (ed Ptr (Editor al), menu)
+	ed <&.mode= Menu(menu)
 
 
-# goto-menu = Menu { name: 'goto', items: Array.as-slice(&
-# 	[ MenuItem { key: 'l', description: 'miaumiau', action: fn _: () }
-# 	]) }
+EditorAllocator = Alloc.CAllocator
 
-fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
+goto-menu = Menu
+	{ name: 'goto'
+	, items:
+		[ MenuItem { key: 'l', description: 'move to end of line', action: fn pane: pane Pane.move-to-end() }
+		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn pane: pane Pane.move-to-beginning-indented() }
+		, MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.NoChanges) }
+		]
+	} as Menu EditorAllocator
+
+space-menu = Menu
+	{ name: 'space'
+	, items:
+		[ MenuItem { key: 'f', description: 'open dir bruh', action: fn pane: pane Pane.move-to-end() }
+		, MenuItem { key: 'y', description: 'copy to system clipboard', action: fn pane: () }
+		# , MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0}, None, Pane.NoChanges) }
+		]
+	} as Menu EditorAllocator
+
+fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 	case key
 		Tui.Char(c)
 			if c == 'q'
@@ -347,8 +368,10 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				# ed <&.mode= Menu(goto-menu)
 				# special movement menu
 				# 'goto'
-				# ed enmenue(goto-menu)
-				pass
+				ed enmenue(goto-menu)
+			
+			elif c == ' '
+				ed enmenue(space-menu)
 
 		Tui.Escape
 			ed pane() set-mode(Pane.Normal)
@@ -368,7 +391,7 @@ fn handle-normal-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 			pass
 
 
-fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
+fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 	case &ed&.mode
 		Ptr(Normal)
 			case ed&.pane.mode
@@ -462,6 +485,20 @@ fn handle-key (ed Ptr (Editor al), key Tui.Key) <= Allocator al
 				_
 					pass
 
+		Ptr(Menu(menu))
+			case key
+				Tui.Char(c)
+					for menu-item in menu.items
+						if menu-item.key == c
+							menu-item.action(ed pane())
+
+					ed <&.mode= Normal
+					
+				Tui.Escape
+					ed <&.mode= Normal
+					
+				_
+					pass
 
 		_
 			todo()
@@ -501,6 +538,14 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 			full-str = ' 🔎  \(sb)\(pad)  '
 			full-chars = full-str chars() count() Mem.size-i32()
 			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
+		
+		Menu(menu)
+			screen Tui.draw-str(menu.name, 0, 0)
+			for (menu-item, i) in menu.items zip(from(1))
+				screen Tui.draw-str('\(menu-item.key) \(menu-item.description)', 0, i)
+			
+		_
+			todo()
 
 
 	# debug stuff.
@@ -565,6 +610,7 @@ ed =& Editor
 	, search-term: None
 
 	, mode: Normal
+	#, mode: Menu({ name: 'miauuu', items: [MenuItem { key: 'a', description: 'miau', action: fn _: () }] })
 	, msg: initial-message
 
 	, cfg: cfg

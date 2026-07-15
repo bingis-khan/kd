@@ -378,7 +378,7 @@ fn max-pos (pane Ptr (Pane al)):
 		_: pane&.cursor
 
 fn indent-at-line (pane Ptr (Pane al), line I32) -> I32:
-	pane&.buf TextBuf.line(line) take-while(fn c: c == '\t') map(fn c: c.num-bytes) sum() Mem.size-i32()
+	pane&.buf TextBuf.line(line) take-while(fn c: c is-whitespace()) map(fn c: c.num-bytes) sum() Mem.size-i32()
 
 # helix's 'x' cmd. 
 # 1. if the ends are not already expanded, then expand current selection to ends of screen.

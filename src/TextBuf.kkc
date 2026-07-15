@@ -11,7 +11,7 @@ use StrBuilder (StrBuilder)
 
 use Pos (Pos)
 use Highlight
-	HighlightType
+	HighlightType, Highlight
 use CharType
 	char-type
 
@@ -70,11 +70,6 @@ fn trim-actions (actions Ptr (Actions Allocator))
 	for action in actions&.list drop(cur)
 		action free-changeset(al)
 	List.trim(&actions&.list, cur)
-
-Highlight
-	type HighlightType
-	from I32
-	to I32
 
 Line al
 	line List al U8
@@ -472,9 +467,6 @@ fn set-filetype (self Ptr (TextBuf al), type Filetype)
 
 ## syntax highlighting
 
-# TEMP: there's a compiler bug, which forbids me from defining it inside.
-fn gcode-keyword-char(c Char): c is-not-whitespace() and c /= ';'
-
 fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= Allocator al
 	if not line&.invalidated
 		return
@@ -487,254 +479,17 @@ fn recompute-highlights-at-line (self Ptr (TextBuf al), line Ptr (Line al)) <= A
 		Text
 			pass
 		KC
-			sc =& Scan.mk-from-str(line-sv)
-			while not sc null()
-				from-off = sc&.byte-offset Mem.size-i32()
-				first-char = sc Scan.peek()
-		
-				# comment
-				if sc Scan.try-char('#')
-					# optionally a tag!
-					if sc Scan.try-char('[')
-						sc Scan.skip-while(fn c: c /= ']')
-						sc drop'(1)
-						to-off = sc&.byte-offset Mem.size-i32()
-						hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Special3 })
-					else
-						hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
-					break
-		
-				# string
-				elif sc Scan.try-char('\'')
-					while True
-						sc Scan.skip-while(fn c: c /= '\'' and c /= '\\')
-						if sc Scan.peek() == Just('\\')
-							sc drop'(1)
-							if sc Scan.peek() == Just('\'')
-								sc drop'(1)
-							else
-								# todo for highlighting special sequences and interpolation
-								pass
-						else
-							sc drop'(1)  # drop the ending quote also
-							break
-					cur-off = sc&.byte-offset Mem.size-i32()
-					hls List.add({ from: from-off, to: cur-off, type: Highlight.String })
-		
-				# intrinsics
-				elif sc Scan.try-char('@')
-					if sc Scan.char-satisfies(is-alpha)
-						sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
-						cur-off = sc&.byte-offset Mem.size-i32()
-						hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident3 })
-					else
-						# none for now. maybe later when single @ gets a meaning?
-						pass
-		
-				# members (i dont like it, currently cant distinguish between `Module.member` and `struct.member`)
-				# elif sc Scan.try-char('.')
-				# 	if sc Scan.char-satisfies(is-alpha)
-				# 		sc Scan.skip-while(fn c: c char-type() == CharType.CharWord)
-				# 		cur-off = sc&.byte-offset Mem.size-i32()
-				# 		hls List.add({ from: from-off, to: cur-off, type: Highlight.Ident4 })
-				# 	else
-				# 		# none for now. maybe later when single @ gets a meaning?
-				# 		pass
-		
-				elif ['==', '/='] any(fn sym: sc Scan.matches-str(sym))
-					cur-off = sc&.byte-offset Mem.size-i32()
-					type = Highlight.Special2
-					hls List.add({ from: from-off, to: cur-off, type })
-		
-				elif ['<&', '=' as StrView, '&', '->', ':', '(', ')', '{', '}', '[', ']', ','] any(fn sym: sc Scan.matches-str(sym))
-					cur-off = sc&.byte-offset Mem.size-i32()
-					type = Highlight.Special1
-					hls List.add({ from: from-off, to: cur-off, type })
-		
-				# lowercase and uppercase identifier and word keywords
-				elif sc Scan.char-satisfies(is-alpha)
-					sc Scan.skip-while(fn c: c char-type() == CharType.CharWord or c == '\'')
-					cur-off = sc&.byte-offset Mem.size-i32()
-					first-char-uppercase = first-char Misc.maybe(is-upper, False)
-					type = if first-char-uppercase: Highlight.Ident2 else Highlight.Ident1
-		
-					ident = line-sv StrView.byte-substr(from-off Mem.i32-size(), cur-off Mem.i32-size()) as StrView
-		
-					# more important keywords
-					keywords1 = # leave it here or put it in Highlight module?
-						[ 'fn'
-						, 'class'
-						, 'inst'
-						, 'external'
-						, 'use'
-						, 'export'
-						, 'let'
-						]
-		
-					keywords2 = 
-						[ 'if'
-						, 'elif'
-						, 'else'
-						, 'case'
-						, 'for'
-						, 'in'
-						, 'while'
-						, 'pass'
-						, 'break'
-						, 'continue'
-						, 'as'
-						, 'or'
-						, 'and'
-						, 'not'
-						, 'return'
-						]
-		
-					if keywords1 any(fn kw: kw == ident)
-						type <= Highlight.Keyword1
-					elif keywords2 any(fn kw: kw == ident)
-						type <= Highlight.Keyword2
-					elif not first-char-uppercase and sc Scan.peek() == Just('(')  # check if it's a function call? accept space or not? but then it depends if functions declarations have a space between em.
-						type <= Highlight.Ident4
-					
-					hls List.add({ from: from-off, to: cur-off, type })
-		
-				else
-					case sc Scan.int()
-						Just(i)
-							cur-off = sc&.byte-offset Mem.size-i32()
-							type = Highlight.Number
-							if i == 0
-								if sc Scan.try-char('x')
-									sc Scan.skip-while(is-hex)
-									cur-off = sc&.byte-offset Mem.size-i32()
-									hls List.add({ from: from-off, to: cur-off, type })
-		
-									sc Scan.skip-while(is-alpha)
-									invalid-off = sc&.byte-offset Mem.size-i32()
-									if cur-off /= invalid-off
-										hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
-								elif sc Scan.try-char('o')
-									sc Scan.skip-while(is-octal)
-									cur-off = sc&.byte-offset Mem.size-i32()
-									hls List.add({ from: from-off, to: cur-off, type })
-		
-									sc Scan.skip-while(is-digit)  # skip the invalid numbers (or create an invalid highlight :O)
-									invalid-off = sc&.byte-offset Mem.size-i32()
-									if cur-off /= invalid-off
-										hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
-								elif sc Scan.try-char('b')
-									sc Scan.skip-while(is-binary)
-									cur-off = sc&.byte-offset Mem.size-i32()
-									hls List.add({ from: from-off, to: cur-off, type })
-		
-									sc Scan.skip-while(is-digit)  # skip the invalid numbers (or create an invalid highlight :O)
-									invalid-off = sc&.byte-offset Mem.size-i32()
-									if cur-off /= invalid-off
-										hls List.add({ from: cur-off, to: invalid-off, type: Highlight.Invalid })
-								else
-									hls List.add({ from: from-off, to: cur-off, type })
-							else
-								hls List.add({ from: from-off, to: cur-off, type })
-		
-						None
-							# if nothing matched at all, just drop the character.
-							sc drop'(1)
+			hls Highlight.kc(line-sv)
 		
 		Markdown
-			sc =& Scan.mk-from-str(line-sv)
-			if sc Scan.try-char('#')
-				hls List.add({ from: 0, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Keyword1 })
-			else
-				sc Scan.skip-while(is-whitespace)
-				from-off = sc&.byte-offset Mem.size-i32()
-				if sc Scan.try-char('-')
-					to-off = sc&.byte-offset Mem.size-i32()
-					hls List.add({ from: from-off, to: to-off, type: Highlight.Special1 })
-					
-					sc Scan.skip-while(is-whitespace)
-					from-off = sc&.byte-offset Mem.size-i32()
-					if sc Scan.matches-str('[ ]')
-						to-off = sc&.byte-offset Mem.size-i32()
-						hls List.add({ from: from-off, to: to-off, type: Highlight.Keyword1 })
-					elif sc Scan.matches-str('[x]') or sc Scan.matches-str('[X]')
-						to-off = sc&.byte-offset Mem.size-i32()
-						hls List.add({ from: from-off, to: to-off, type: Highlight.Keyword2 })
-					
-				# todo more
-				pass
+			hls Highlight.markdown(line-sv)
 		
 		GCode
-			sc =& Scan.mk-from-str(line-sv)
-			sc Scan.skip-while(is-whitespace)
-			
-			# syntax: instr [arg...] ;?
-			# the gcode-keyword-char function should be defined here, but it breaks in the monomorphiser
-			# fn gcode-keyword-char(c Char): c is-not-whitespace() and c /= ';'
-			first-from-off = sc&.byte-offset Mem.size-i32()
-			if sc Scan.char-satisfies(is-alphanumeric)
-				sc Scan.skip-while(gcode-keyword-char)
-				first-to-off = sc&.byte-offset Mem.size-i32()
-				type = Highlight.Invalid
-				first-char = line-sv StrView.char-at-offset(first-from-off Mem.i32-size()) Char.to-lower()
-				if first-char == 'm'
-					type <= Highlight.Keyword1
-				elif first-char == 'g'
-					type <= Highlight.Ident1
-					
-				hls List.add({ from: first-from-off, to: first-to-off, type })
-				
-				sc Scan.skip-while(is-whitespace)
-				
-				from-off = sc&.byte-offset Mem.size-i32()
-				while sc Scan.char-satisfies(is-alphanumeric)
-					sc Scan.skip-while(gcode-keyword-char)
-					to-off = sc&.byte-offset Mem.size-i32()
-				
-					sc Scan.skip-while(is-whitespace)
-					hls List.add({ from: from-off, to: to-off, type: Highlight.Ident4 })
-			
-			# skip non-comment chars.
-			while sc Scan.char-satisfies(fn c: c /= ';')
-				pass
-			
-			from-off = sc&.byte-offset Mem.size-i32()
-			if sc Scan.try-char(';')
-				hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Highlight.Comment })
-	
+			hls Highlight.gcode(line-sv)
+
 		Brainfuck
-			sc =& Scan.mk-from-str(line-sv)
-			sc Scan.skip-while(is-whitespace)
-			bf-chars =
-				[ ('[', Highlight.Special1)
-				, (']', Highlight.Special1)
-				, ('+', Highlight.Special2)
-				, ('-', Highlight.Special2)
-				, ('<', Highlight.Special3)
-				, ('>', Highlight.Special3)
-				, (',', Highlight.Keyword1)
-				, ('.', Highlight.Keyword2)
-				] as Slice (Char, HighlightType)
-			
-			is-bf-char = fn c: bf-chars map(fst) any(fn eq: eq == c)
-			
-			while not sc null()
-				while True
-					from-off = sc&.byte-offset Mem.size-i32()
-					case sc Scan.char-satisfies'(fn c: bf-chars map(fst) any(fn ec: ec == c))
-						Just(cc)
-							hl = bf-chars filter(fn ((c, _)): c == cc) head() or-fail('could not find matched char (it should not happen)') snd()
-							to-off = sc&.byte-offset Mem.size-i32()
-							hls List.add({ from: from-off, to: to-off, type: hl })
-						None
-							break
-				from-off = sc&.byte-offset Mem.size-i32()
-				sc Scan.skip-while(fn c: not c is-bf-char())
-				to-off = sc&.byte-offset Mem.size-i32()
-				if to-off > from-off
-					hls List.add({ from: from-off, to: to-off, type: Highlight.Comment })
-
-
-
+			hls Highlight.brainfuck(line-sv)
+	
 	line <&.invalidated= False
 
 fn highlight-at (self Ptr (TextBuf al), pos Pos) -> Maybe HighlightType <= Allocator al
