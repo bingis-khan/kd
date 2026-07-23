@@ -3184,7 +3184,7 @@ static  enum Unit_8   lam394 (    struct Pane_238 *  pane4787 ) {
 }
 
 static  enum Unit_8   lam414 (    struct Pane_238 *  pane4789 ) {
-    return ( (  set_dash_cursors284 ) ( (  pane4789 ) ,  ( (struct Pos_26) { .f_line = (  from_dash_integral56 ( 0 ) ) , .f_bi = (  from_dash_integral56 ( 0 ) ) } ) ,  ( (struct Maybe_34) { .tag = Maybe_34_None_t } ) ,  ( CursorMovement_285_NoChanges ) ) );
+    return ( (  set_dash_cursors284 ) ( (  pane4789 ) ,  ( (struct Pos_26) { .f_line = (  from_dash_integral56 ( 0 ) ) , .f_bi = (  from_dash_integral56 ( 0 ) ) } ) ,  ( (struct Maybe_34) { .tag = Maybe_34_None_t } ) ,  ( CursorMovement_285_UpdateVI ) ) );
 }
 
 struct Array_416 {

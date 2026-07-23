@@ -225,7 +225,7 @@ goto-menu = Menu
 	, items:
 		[ MenuItem { key: 'l', description: 'move to end of line', action: fn pane: pane Pane.move-to-end() }
 		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn pane: pane Pane.move-to-beginning-indented() }
-		, MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.NoChanges) }
+		, MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
 		]
 	} as Menu EditorAllocator
 
