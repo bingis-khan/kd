@@ -73,6 +73,60 @@ goblin-ultra =& Theme
 	}
 
 
+# my gruvbox
+gb-fg = rgb(0xebdbb2)
+gb-bg = rgb(0x282828)
+
+gb-cfg = rgb(0x3c3836)
+gb-cbg = rgb(0xbdae93)
+
+gb-sfg = gb-fg
+gb-sbg = rgb(0x504945)
+
+gb-lnfg = rgb(0x665c54)
+gb-lnhlfg = rgb(0xfabd2f)
+
+gb-ofg = gb-fg
+gb-obg = gb-cfg
+
+gb-gray = rgb(0x928374)
+gb-green1 = rgb(0xb8bb26)
+gb-purple0 = rgb(0xb16286)
+gb-purple1 = rgb(0xd3869b)
+gb-yellow1 = rgb(0xfabd2f)
+gb-red1 = rgb(0xfb4934)
+gb-aqua1 = rgb(0x8ec07c)
+
+gruvbox =& Theme
+	{ default: { bg: gb-bg, fg: gb-fg }
+
+	, cursor: { bg: gb-cbg, fg: gb-cfg }
+	, selection: { bg: gb-sbg, fg: gb-sfg }
+	, line-num: { bg: gb-bg, fg: gb-lnfg }
+	, line-num-hl: { bg: gb-bg, fg: gb-lnhlfg }
+	, overlay: { bg: gb-obg, fg: gb-ofg }
+	, highlights: Array.as-slice(&
+		[ hlt(Highlight.Number, gb-purple1)
+		, hlt(Highlight.String, gb-green1)
+		, hlt(Highlight.Comment, gb-gray)
+
+		, hlt(Highlight.Ident1, gb-fg)
+		, hlt(Highlight.Ident2, gb-yellow1)
+		, hlt(Highlight.Ident3, gb-purple0)
+		, hlt(Highlight.Ident4, gb-green1)
+
+		, hlt(Highlight.Keyword1, gb-aqua1)
+		, hlt(Highlight.Keyword2, gb-red1)
+
+		, hlt(Highlight.Special1, gb-purple1)
+		, hlt(Highlight.Special2, gb-purple1)
+		, hlt(Highlight.Special3, gb-aqua1)
+
+		, { type: Highlight.Invalid, fg: evergreen, bg: Just(Term.Color8(Term.Red8)) }
+		])
+	}
+
+
 dark-theme =& Theme
 	{ default: { bg: Term.Color8(Term.Black8), fg: Term.Color8(Term.White8) }
 
@@ -96,13 +150,16 @@ light-theme =& Theme
 	}
 
 
-default = goblin-ultra
+default = gruvbox
 all-themes = Array.as-slice(&
 	[ ('default', default)
 	, ('goblin-ultra', goblin-ultra)
+	, ('gruvbox', gruvbox)
 	, ('dark-mono', dark-theme)
 	, ('light-mono', light-theme)
 	])
+
+
 
 # partially match theme
 fn match-theme (name StrView) -> Maybe (Ptr Theme)
