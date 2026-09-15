@@ -30,8 +30,7 @@ MenuItem al
 	key AsciiChar
 	description StrView
 
-	# cast to Editor, we don't yet have recursive types.
-	action (Ptr (Pane al)) -> ()
+	action (Ptr (Editor al)) -> ()
 
 Menu al
 	name StrView
@@ -43,22 +42,6 @@ EditorMode al
 	Cmd Pos (StrBuilder al)
 	Search Pos (StrBuilder al)
 	Menu (Menu al)
-
-inst Str EditorMode
-	chars (self _)
-		c = @undefined
-		case self
-			Normal
-				c <= 'Normal' StrCase1()
-			Cmd(pos, sb)
-				c <= 'Cmd(\(pos)|\(sb))' StrCase2()
-			Search(pos, sb)
-				c <= 'Search(\(pos)|\(sb))' StrCase2()
-			Menu(menu)
-				c <= 'Menu' StrCase1()
-			_
-				return todo()
-		return c chars()
 
 Editor al
 	al al
@@ -75,6 +58,22 @@ Editor al
 	cfg Ptr Config
 	og-theme Ptr Theme  # hackish. stores the theme we currently have set (but might not be "trying out" with the :theme command)
 
+
+inst Str EditorMode
+	chars (self _)
+		c = @undefined
+		case self
+			Normal
+				c <= 'Normal' StrCase1()
+			Cmd(pos, sb)
+				c <= 'Cmd(\(pos)|\(sb))' StrCase2()
+			Search(pos, sb)
+				c <= 'Search(\(pos)|\(sb))' StrCase2()
+			Menu(menu)
+				c <= 'Menu' StrCase1()
+			_
+				return todo()
+		return c chars()
 
 
 # use this to get the current pane.
@@ -223,17 +222,18 @@ EditorAllocator = Alloc.CAllocator
 goto-menu = Menu
 	{ name: 'goto'
 	, items:
-		[ MenuItem { key: 'l', description: 'move to end of line', action: fn pane: pane Pane.move-to-end() }
-		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn pane: pane Pane.move-to-beginning-indented() }
-		, MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
+		[ MenuItem { key: 'l', description: 'move to end of line', action: fn ed: ed pane() Pane.move-to-end() }
+		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn ed: ed pane() Pane.move-to-beginning-indented() }
+		, MenuItem { key: 'g', description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
+		, MenuItem { key: 'e', description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
 		]
 	} as Menu EditorAllocator
 
 space-menu = Menu
 	{ name: 'space'
 	, items:
-		[ MenuItem { key: 'f', description: 'open dir bruh', action: fn pane: pane Pane.move-to-end() }
-		, MenuItem { key: 'y', description: 'copy to system clipboard', action: fn pane: () }
+		[ MenuItem { key: 'f', description: 'open dir bruh', action: fn ed : ed pane() Pane.move-to-end() }
+		, MenuItem { key: 'y', description: 'copy to system clipboard', action: fn ed: () }
 		# , MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0}, None, Pane.NoChanges) }
 		]
 	} as Menu EditorAllocator
@@ -490,7 +490,7 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 				Tui.Char(c)
 					for menu-item in menu.items
 						if menu-item.key == c
-							menu-item.action(ed pane())
+							menu-item.action(ed)
 
 					ed <&.mode= Normal
 					

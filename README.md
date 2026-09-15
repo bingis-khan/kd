@@ -28,7 +28,9 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] `ctrl+c` comment out
 - [x] undo/redo
 - [x] undo/redo typed characters as full words.
-- [ ] `g` and `<space>` submenu
+- [x] `g` submenu
+- [ ] `<space>` submenu
+- [ ] nice menu styling
 - [x] themes
 - [x] editor messages (send message Str -> () which allocates and frees n stuff)
 - [ ] proper cursor position and `before-cursors` position for commenting out, moving, `oO` newlines

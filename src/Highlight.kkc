@@ -117,7 +117,6 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 				, 'external'
 				, 'use'
 				, 'export'
-				, 'let'
 				]
 
 			keywords2 = 
@@ -136,6 +135,7 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 				, 'and'
 				, 'not'
 				, 'return'
+				, 'let'
 				]
 
 			if keywords1 any(fn kw: kw == ident)
