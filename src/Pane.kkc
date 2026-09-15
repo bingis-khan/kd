@@ -399,16 +399,16 @@ fn expand(pane Ptr (Pane al))
 		pane <&.cursor= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
 
 fn move-to-beginning (self Ptr (Pane al))
-	self set-cursors(self&.cursor { bi: 0 }, None, OverrideSelect)
+	self set-cursors(self&.cursor { bi: 0 }, None, UpdateVI)
 
 fn move-to-beginning-indented (self Ptr (Pane al))
 	cur = self&.cursor
 	indent = self indent-at-line(cur.line)
-	self set-cursors(cur { bi: indent }, None, OverrideSelect)
+	self set-cursors(cur { bi: indent }, None, UpdateVI)
 
 fn move-to-end (self Ptr (Pane al))
 	cur = self&.cursor
-	self set-cursors(cur { bi: self&.buf TextBuf.line(cur.line) StrView.num-bytes() Mem.size-i32() }, None, OverrideSelect)
+	self set-cursors(cur { bi: self&.buf TextBuf.line(cur.line) StrView.num-bytes() Mem.size-i32() }, None, UpdateVI)
 
 fn line-begins-with-comment (self Ptr (Pane al), line I32) -> Maybe (Pos, Pos)
 	indent = self indent-at-line(line)
