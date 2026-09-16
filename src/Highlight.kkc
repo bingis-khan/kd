@@ -89,8 +89,13 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 		# 	else
 		# 		# none for now. maybe later when single @ gets a meaning?
 		# 		pass
+		
+		elif ['->'] any(fn sym: sc Scan.matches-str(sym))  # smol ting otherwise it gets misclassified as Special2
+			cur-off = sc&.byte-offset Mem.size-i32()
+			type = Special1
+			hls List.add({ from: from-off, to: cur-off, type })
 
-		elif ['==', '/='] any(fn sym: sc Scan.matches-str(sym))
+		elif ['==', '/=', '+', '-', '/', '*', '>=', '<=', '>', '<'] any(fn sym: sc Scan.matches-str(sym))
 			cur-off = sc&.byte-offset Mem.size-i32()
 			type = Special2
 			hls List.add({ from: from-off, to: cur-off, type })
@@ -210,6 +215,18 @@ fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 				to-off = sc&.byte-offset Mem.size-i32()
 				hls List.add({ from: from-off, to: to-off, type: Keyword2 })
 			
+		while not sc null()
+			from-off = sc&.byte-offset Mem.size-i32()
+			if sc Scan.try-char('`')
+				while not sc Scan.try-char('`') and not sc null()
+					sc drop'(1)
+				
+				to-off = sc&.byte-offset Mem.size-i32()
+				hls List.add({ from: from-off, to: to-off, type: Ident2 })
+				sc drop'(1)
+			
+			else
+				sc drop'(1)
 		# todo more
 		pass
 
