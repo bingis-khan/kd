@@ -197,8 +197,13 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 
 fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 	sc =& Scan.mk-from-str(line-sv)
-	if sc Scan.try-char('#')
+	if sc Scan.matches-str('---')
+		to-off = sc&.byte-offset Mem.size-i32()
+		hls List.add({ from: 0, to: to-off, type: Special1 })
+		
+	elif sc Scan.try-char('#')
 		hls List.add({ from: 0, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Keyword1 })
+		
 	else
 		sc Scan.skip-while(is-whitespace)
 		from-off = sc&.byte-offset Mem.size-i32()
@@ -223,7 +228,6 @@ fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 				
 				to-off = sc&.byte-offset Mem.size-i32()
 				hls List.add({ from: from-off, to: to-off, type: Ident2 })
-				sc drop'(1)
 			
 			else
 				sc drop'(1)
