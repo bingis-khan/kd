@@ -15083,7 +15083,7 @@ static  enum Unit_10   handle_dash_key1498 (   struct env820* env ,    struct Ed
                 struct Key_829  dref5155 = (  key5142 );
                 if ( dref5155.tag == Key_829_Escape_t ) {
                     ( (  set_dash_cursors356 ) ( ( (  pane466 ) ( (  ed5140 ) ) ) ,  ( (* dref5143 ) .stuff .EditorMode_330_Search_s .field0 ) ,  ( (struct Maybe_47) { .tag = Maybe_47_None_t } ) ,  ( CursorMovement_357_UpdateVI ) ) );
-                    (*  ed5140 ) .f_mode = ( (struct EditorMode_330) { .tag = EditorMode_330_Normal_t } );
+                    ( (  exit_dash_mode2133 ) ( (  ed5140 ) ) );
                 }
                 else {
                     if ( dref5155.tag == Key_829_Enter_t ) {
@@ -15099,6 +15099,7 @@ static  enum Unit_10   handle_dash_key1498 (   struct env820* env ,    struct Ed
                         } else {
                             (*  ed5140 ) .f_search_dash_term = ( (struct Maybe_125) { .tag = Maybe_125_None_t } );
                         }
+                        ( (  exit_dash_mode2133 ) ( (  ed5140 ) ) );
                     }
                     else {
                         if ( dref5155.tag == Key_829_Char_t ) {

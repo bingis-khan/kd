@@ -488,7 +488,7 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 			case key
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
-					ed <&.mode= Normal
+					ed exit-mode()
 
 				Tui.Enter
 					# assume we are already in the correct place.
@@ -504,6 +504,8 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 						ed <&.search-term= Just(StrBuilder.as-str(&sb))
 					else
 						ed <&.search-term= None
+					
+					ed exit-mode()
 
 
 				Tui.Char(c)
