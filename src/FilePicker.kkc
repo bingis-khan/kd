@@ -1,0 +1,194 @@
+use Term (Color)
+use StrBuilder (StrBuilder)
+use Iter (map-maybe)
+
+use File (Dir, DirType(File, Directory))
+use Pane (ScreenDims)  # bad import, we only depend on the screen dims data structure.
+
+# quick and dirty impl (without the Path type and file info stuff)
+fn get-files-in-dir(dirname StrView, al Allocator) -> Slice StrView
+	files =& List.mk(al)
+	
+	fn recurse-into-dir(dirname StrView)
+		entries = File.list-dir(dirname, al)
+		case entries
+			None
+				return
+			Just(entries)
+				for entry in entries
+					case entry.type
+						Just(File)
+							if dirname == '.'
+								files List.add(entry.name StrView.clone-0(al))
+							else
+								files List.add('\(dirname)/\(entry.name)' StrView.from-str-0(al))
+						Just(Directory)
+							if not entry.name Str.begins-with('.')
+								full-name = if dirname == '.': entry.name StrView.clone-0(al) else '\(dirname)/\(entry.name)' StrView.from-str-0(al)
+								recurse-into-dir(full-name)
+								StrView.free(full-name, al)
+				entries File.free-dir-entries(al)
+	
+	recurse-into-dir(dirname)
+	return files& List.to-slice()
+
+
+FilePicker al
+	total-files Slice StrView
+	rendered-files Slice (StrView, Size)  # which files to show after filtering them through a query. is 'filtered' a better name?
+	
+	sel Size
+	query StrBuilder al  # IDEA: maybe generalize textboxes (I should, since I want to control more stuff with CTRL-... which would be tedious)
+	sel-size Size   # smol thing. we trim the original string when searching and this will point to the actual query size.
+
+fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
+	files = get-files-in-dir(dir, al)
+	
+	# initialize rendered files (for empty query) and populate with default values
+	default-filtered = al Alloc.allocate(files.count)
+	for (ff, filename) in default-filtered Slice.addresses() zip(files)
+		ff <&= (filename, 0)
+		
+	return
+		{ total-files: files
+		, rendered-files: default-filtered
+		, sel: 0
+		, query: StrBuilder.mk(al)
+		, sel-size: 0
+		}
+
+fn free(p FilePicker Allocator, al Allocator)
+	for name in p.total-files
+		StrView.free(name, al)
+	al Alloc.free(p.total-files)
+	al Alloc.free(p.rendered-files)
+	StrBuilder.free(&p.query)
+
+
+fn query-update(p Ptr (FilePicker al))
+	buflist =& BufList.mk(p&.rendered-files { count: p&.total-files.count })
+	query = StrBuilder.as-str(&p&.query) StrView.trim()
+	buflist BufList.add-all(p&.total-files map-maybe(fn filename: filename StrView.find(query) Misc.fmap-maybe(fn idx: (filename, idx))))
+	p <&.rendered-files= buflist&.slice
+	p <&.sel = 0  # also don't forget to reset the sel cursor. (to the first position, like helix)
+	p <&.sel-size= query StrView.num-bytes()
+
+
+# primitives. maybe move them to std?
+fn fill-rect(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32, color Color)
+	screen Tui.set-screen-bg(color)
+	for y in from-y to (to-y)
+		for x in from-x to (to-x)
+			screen Tui.put-char(' ', x, y)
+			
+fn draw-rect(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32, color Color)
+	screen Tui.set-screen-bg(color)
+	for x in from-x to (to-x)
+		screen Tui.put-char(' ', x, from-y)
+		screen Tui.put-char(' ', x, to-y)
+		
+	for y in (from-y + 1) to (to-y - 1)
+		screen Tui.put-char(' ', from-x, y)
+		screen Tui.put-char(' ', to-x, y)
+
+fn draw-hline(screen Ptr (Tui.Screen Allocator), from-x I32, to-x I32, y I32, color Color)
+	screen Tui.set-screen-bg(color)
+	for x in from-x to (to-x)
+		screen Tui.put-char(' ', x, y)
+
+fn render(screen Ptr (Tui.Screen al), p FilePicker al) <= Allocator al
+	width = screen&.tui&.width Mem.u32-i32() - 1
+	height = screen&.tui&.height Mem.u32-i32() - 1
+	screen draw-rect(0, 0, width, height, Term.Color16(Term.Red16))
+	screen fill-rect(1, 1, width - 1, height - 1, Term.Color16(Term.Black16))
+	
+	left-off = 1
+	max-width = width - left-off - 1 - 1
+	
+	searchbar-y-size = 2
+	screen Tui.draw-str(p.query Term.trim-to-wcwidth(max-width), 2, 1)
+	screen draw-hline(1, width - 1, 2, Term.Color16(Term.Red16))
+	
+	screen Tui.set-screen-bg(Term.Color16(Term.Black16))
+	num-files-to-display = height - 2 - searchbar-y-size
+	if num-files-to-display <= 0  # in case we don't have space, exit. 0 can mess up some of the calculations.
+		return
+		
+	page = p.sel / Mem.i32-size(num-files-to-display + 1)  # +1 cuz... trust the science
+	start-i = page * Mem.i32-size(num-files-to-display + 1)
+	files = p.rendered-files Slice.from(start-i)  # go to correct page
+	sel-size = p.sel-size
+	sel-color = Term.Color16(Term.Cyan16)
+	
+	sel-cursor = ' > '
+	sel-cursor-off = sel-cursor Term.rendered-str-width()
+	for (((filename, found-idx), file-i), y) in files zip(from(Mem.size-i32(start-i))) zip((1 + searchbar-y-size) to (height - 1))
+		text-color = Term.Color16(Term.White16)
+		if file-i == p.sel Mem.size-i32()
+			text-color <= Term.Color16(Term.Yellow16)
+			screen Tui.set-screen-fg(text-color)
+			screen Tui.draw-str(sel-cursor, left-off, y)
+			
+		filename = filename Term.trim-strview-to-wcwidth(max-width - sel-cursor-off)
+		
+		# display text<selected>othertest
+		before-sel = filename StrView.byte-substr(0, found-idx)
+		in-sel = filename StrView.byte-substr(found-idx, found-idx + sel-size)
+		after-sel = filename StrView.byte-substr-from(found-idx + sel-size)
+		
+		text-from-x = left-off + sel-cursor-off
+		screen Tui.set-screen-fg(text-color)
+		screen Tui.draw-str(before-sel, text-from-x, y)
+		screen Tui.set-screen-fg(sel-color)
+		screen Tui.draw-str(in-sel, text-from-x + Mem.size-i32(found-idx), y)
+		screen Tui.set-screen-fg(text-color)
+		screen Tui.draw-str(after-sel, text-from-x + Mem.size-i32(found-idx + sel-size), y)
+
+
+Choice
+	PickerExit
+	PickerFile StrView
+fn handle-key (p Ptr (FilePicker al), key Tui.Key) -> Maybe Choice <= Allocator al
+	case key
+		Tui.Escape
+			return Just(PickerExit)
+		
+		Tui.Enter
+			if p&.rendered-files.count == 0
+				return Just(PickerExit)
+			
+			assert(p&.sel < p&.rendered-files.count, '(FilePicker.handle-key) index must point to a valid list element')
+			return Just(PickerFile(p&.rendered-files[p&.sel] fst()))
+		
+		Tui.Char(c)
+			StrBuilder.write-char(&p&.query, c Char.ascii-char())
+			p query-update()
+		
+		Tui.Backspace
+			if not p&.query null()
+				StrBuilder.pop(&p&.query)
+			p query-update()
+		
+		Tui.Up
+			filecount = p&.rendered-files.count
+			if filecount == 0
+				return None
+				
+			# TODO: funny stuff due to unsigned. which type should I use for such stuff so that it wraps gracefully?
+			if p&.sel == 0
+				p <&.sel= filecount - 1
+			else
+				p <&.sel= p&.sel - 1
+				
+		Tui.Down
+			filecount = p&.rendered-files.count
+			if filecount == 0
+				return None
+				
+			p <&.sel= (p&.sel + 1) Math.mod(filecount)
+
+			
+		_
+			pass
+			
+	return None

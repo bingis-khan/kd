@@ -5,12 +5,13 @@ args = Args.get()
 
 first-arg = args Slice.try-get(0)
 full-reinstall = first-arg == Just('reinstall')
+rebuild = first-arg == Just('rebuild')
 if first-arg == Just('clean') or full-reinstall
 	'rm -f kd kd.c' Sh.run(al)
 	if not full-reinstall
 		return 0
 
-if 'kd' deps(['src']) or full-reinstall
+if 'kd' deps(['src']) or full-reinstall or rebuild
 	'kkc --backend c --dont-compile src/kd.kkc' Sh.run(al)
 	'cc -O2 kd.c -o kd' Sh.run(al)
 	

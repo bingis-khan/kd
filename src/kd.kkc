@@ -17,6 +17,8 @@ use Theme
 	Theme
 use Config
 	Config
+use FilePicker
+	FilePicker, Choice(PickerExit, PickerFile)
 
 # some structure:
 # Editor
@@ -42,6 +44,7 @@ EditorMode al
 	Cmd Pos (StrBuilder al)
 	Search Pos (StrBuilder al)
 	Menu (Menu al)
+	Picker (FilePicker al)
 
 Editor al
 	al al
@@ -51,6 +54,7 @@ Editor al
 	search-term Maybe StrView
 
 	mode EditorMode al
+	next-mode Maybe (EditorMode al)
 
 	msg Maybe StrView
 
@@ -95,6 +99,16 @@ fn reset-msg (ed Ptr (Editor al)) <= Allocator al
 fn set-msg (ed Ptr (Editor al), s Str) <= Allocator al
 	ed reset-msg()
 	ed <&.msg = s StrBuilder.mk-dyn-str(ed&.al) Just()
+
+fn exit-mode (ed Ptr (Editor al))
+	# if we have a next mode scheduled use this, else be sure to reset.
+	case ed&.next-mode
+		None
+			ed <&.mode= Normal
+		Just(next-mode)
+			ed <&.mode = next-mode
+			ed <&.next-mode = None
+
 
 fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 	case cmd parse-int()
@@ -229,10 +243,30 @@ goto-menu = Menu
 		]
 	} as Menu EditorAllocator
 
+
+# fn open-filepicker (ed Ptr (Editor EditorAllocator))
+# 	ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
+
 space-menu = Menu
 	{ name: 'space'
 	, items:
-		[ MenuItem { key: 'f', description: 'open dir bruh', action: fn ed : ed pane() Pane.move-to-end() }
+		[ MenuItem
+			{ key: 'f'
+			, description: 'open dir bruh'
+			, action: (fn(ed))
+				# ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
+				# ed open-filepicker()
+				pass
+			}
+		, MenuItem
+			{ key: 'F'
+			, description: 'open dir at cwd'
+			, action: (fn(ed))
+				# TODO(kc-bug): for some reason, the same line at both options crashes the compiler. even with the helper function.
+				ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
+				# ed open-filepicker()
+				pass
+			}
 		, MenuItem { key: 'y', description: 'copy to system clipboard', action: fn ed: () }
 		# , MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0}, None, Pane.NoChanges) }
 		]
@@ -434,7 +468,7 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					# we're really just setting the vi
 					ed pane() Pane.set-cursors(ed pane()&.cursor, None, Pane.UpdateVI)
 
-					ed <&.mode= Normal
+					ed exit-mode()
 					ed <&.og-theme= ed&.cfg&.theme  # set the theme if it was modified.
 
 				Tui.Char(c)
@@ -471,7 +505,6 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					else
 						ed <&.search-term= None
 
-					ed <&.mode= Normal
 
 				Tui.Char(c)
 					StrBuilder.write-char(&sb, c Char.ascii-char())
@@ -491,15 +524,27 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					for menu-item in menu.items
 						if menu-item.key == c
 							menu-item.action(ed)
-
-					ed <&.mode= Normal
+					
+					ed exit-mode()
 					
 				Tui.Escape
-					ed <&.mode= Normal
+					ed exit-mode()
 					
 				_
 					pass
 
+		Ptr(Picker(picker))
+			case FilePicker.handle-key(&picker, key)
+				Just(PickerExit)
+					picker FilePicker.free(ed&.al)
+					ed exit-mode()
+				Just(PickerFile(s))
+					ed set-msg('selected file: \(s)')
+					picker FilePicker.free(ed&.al)
+					ed exit-mode()
+				None
+					pass
+			
 		_
 			todo()
 
@@ -543,6 +588,9 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 			screen Tui.draw-str(menu.name, 0, 0)
 			for (menu-item, i) in menu.items zip(from(1))
 				screen Tui.draw-str('\(menu-item.key) \(menu-item.description)', 0, i)
+		
+		Picker(picker)
+			screen FilePicker.render(picker)
 			
 		_
 			todo()
@@ -610,7 +658,8 @@ ed =& Editor
 	, search-term: None
 
 	, mode: Normal
-	#, mode: Menu({ name: 'miauuu', items: [MenuItem { key: 'a', description: 'miau', action: fn _: () }] })
+	, next-mode: None
+	
 	, msg: initial-message
 
 	, cfg: cfg

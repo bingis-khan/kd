@@ -76,7 +76,7 @@ fn char-replacement (c Char) -> Maybe StrView
 	else
 		return None
 
-fn char-screen-width (c Char) -> I32: char-replacement(c) Misc.maybe(fn s: s chars() count() Mem.size-i32(), Tui.rendered-wcwidth(c))
+fn char-screen-width (c Char) -> I32: char-replacement(c) Misc.maybe(fn s: s chars() count() Mem.size-i32(), Term.rendered-wcwidth(c))
 
 
 fn vi-bi (self Ptr (TextBuf al), ln I32, vx I32) -> I32

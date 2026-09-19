@@ -35,9 +35,15 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [x] editor messages (send message Str -> () which allocates and frees n stuff)
 - [ ] proper cursor position and `before-cursors` position for commenting out, moving, `oO` newlines
 - ...
-- [ ] filepicker (which respects .ignore and .gitignore) (will require more std functions.)
+- [x] filepicker
+	- [ ] actually load files (different buffer support todo)
+	- [ ] respect .gitignore and .ignore :)
+	- [ ] hide hidden files and allow toggle?
+	- [ ] make it look good and style (different styles: either window in the middle or show file contents (or both if the window is big enough))
+- [ ] unify text input controls (search, command, filepicker)
 - ...
 - [x] syntax (keyword) highlighting
+	- [ ] multiline higlighting (eg. markdown code snippets)
 - ...
 - [ ] proper datastructure for handling text (continuous array, the new le vscode data structure, ideally non-recursive :])
 - [ ] hex edit mode (this requires file type detection)
