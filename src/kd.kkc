@@ -5,20 +5,22 @@ use StrBuilder
 use Misc
 	own
 use Cnile (AsciiChar)
+use Alloc (allocate-one)
+use Misc
+	maybe
 
 use TextBuf
 	TextBuf
 use Pos
 	Pos
 use Pane
-	Pane
-	set-mode
+	Pane, set-mode
 use Theme
 	Theme
 use Config
 	Config
 use FilePicker
-	FilePicker, Choice(PickerExit, PickerFile)
+	FilePicker, Choice(PickerExit, PickerFile), is-dir
 
 # some structure:
 # Editor
@@ -52,6 +54,9 @@ Editor al
 	pane Pane al
 	clipboard Maybe StrView
 	search-term Maybe StrView
+	
+	open-files Hash al StrView (Ptr (TextBuf al))
+	all-files List al (Ptr (TextBuf al))
 
 	mode EditorMode al
 	next-mode Maybe (EditorMode al)
@@ -109,6 +114,61 @@ fn exit-mode (ed Ptr (Editor al))
 			ed <&.mode = next-mode
 			ed <&.next-mode = None
 
+# encapsulates logic for opening buffers.
+fn open-buffer-standalone(fname Maybe StrView, al al) -> Ptr (TextBuf al) <= Allocator al
+	tb = al allocate-one()
+	case fname
+		Just(fname)
+			case TextBuf.mk-from-file(al, fname)
+				None
+					# if not, create an empty textbuf with the defined filename (so :w writes to it)
+					# maybe make specialized constructors? or TextBuf.mk-from-file should handle it????
+					tb <&= TextBuf.mk(al)
+					tb <&.filename= Just(fname StrView.clone-0(al))
+				Just(ftb)
+					tb <&= ftb
+		None
+			tb <&= TextBuf.mk(al)
+	return tb
+
+# we split 'em cuz when we are first constructing editor, it's not fully initialized
+# I might just as well maybe leave these fields uninitialized?
+fn add-new-buffer (ed Ptr (Editor al), tb Ptr (TextBuf al)) <= Allocator al
+	List.add(&ed&.all-files, tb)
+
+fn associate-name-with-buffer (ed Ptr (Editor al), tb Ptr (TextBuf al)) <= Allocator al
+	tb&.filename if-just(fn(fname))
+		oldval = Hash.insert-and-get-old-value(&ed&.open-files, fname, tb)
+		
+		# names are always owned, so be sure to free the old one.
+		# we might rename a file to some previously used name. then `is-new` is True, so we must free the old name.
+		# if an old file is selected, then the name points to the same memory.
+		oldval fmap-maybe(fst) if-just(fn(fname))
+			fname StrView.free(tb&.al)
+		
+
+fn open-buffer (ed Ptr (Editor al), fname Maybe StrView) <= Allocator al
+	tb = @undefined
+	case fname and-maybe(fn fname: Hash.lookup(&ed&.open-files, fname))
+		Just(ole-tb)
+			tb <= ole-tb
+		None
+			tb <= fname open-buffer-standalone(ed&.al)
+			ed add-new-buffer(tb)
+			ed associate-name-with-buffer(tb)
+	ed <&.pane = Pane.mk(ed&.al, tb)  # also store Panes too. maybe in the next function?
+
+fn save-current-buffer (ed Ptr (Editor al), new-filename Maybe StrView) <= Allocator al
+	case new-filename
+		None
+			return ed pane()&.buf TextBuf.write-to-file(None)
+		Just(new-filename)
+			new-filename = new-filename StrView.clone-0(ed&.al)
+			tb = ed pane()&.buf
+			write-result = tb TextBuf.write-to-file(Just(new-filename))
+			ed associate-name-with-buffer(tb)
+			return write-result
+		
 
 fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 	case cmd parse-int()
@@ -140,7 +200,7 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 	elif cmd == 'w'
 		filename = sc Scan.take-str-while(is-not-whitespace)
 		filename = if filename null(): None else Just(filename)
-		write-result = ed pane()&.buf TextBuf.write-to-file(filename)
+		write-result = ed save-current-buffer(filename)
 		case write-result
 			None
 				if filename is-none()
@@ -151,8 +211,12 @@ fn run-cmd (ed Ptr (Editor al), s StrView) <= Allocator al
 				ed set-msg('written \(bytes-written) bytes')
 
 	elif cmd == 'o'
-		todo()
-		pass
+		filename = sc Scan.take-str-while(is-not-whitespace)
+		if filename null()
+			ed set-msg('no filename given')
+			return
+			
+		ed open-buffer(Just(filename))
 	
 	elif cmd == 'ln'
 		what = sc Scan.take-str-while(is-not-whitespace)
@@ -541,7 +605,7 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					picker FilePicker.free(ed&.al)
 					ed exit-mode()
 				Just(PickerFile(s))
-					ed set-msg('selected file: \(s)')
+					ed open-buffer(Just(s))
 					picker FilePicker.free(ed&.al)
 					ed exit-mode()
 				None
@@ -631,21 +695,16 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	# ann(Time.now().tv-sec)
 
 
-
 al = Alloc.idc()
-tb =& @undefined
 args = Args.get()
 initial-message = None
-if args.count > 0
-	fname = args[0] StrView.from-const-str()
-	case TextBuf.mk-from-file(al, fname)
-		None
-			tb <&= TextBuf.mk(al)
-			tb <&.filename= Just(fname StrView.clone-0(al))
-		Just(ftb)
-			tb <&= ftb
-else
-	tb <&= TextBuf.mk(al)
+given-name = args
+	Slice.try-get(0)
+	fmap-maybe(StrView.from-const-str)
+	
+is-given-a-dir = given-name maybe(fn name: name StrView.as-const-str() is-dir(), False)
+filename = if not is-given-a-dir: given-name else None  # don't open it as a file if it's a dir.
+tb = filename open-buffer-standalone(al)
 
 cfg =& Config
 	{ theme: Theme.default
@@ -658,6 +717,9 @@ ed =& Editor
 	, pane: Pane.mk(al, tb)
 	, clipboard: None
 	, search-term: None
+	
+	, open-files: Hash.mk(al)
+	, all-files: List.mk(al)
 
 	, mode: Normal
 	, next-mode: None
@@ -667,6 +729,14 @@ ed =& Editor
 	, cfg: cfg
 	, og-theme: Theme.default
 	}
+
+# finish adding the new buffer bruh.
+ed add-new-buffer(tb)
+ed associate-name-with-buffer(tb)
+
+if is-given-a-dir
+	ed <&.mode= Picker(FilePicker.at-dir(given-name or-fail('when we detect it\'s a directory, we must have had a filename'), ed&.al))
+
 
 # screen shit
 tui =& Tui.mk()
@@ -705,3 +775,14 @@ while ed&.running
 
 screen Tui.free-screen()
 tui Tui.deinit()
+
+
+# free editor
+# (todo cuz it crashes it for now :)))
+# (&ed&.all-files) List.deep-free(fn (al, tb))
+# 	TextBuf.free(tb)
+# 	al Alloc.free-one(tb)
+# 
+# for (name, _) in ed&.open-files
+# 	name StrView.free(ed&.al)
+

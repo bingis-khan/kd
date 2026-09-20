@@ -57,6 +57,15 @@ fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
 		, sel-size: 0
 		}
 
+# very shitty way to check if a path is a directory.
+fn is-dir(filename CStr)
+	case filename File.open-dir-os()
+		Just(dir)
+			dir File.close-dir()
+			return True
+		None
+			return False
+
 fn free(p FilePicker Allocator, al Allocator)
 	for name in p.total-files
 		StrView.free(name, al)

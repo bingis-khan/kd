@@ -64,6 +64,11 @@ Actions al
 	input-changeset ChangesetInputType
 
 fn mk-actions (al al) -> Actions al: { list: List.mk(al), cur: 0, input-changeset: NoChangeset }
+
+fn free-actions(self Actions al) <= Allocator al
+	(&self.list) List.deep-free(fn(al, chs): chs free-changeset(al))
+
+
 fn trim-actions (actions Ptr (Actions Allocator))
 	al = actions&.list.al
 	cur = actions&.cur
@@ -241,6 +246,7 @@ fn change-no-action (self Ptr (TextBuf Allocator), from-pos Pos, to-pos Pos, byt
 fn write-to-file (self Ptr (TextBuf al), altname Maybe StrView) -> Maybe Size <= Allocator al
 	al = self&.al
 
+	# TODO: memleak here.
 	nu-filename = altname Misc.fmap-maybe(fn s: s StrView.clone-0(al))  # allocate if setting a new filename.
 	filename = altname Misc.maybe(Just, self&.filename)
 	if filename is-none()
@@ -276,6 +282,10 @@ fn mk (al Allocator): TextBuf
 	, filename: None
 	, filetype: Text
 	}
+
+fn free (self Ptr (TextBuf al)) <= Allocator al
+	(&self&.buf) List.deep-free(fn (_, line): free-line(&line))
+	self&.actions free-actions()
 
 fn mk-from-file (al Allocator, filename StrView) -> Maybe (TextBuf Allocator)
 	tb =& mk(al)
