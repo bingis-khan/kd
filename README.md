@@ -36,11 +36,12 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 - [ ] proper cursor position and `before-cursors` position for commenting out, moving, `oO` newlines
 - ...
 - [x] filepicker
-	- [ ] actually load files (different buffer support todo)
+	- [x] actually load files (different buffer support todo)
 	- [ ] respect .gitignore and .ignore :)
 	- [ ] hide hidden files and allow toggle?
-	- [ ] make it look good and style (different styles: either window in the middle or show file contents (or both if the window is big enough))
-- [ ] unify text input controls (search, command, filepicker)
+	- [x] make it look good and style
+	- [x] open directories and open picker when specified a dir.
+- [x] unify text input controls (search, command, filepicker)
 - ...
 - [x] syntax (keyword) highlighting
 	- [ ] multiline higlighting (eg. markdown code snippets)

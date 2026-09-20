@@ -4,6 +4,9 @@ use Iter (map-maybe)
 
 use File (Dir, DirType(File, Directory))
 use Pane (ScreenDims)  # bad import, we only depend on the screen dims data structure.
+use Config (Config)
+use TextBox (TextBox)
+
 
 # quick and dirty impl (without the Path type and file info stuff)
 fn get-files-in-dir(dirname StrView, al Allocator) -> Slice StrView
@@ -38,7 +41,7 @@ FilePicker al
 	rendered-files Slice (StrView, Size)  # which files to show after filtering them through a query. is 'filtered' a better name?
 	
 	sel Size
-	query StrBuilder al  # IDEA: maybe generalize textboxes (I should, since I want to control more stuff with CTRL-... which would be tedious)
+	query TextBox al  # IDEA: maybe generalize textboxes (I should, since I want to control more stuff with CTRL-... which would be tedious)
 	sel-size Size   # smol thing. we trim the original string when searching and this will point to the actual query size.
 
 fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
@@ -53,7 +56,7 @@ fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
 		{ total-files: files
 		, rendered-files: default-filtered
 		, sel: 0
-		, query: StrBuilder.mk(al)
+		, query: TextBox.mk(al)
 		, sel-size: 0
 		}
 
@@ -71,12 +74,12 @@ fn free(p FilePicker Allocator, al Allocator)
 		StrView.free(name, al)
 	al Alloc.free(p.total-files)
 	al Alloc.free(p.rendered-files)
-	StrBuilder.free(&p.query)
+	TextBox.free(&p.query)
 
 
 fn query-update(p Ptr (FilePicker al))
 	buflist =& BufList.mk(p&.rendered-files { count: p&.total-files.count })
-	query = StrBuilder.as-str(&p&.query) StrView.trim()
+	query = p&.query TextBox.as-str() StrView.trim()
 	buflist BufList.add-all(p&.total-files map-maybe(fn filename: filename StrView.find(query) Misc.fmap-maybe(fn idx: (filename, idx))))
 	p <&.rendered-files= buflist&.slice
 	p <&.sel = 0  # also don't forget to reset the sel cursor. (to the first position, like helix)
@@ -84,59 +87,101 @@ fn query-update(p Ptr (FilePicker al))
 
 
 # primitives. maybe move them to std?
-fn fill-rect(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32, color Color)
-	screen Tui.set-screen-bg(color)
+fn fill-rect(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32)
 	for y in from-y to (to-y)
 		for x in from-x to (to-x)
 			screen Tui.put-char(' ', x, y)
 			
-fn draw-rect(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32, color Color)
-	screen Tui.set-screen-bg(color)
-	for x in from-x to (to-x)
-		screen Tui.put-char(' ', x, from-y)
-		screen Tui.put-char(' ', x, to-y)
+fn draw-box(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32, to-y I32)
+	vbar = '┃'
+	hbar = '━'
+	tl = '┏'
+	lj = '┣'
+	tr = '┓'
+	rj = '┫'
+	bl = '┗'
+	br = '┛'
+	
+	screen fill-rect(from-x + 1, from-y + 1, to-x - 1, to-y - 1)
+	
+	hbar-y = from-y + 2
+	for x in (from-x + 1) to (to-x - 1)
+		screen Tui.put-char(hbar, x, from-y)
+		screen Tui.put-char(hbar, x, to-y)
+		screen Tui.put-char(hbar, x, hbar-y)
 		
 	for y in (from-y + 1) to (to-y - 1)
-		screen Tui.put-char(' ', from-x, y)
-		screen Tui.put-char(' ', to-x, y)
+		screen Tui.put-char(vbar, from-x, y)
+		screen Tui.put-char(vbar, to-x, y)
+	
+	screen Tui.put-char(lj, from-x, hbar-y)
+	screen Tui.put-char(rj, to-x, hbar-y)
+	
+	# corners
+	screen Tui.put-char(tl, from-x, from-y)
+	screen Tui.put-char(tr, to-x, from-y)
+	screen Tui.put-char(bl, from-x, to-y)
+	screen Tui.put-char(br, to-x, to-y)
 
-fn draw-hline(screen Ptr (Tui.Screen Allocator), from-x I32, to-x I32, y I32, color Color)
-	screen Tui.set-screen-bg(color)
-	for x in from-x to (to-x)
-		screen Tui.put-char(' ', x, y)
-
-fn render(screen Ptr (Tui.Screen al), p FilePicker al) <= Allocator al
+fn render(screen Ptr (Tui.Screen al), p FilePicker al, config Ptr Config) <= Allocator al
+	# parameters
+	default-width = 30
+	expected-page-size = 15
+	
+	# ==========
 	width = screen&.tui&.width Mem.u32-i32() - 1
 	height = screen&.tui&.height Mem.u32-i32() - 1
-	screen draw-rect(0, 0, width, height, Term.Color16(Term.Red16))
-	screen fill-rect(1, 1, width - 1, height - 1, Term.Color16(Term.Black16))
 	
 	left-off = 1
-	max-width = width - left-off - 1 - 1
-	
+	max-possible-width = width - left-off - 1 - 1
 	searchbar-y-size = 2
-	screen Tui.draw-str(p.query Term.trim-to-wcwidth(max-width), 2, 1)
-	screen draw-hline(1, width - 1, 2, Term.Color16(Term.Red16))
+	num-files-to-display = Math.min(height - 2 - searchbar-y-size, expected-page-size)
+		
+	page = p.sel / Mem.i32-size(num-files-to-display)  # +1 cuz... trust the science
+	start-i = page * Mem.i32-size(num-files-to-display)
+	displayed-files = p.rendered-files Slice.subslice(start-i, start-i + num-files-to-display Mem.i32-size())  # go to correct page
+	max-shown-filename-width = displayed-files map(fst) map(Term.rendered-str-wcwidth) maximum() or-else(default-width) Math.max(default-width)
 	
-	screen Tui.set-screen-bg(Term.Color16(Term.Black16))
-	num-files-to-display = height - 2 - searchbar-y-size
+	sel-cursor = ' > '
+	sel-cursor-off = sel-cursor Term.rendered-str-wcwidth()
+	
+	max-width = Math.min(max-possible-width, max-shown-filename-width + sel-cursor-off)
+	
+	box-width = 2 + max-width
+	box-height = Mem.size-i32(3 + displayed-files.count)
+	default-box-height = 3 + expected-page-size
+	box-x = (width - box-width) / 2
+	box-y = Math.min((height - default-box-height) / 2, (height - box-height) / 2)
+	box-to-x = box-x + box-width
+	box-to-y = box-y + box-height
+	
+	colors = config&.theme&.default
+	default-text-color = config&.theme&.default
+	screen Theme.set-screen-colors(colors)
+	screen draw-box(box-x, box-y, box-to-x, box-to-y)
+	
+	screen Tui.draw-str-right-aligned('\(p.rendered-files.count)/\(p.total-files.count)', box-to-x - 1, box-y + 1)
+	
+	# draw query and cursor
+	screen Tui.draw-str(p.query TextBox.as-str() Term.trim-to-wcwidth(max-width), box-x + 2, box-y + 1)
+	if p.query.cursor <= max-shown-filename-width Mem.i32-size()
+		screen Tui.get-cell-ptr(box-x + 2 + p.query.cursor Mem.size-i32(), box-y + 1) if-just(fn(cell))
+			cell <&.fg= config&.theme&.cursor.fg
+			cell <&.bg= config&.theme&.cursor.bg
+	
+	
 	if num-files-to-display <= 0  # in case we don't have space, exit. 0 can mess up some of the calculations.
 		return
 		
-	page = p.sel / Mem.i32-size(num-files-to-display + 1)  # +1 cuz... trust the science
-	start-i = page * Mem.i32-size(num-files-to-display + 1)
-	files = p.rendered-files Slice.from(start-i)  # go to correct page
 	sel-size = p.sel-size
-	sel-color = Term.Color16(Term.Cyan16)
-	
-	sel-cursor = ' > '
-	sel-cursor-off = sel-cursor Term.rendered-str-width()
-	for (((filename, found-idx), file-i), y) in files zip(from(Mem.size-i32(start-i))) zip((1 + searchbar-y-size) to (height - 1))
-		text-color = Term.Color16(Term.White16)
+	match-colors = config&.theme&.picker-match
+	sel-colors = config&.theme&.picker-sel
+	for (((filename, found-idx), file-i), y) in displayed-files zip(from(Mem.size-i32(start-i))) zip((box-y + 1 + searchbar-y-size) to (height - 1))
+		text-colors = default-text-color
 		if file-i == p.sel Mem.size-i32()
-			text-color <= Term.Color16(Term.Yellow16)
-			screen Tui.set-screen-fg(text-color)
-			screen Tui.draw-str(sel-cursor, left-off, y)
+			text-colors <= { fg: sel-colors.fg, bg: sel-colors.bg or-else(text-colors.bg) }
+			screen Theme.set-screen-colors(text-colors)
+			screen Tui.draw-str(sel-cursor, box-x + left-off, y)
 			
 		filename = filename Term.trim-strview-to-wcwidth(max-width - sel-cursor-off)
 		
@@ -145,12 +190,12 @@ fn render(screen Ptr (Tui.Screen al), p FilePicker al) <= Allocator al
 		in-sel = filename StrView.byte-substr(found-idx, found-idx + sel-size)
 		after-sel = filename StrView.byte-substr-from(found-idx + sel-size)
 		
-		text-from-x = left-off + sel-cursor-off
-		screen Tui.set-screen-fg(text-color)
+		text-from-x = box-x + left-off + sel-cursor-off
+		screen Theme.set-screen-colors(text-colors)
 		screen Tui.draw-str(before-sel, text-from-x, y)
-		screen Tui.set-screen-fg(sel-color)
+		screen Theme.set-screen-colors({ fg: match-colors.fg, bg: match-colors.bg or-else(text-colors.bg) })
 		screen Tui.draw-str(in-sel, text-from-x + Mem.size-i32(found-idx), y)
-		screen Tui.set-screen-fg(text-color)
+		screen Theme.set-screen-colors(text-colors)
 		screen Tui.draw-str(after-sel, text-from-x + Mem.size-i32(found-idx + sel-size), y)
 
 
@@ -168,15 +213,6 @@ fn handle-key (p Ptr (FilePicker al), key Tui.Key) -> Maybe Choice <= Allocator 
 			
 			assert(p&.sel < p&.rendered-files.count, '(FilePicker.handle-key) index must point to a valid list element')
 			return Just(PickerFile(p&.rendered-files[p&.sel] fst()))
-		
-		Tui.Char(c)
-			StrBuilder.write-char(&p&.query, c Char.ascii-char())
-			p query-update()
-		
-		Tui.Backspace
-			if not p&.query null()
-				StrBuilder.pop(&p&.query)
-			p query-update()
 		
 		Tui.Up
 			filecount = p&.rendered-files.count
@@ -197,7 +233,9 @@ fn handle-key (p Ptr (FilePicker al), key Tui.Key) -> Maybe Choice <= Allocator 
 			p <&.sel= (p&.sel + 1) Math.mod(filecount)
 
 			
-		_
-			pass
-			
+		other			
+			if TextBox.handle-key(&p&.query, key)
+				p query-update()
+		
+
 	return None

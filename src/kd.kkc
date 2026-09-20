@@ -21,6 +21,8 @@ use Config
 	Config
 use FilePicker
 	FilePicker, Choice(PickerExit, PickerFile), is-dir
+use TextBox
+	TextBox
 
 # some structure:
 # Editor
@@ -43,8 +45,8 @@ Menu al
 
 EditorMode al
 	Normal
-	Cmd Pos (StrBuilder al)
-	Search Pos (StrBuilder al)
+	Cmd Pos (TextBox al)
+	Search Pos (TextBox al)
 	Menu (Menu al)
 	Picker (FilePicker al)
 
@@ -74,10 +76,12 @@ inst Str EditorMode
 		case self
 			Normal
 				c <= 'Normal' StrCase1()
-			Cmd(pos, sb)
-				c <= 'Cmd(\(pos)|\(sb))' StrCase2()
-			Search(pos, sb)
-				c <= 'Search(\(pos)|\(sb))' StrCase2()
+			Cmd(pos, textbox)
+				s = textbox TextBox.as-str()
+				c <= 'Cmd(\(pos)|\(s))' StrCase2()
+			Search(pos, textbox)
+				s = textbox TextBox.as-str()
+				c <= 'Search(\(pos)|\(s))' StrCase2()
 			Menu(menu)
 				c <= 'Menu' StrCase1()
 			_
@@ -446,11 +450,11 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					ed <&.pane.sel= Just(ed&.pane.cursor)
 
 			elif c == ':'
-				ed <&.mode= Cmd(ed pane()&.cursor, StrBuilder.mk(ed&.al))
+				ed <&.mode= Cmd(ed pane()&.cursor, TextBox.mk(ed&.al))
 
 
 			elif c == '/'
-				ed <&.mode= Search(ed pane()&.cursor, StrBuilder.mk(ed&.al))
+				ed <&.mode= Search(ed pane()&.cursor, TextBox.mk(ed&.al))
 
 			elif c == 'n'
 				ed next-match()
@@ -517,16 +521,16 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 							ed pane() Pane.add-str-at-char(s)
 							ed pane() Pane.move-right()
 
-		Ptr(Cmd(prev-cur, sb))
+		Ptr(Cmd(prev-cur, textbox))
 			case key
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
-					ed <&.mode= Normal
+					ed exit-mode()
 					ed <&.cfg&.theme= ed&.og-theme  # reset theme in case it was changed.
 
 				Tui.Enter
-					ed run-cmd(StrBuilder.as-str(&sb))
-					StrBuilder.free(&sb)
+					ed run-cmd(textbox TextBox.as-str())
+					TextBox.free(&textbox)
 
 					# assume we are already in the correct place.
 					# we're really just setting the vi
@@ -535,20 +539,12 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					ed exit-mode()
 					ed <&.og-theme= ed&.cfg&.theme  # set the theme if it was modified.
 
-				Tui.Char(c)
-					StrBuilder.write-char(&sb, c Char.ascii-char())
-					ed live-cmd(StrBuilder.as-str(&sb))
-
-				Tui.Backspace
-					if not sb null()
-						StrBuilder.pop(&sb)
-					ed live-cmd(StrBuilder.as-str(&sb))
-
 				_
-					pass
+					if TextBox.handle-key(&textbox, key)
+						ed live-cmd(textbox TextBox.as-str())
 
 
-		Ptr(Search(prev-cur, sb))
+		Ptr(Search(prev-cur, textbox))
 			case key
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
@@ -562,27 +558,20 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					ed&.search-term if-just(fn(st))
 						StrView.free(st, ed&.al)
 
-					if not sb null()
+					nu-search = textbox TextBox.as-str()
+					if not nu-search null()
 						to = ed pane()&.cursor
 						from = ed pane()&.sel or-else(to)
-						ed <&.search-term= Just(StrBuilder.as-str(&sb))
+						ed <&.search-term= Just(nu-search)
 					else
 						ed <&.search-term= None
 					
 					ed exit-mode()
 
-
-				Tui.Char(c)
-					StrBuilder.write-char(&sb, c Char.ascii-char())
-					ed live-search(prev-cur, StrBuilder.as-str(&sb))
-
-				Tui.Backspace
-					if not sb null()
-						StrBuilder.pop(&sb)
-					ed live-search(prev-cur, StrBuilder.as-str(&sb))
-
 				_
-					pass
+					if TextBox.handle-key(&textbox, key)
+						ed live-search(prev-cur, textbox TextBox.as-str())
+						
 
 		Ptr(Menu(menu))
 			case key
@@ -633,22 +622,49 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		Normal
 			pass
 
-		Cmd(_, sb)
-			num-chars = sb chars() count() Mem.size-i32()
+		Cmd(_, textbox)
+			s = textbox TextBox.as-str()
+			num-chars = s Term.rendered-str-wcwidth()
 			pad = if num-chars Math.mod(2) == 0: '' else ' '
 			num-chars = num-chars + num-chars Math.mod(2)
 			# todo: keyboard emoji has a surrogate pair, which I should theoretically handle, but I'm not doing that.
-			full-str = ' ⌨️ \(sb)\(pad) '  # alternate char that looks nice is '#'
-			full-chars = full-str chars() count() Mem.size-i32()
-			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
+			pre = ' ⌨️ '
+			pre-width = pre Term.rendered-str-wcwidth()
+			post = '\(pad) '
+			post-width = post Term.rendered-str-wcwidth()
+			full-str = '\(pre)\(s)\(post)'  # alternate char that looks nice is '#'
+			full-chars = full-str Term.rendered-str-wcwidth()
+			begin-x = (screen&.tui&.width Mem.u32-i32() - full-chars) / 2
+			screen Tui.draw-str(full-str, begin-x, 1)
+			
+			chars-before-cursor-offset = s take(textbox.cursor) Term.rendered-str-wcwidth()		
+			cursor-screen-pos = begin-x + pre-width + chars-before-cursor-offset 
+			if not textbox TextBox.cursor-is-at-end()
+				screen Tui.get-cell-ptr(cursor-screen-pos, 1) if-just(fn(cell))
+					cell <&.fg= ed&.cfg&.theme&.cursor.fg
+					cell <&.bg= ed&.cfg&.theme&.cursor.bg
 
-		Search(_, sb)
-			num-chars = sb chars() count() Mem.size-i32()
+
+		Search(_, textbox)
+			s = textbox TextBox.as-str()
+			num-chars = s Term.rendered-str-wcwidth()
 			pad = if num-chars Math.mod(2) == 0: '' else ' '
 			num-chars = num-chars + num-chars Math.mod(2)
-			full-str = ' 🔎  \(sb)\(pad)  '
-			full-chars = full-str chars() count() Mem.size-i32()
-			screen Tui.draw-str(full-str, (screen&.tui&.width Mem.u32-i32() - full-chars) / 2, 1)
+			post = '\(pad)  '
+			post-width = post Term.rendered-str-wcwidth()
+			pre = ' 🔎  '
+			pre-width = pre Term.rendered-str-wcwidth()
+			full-str = '\(pre)\(s)\(post)'
+			full-chars = full-str Term.rendered-str-wcwidth()
+			begin-x = (screen&.tui&.width Mem.u32-i32() - full-chars) / 2
+			screen Tui.draw-str(full-str, begin-x, 1)
+			
+			chars-before-cursor-offset = s take(textbox.cursor) Term.rendered-str-wcwidth()
+			cursor-screen-pos = begin-x + pre-width + chars-before-cursor-offset 
+			if not textbox TextBox.cursor-is-at-end()
+				screen Tui.get-cell-ptr(cursor-screen-pos, 1) if-just(fn(cell))
+					cell <&.fg= ed&.cfg&.theme&.cursor.fg
+					cell <&.bg= ed&.cfg&.theme&.cursor.bg
 		
 		Menu(menu)
 			screen Tui.draw-str(menu.name, 0, 0)
@@ -656,7 +672,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 				screen Tui.draw-str('\(menu-item.key) \(menu-item.description)', 0, i)
 		
 		Picker(picker)
-			screen FilePicker.render(picker)
+			screen FilePicker.render(picker, ed&.cfg)
 			
 		_
 			todo()

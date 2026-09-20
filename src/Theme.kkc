@@ -1,5 +1,7 @@
 use Term
 	Color
+use Tui
+	Screen, set-screen-colors
 
 use Highlight
 	HighlightType
@@ -7,6 +9,18 @@ use Highlight
 Colors
 	fg   Color
 	bg   Color
+
+Colors'
+	fg Color
+	bg Maybe Color
+
+fn set-screen-colors (screen Ptr (Screen Allocator), colors Colors)
+	screen Tui.set-screen-colors(colors.fg, colors.bg)
+		
+fn set-screen-colors' (screen Ptr (Screen Allocator), colors Colors')
+	screen Tui.set-screen-fg(colors.fg)
+	colors.bg if-just(fn(bg))
+		screen Tui.set-screen-bg(bg)
 
 HighlightColors
 	type HighlightType
@@ -23,6 +37,8 @@ Theme
 	line-num    Colors
 	line-num-hl Colors
 	overlay     Colors
+	picker-sel  Colors'
+	picker-match Colors'
 
 	highlights  Slice HighlightColors
 
@@ -51,6 +67,8 @@ goblin-ultra =& Theme
 	, line-num: { bg: evergreen, fg: forest-green }
 	, line-num-hl: { bg: evergreen, fg: tea-green }
 	, overlay: { bg: dark-spruce, fg: lime-green }
+	, picker-sel: { fg: tea-green, bg: None }
+	, picker-match: { fg: muted-olive, bg: None }
 	, highlights: Array.as-slice(&
 		[ hlt(Highlight.Number, green)
 		, hlt(Highlight.String, camel)
@@ -96,6 +114,7 @@ gb-purple1 = rgb(0xd3869b)
 gb-yellow1 = rgb(0xfabd2f)
 gb-red1 = rgb(0xfb4934)
 gb-aqua1 = rgb(0x8ec07c)
+gb-fg3 = rgb(0xbdae93)
 
 gruvbox =& Theme
 	{ default: { bg: gb-bg, fg: gb-fg }
@@ -105,6 +124,8 @@ gruvbox =& Theme
 	, line-num: { bg: gb-bg, fg: gb-lnfg }
 	, line-num-hl: { bg: gb-bg, fg: gb-lnhlfg }
 	, overlay: { bg: gb-obg, fg: gb-ofg }
+	, picker-sel: { fg: gb-yellow1, bg: None }
+	, picker-match: { fg: gb-aqua1, bg: None }
 	, highlights: Array.as-slice(&
 		[ hlt(Highlight.Number, gb-purple1)
 		, hlt(Highlight.String, gb-green1)
@@ -135,6 +156,8 @@ dark-theme =& Theme
 	, line-num: { bg: Term.Color8(Term.Black8), fg: Term.Color8(Term.White8) }
 	, line-num-hl: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
 	, overlay: { bg: Term.Color8(Term.White8), fg: Term.Color8(Term.Black8) }
+	, picker-sel: { fg: Term.Color16(Term.BrightWhite16), bg: None }
+	, picker-match: { fg: Term.Color16(Term.BrightWhite16), bg: None }
 	, highlights: Slice.empty()
 	}
 
@@ -146,6 +169,8 @@ light-theme =& Theme
 	, line-num: { bg: Term.Color16(Term.BrightWhite16), fg: Term.Color8(Term.Black8) }
 	, line-num-hl: { bg: Term.Color8(Term.Black8), fg: Term.Color16(Term.BrightWhite16) }
 	, overlay: { bg: Term.Color8(Term.Black8), fg: Term.Color16(Term.BrightWhite16) }
+	, picker-sel: { fg: Term.Color16(Term.BrightBlack16), bg: None }
+	, picker-match: { fg: Term.Color16(Term.White16), bg: None }
 	, highlights: Slice.empty()
 	}
 

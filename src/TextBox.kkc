@@ -1,0 +1,62 @@
+use StrBuilder (StrBuilder)
+
+
+TextBox al
+	buf StrBuilder al
+	cursor Size
+
+
+fn mk(al al) -> TextBox al <= Allocator al:
+	{ buf: StrBuilder.mk(al), cursor: 0 }
+
+fn free(self Ptr (TextBox al)) <= Allocator al
+	StrBuilder.free(&self&.buf)
+
+
+fn as-str(self TextBox al) -> StrView: StrBuilder.as-str(&self.buf)
+
+fn cursor-is-at-end(self TextBox al) -> Bool: StrBuilder.count(&self.buf) == self.cursor
+
+
+fn handle-key(self Ptr (TextBox Allocator), key Tui.Key) -> Bool
+	case key
+		Tui.Char(c)
+			StrBuilder.insert-char(&self&.buf, self&.cursor, c Char.ascii-char())
+			self <&.cursor= self&.cursor + 1
+			return True
+
+		Tui.Backspace
+			if self&.cursor > 0
+				StrBuilder.remove(&self&.buf, self&.cursor - 1)
+				self <&.cursor= self&.cursor - 1
+				return True
+
+		Tui.Left
+			if self&.cursor /= 0
+				self <&.cursor= self&.cursor - 1
+				return True
+			
+		Tui.Right
+			if not self& cursor-is-at-end()
+				self <&.cursor= self&.cursor + 1
+				return True
+		
+		Tui.Ctrl(c)
+			if c == 'a'
+				if self&.cursor /= 0
+					self <&.cursor = 0
+					return True
+			elif c == 'e'
+				if not self& cursor-is-at-end()
+					self <&.cursor = StrBuilder.count(&self&.buf)
+					return True
+			elif c == 'k'
+				if not self& cursor-is-at-end()
+					StrBuilder.trim-bytes(&self&.buf, self&.cursor)
+					return True
+		
+		_
+			pass
+	
+	return False
+
