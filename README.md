@@ -1,6 +1,6 @@
 # kd - kind of an editor
 
-my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). attempts to emulate helix control scheme.
+my attempt at an editor written in [kc](https://git.bimbur.art/kkc)([github](https://github.com/bingis-khan/kkc)). attempts to emulate helix control scheme.
 
 ![showcase](./screenshot.png)
 ![showcase2](./screenshot2.png)
@@ -43,7 +43,7 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 	- [x] make it look good and style
 	- [x] open directories and open picker when specified a dir.
 	- [x] cursor scrolling and preserve cursor position (better than el helixo O_O)
-	- [ ] actually change design of Tui, readd `resize` event? or should I somehow pass dims to `handle-key`?
+	- [x] actually change design of Tui, readd `resize` event? or should I somehow pass dims to `handle-key`? (added the resize event)
 - [x] unify text input controls (search, command, filepicker)
 - ...
 - [x] syntax (keyword) highlighting
