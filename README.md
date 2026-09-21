@@ -42,6 +42,8 @@ my attempt at an editor written in [kc](https://github.com/bingis-khan/kkc). att
 	- [ ] hide hidden files and allow toggle?
 	- [x] make it look good and style
 	- [x] open directories and open picker when specified a dir.
+	- [x] cursor scrolling and preserve cursor position (better than el helixo O_O)
+	- [ ] actually change design of Tui, readd `resize` event? or should I somehow pass dims to `handle-key`?
 - [x] unify text input controls (search, command, filepicker)
 - ...
 - [x] syntax (keyword) highlighting

@@ -43,6 +43,12 @@ FilePicker al
 	sel Size
 	query TextBox al  # IDEA: maybe generalize textboxes (I should, since I want to control more stuff with CTRL-... which would be tedious)
 	sel-size Size   # smol thing. we trim the original string when searching and this will point to the actual query size.
+	
+	last-height I32 # last height which we use for scrolling.
+	screen-sel Size  # this points to the expected cursor position in the menu, kinda like vi
+
+
+expected-page-size = 15
 
 fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
 	files = get-files-in-dir(dir, al)
@@ -58,6 +64,8 @@ fn at-dir(dir Str, al Allocator) -> FilePicker Allocator
 		, sel: 0
 		, query: TextBox.mk(al)
 		, sel-size: 0
+		, last-height: expected-page-size
+		, screen-sel: 0
 		}
 
 # very shitty way to check if a path is a directory.
@@ -83,7 +91,21 @@ fn query-update(p Ptr (FilePicker al))
 	buflist BufList.add-all(p&.total-files map-maybe(fn filename: filename StrView.find(query) Misc.fmap-maybe(fn idx: (filename, idx))))
 	p <&.rendered-files= buflist&.slice
 	p <&.sel = 0  # also don't forget to reset the sel cursor. (to the first position, like helix)
+	p <&.screen-sel= 0
 	p <&.sel-size= query StrView.num-bytes()
+
+
+fn page-size (p FilePicker al)
+	# TODO: copypasta :((((
+	height = p.last-height
+	searchbar-y-size = 2
+	num-files-to-display = Math.min(height - 2 - searchbar-y-size, expected-page-size)
+	return num-files-to-display
+
+fn set-sel (p Ptr (FilePicker al), nusel Size)
+	p <&.sel= nusel
+	p <&.screen-sel= if nusel == 0: 0 else nusel Math.mod(p& page-size() Mem.i32-size())  # (also silently handles 0-size)
+	
 
 
 # primitives. maybe move them to std?
@@ -123,23 +145,23 @@ fn draw-box(screen Ptr (Tui.Screen Allocator), from-x I32, from-y I32, to-x I32,
 	screen Tui.put-char(bl, from-x, to-y)
 	screen Tui.put-char(br, to-x, to-y)
 
-fn render(screen Ptr (Tui.Screen al), p FilePicker al, config Ptr Config) <= Allocator al
+fn render(screen Ptr (Tui.Screen al), p Ptr (FilePicker al), config Ptr Config) <= Allocator al
 	# parameters
 	default-width = 30
-	expected-page-size = 15
 	
 	# ==========
 	width = screen&.tui&.width Mem.u32-i32() - 1
 	height = screen&.tui&.height Mem.u32-i32() - 1
+	p <&.last-height= height  # update height yo (should create a screen resize event doe)
 	
 	left-off = 1
 	max-possible-width = width - left-off - 1 - 1
 	searchbar-y-size = 2
-	num-files-to-display = Math.min(height - 2 - searchbar-y-size, expected-page-size)
+	num-files-to-display = p& page-size()
 		
-	page = p.sel / Mem.i32-size(num-files-to-display)  # +1 cuz... trust the science
+	page = p&.sel / Mem.i32-size(num-files-to-display)  # +1 cuz... trust the science
 	start-i = page * Mem.i32-size(num-files-to-display)
-	displayed-files = p.rendered-files Slice.subslice(start-i, start-i + num-files-to-display Mem.i32-size())  # go to correct page
+	displayed-files = p&.rendered-files Slice.subslice(start-i, start-i + num-files-to-display Mem.i32-size())  # go to correct page
 	max-shown-filename-width = displayed-files map(fst) map(Term.rendered-str-wcwidth) maximum() or-else(default-width) Math.max(default-width)
 	
 	sel-cursor = ' > '
@@ -160,12 +182,12 @@ fn render(screen Ptr (Tui.Screen al), p FilePicker al, config Ptr Config) <= All
 	screen Theme.set-screen-colors(colors)
 	screen draw-box(box-x, box-y, box-to-x, box-to-y)
 	
-	screen Tui.draw-str-right-aligned('\(p.rendered-files.count)/\(p.total-files.count)', box-to-x - 1, box-y + 1)
+	screen Tui.draw-str-right-aligned('\(p&.rendered-files.count)/\(p&.total-files.count)', box-to-x - 1, box-y + 1)
 	
 	# draw query and cursor
-	screen Tui.draw-str(p.query TextBox.as-str() Term.trim-to-wcwidth(max-width), box-x + 2, box-y + 1)
-	if p.query.cursor <= max-shown-filename-width Mem.i32-size()
-		screen Tui.get-cell-ptr(box-x + 2 + p.query.cursor Mem.size-i32(), box-y + 1) if-just(fn(cell))
+	screen Tui.draw-str(p&.query TextBox.as-str() Term.trim-to-wcwidth(max-width), box-x + 2, box-y + 1)
+	if p&.query.cursor <= max-shown-filename-width Mem.i32-size()
+		screen Tui.get-cell-ptr(box-x + 2 + p&.query.cursor Mem.size-i32(), box-y + 1) if-just(fn(cell))
 			cell <&.fg= config&.theme&.cursor.fg
 			cell <&.bg= config&.theme&.cursor.bg
 	
@@ -173,12 +195,12 @@ fn render(screen Ptr (Tui.Screen al), p FilePicker al, config Ptr Config) <= All
 	if num-files-to-display <= 0  # in case we don't have space, exit. 0 can mess up some of the calculations.
 		return
 		
-	sel-size = p.sel-size
+	sel-size = p&.sel-size
 	match-colors = config&.theme&.picker-match
 	sel-colors = config&.theme&.picker-sel
 	for (((filename, found-idx), file-i), y) in displayed-files zip(from(Mem.size-i32(start-i))) zip((box-y + 1 + searchbar-y-size) to (height - 1))
 		text-colors = default-text-color
-		if file-i == p.sel Mem.size-i32()
+		if file-i == p&.sel Mem.size-i32()
 			text-colors <= { fg: sel-colors.fg, bg: sel-colors.bg or-else(text-colors.bg) }
 			screen Theme.set-screen-colors(text-colors)
 			screen Tui.draw-str(sel-cursor, box-x + left-off, y)
@@ -221,16 +243,54 @@ fn handle-key (p Ptr (FilePicker al), key Tui.Key) -> Maybe Choice <= Allocator 
 				
 			# TODO: funny stuff due to unsigned. which type should I use for such stuff so that it wraps gracefully?
 			if p&.sel == 0
-				p <&.sel= filecount - 1
+				p set-sel(filecount - 1)
 			else
-				p <&.sel= p&.sel - 1
+				p set-sel(p&.sel - 1)
 				
 		Tui.Down
 			filecount = p&.rendered-files.count
 			if filecount == 0
 				return None
 				
-			p <&.sel= (p&.sel + 1) Math.mod(filecount)
+			p set-sel((p&.sel + 1) Math.mod(filecount))
+		
+		Tui.Ctrl('d')
+			if p&.rendered-files.count == 0
+				return None
+
+			page-size = p& page-size() Mem.i32-size()
+			
+			# check for wrap around or "trim"
+			if p&.sel + page-size >= p&.rendered-files.count
+				next-page-num = (p&.sel + page-size) / page-size
+				next-page-start = next-page-num * page-size
+				pos-on-screen = p&.screen-sel
+				
+				# wrap around
+				if next-page-start >= p&.rendered-files.count
+					p <&.sel= pos-on-screen
+				
+				# trim
+				else
+					next-page-entries = p&.rendered-files.count - next-page-start
+					assert(next-page-entries > 0, 'math should disallow that :)')
+					p <&.sel= next-page-start + pos-on-screen Math.min(next-page-entries - 1)
+			else
+				p <&.sel= p&.sel + page-size
+			
+		Tui.Ctrl('u')
+			if p&.rendered-files.count == 0
+				return None
+				
+			page-size = p& page-size() Mem.i32-size()
+			if p&.sel < page-size
+				pos-on-screen = p&.screen-sel
+				last-page = (p&.rendered-files.count - 1) / page-size
+				next-page-start = last-page * page-size
+				next-page-size = p&.rendered-files.count - next-page-start
+				p <&.sel= next-page-start + pos-on-screen Math.min(next-page-size - 1)
+			else
+				p <&.sel= (p&.sel - page-size) Math.mod(p&.rendered-files.count)
 
 			
 		other			
