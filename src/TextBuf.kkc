@@ -506,11 +506,12 @@ fn highlight-at (self Ptr (TextBuf al), pos Pos) -> Maybe HighlightType <= Alloc
 	line = (&self&.buf) List.get-ptr(pos.line Mem.i32-size())
 	self recompute-highlights-at-line(line)
 
+	chosen = None
 	for hl in line&.highlights
 		if pos.bi Math.between(hl.from, hl.to - 1)
-			return Just(hl.type)
+			chosen <= Just(hl.type)  # basically, select last highlight. makes writing highlighters easier.
 
 		if pos.bi < hl.from
-			return None
+			break
 
-	return None
+	return chosen

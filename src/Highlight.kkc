@@ -1,5 +1,7 @@
 use CharType
 	char-type
+use Scan
+	Scanner
 
 # for kc :)
 HighlightType
@@ -31,6 +33,9 @@ Highlight
 	from I32
 	to I32
 
+
+fn sc-off (sc Ptr (Scanner s)) -> I32:
+	sc&.byte-offset Mem.size-i32()
 
 
 # Highlighters
@@ -197,17 +202,78 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 
 fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 	sc =& Scan.mk-from-str(line-sv)
+	sc Scan.skip-while(is-whitespace)
+	
+	fn markdown-text (endchar Maybe Char)
+		while not (sc null() or endchar Misc.maybe(fn endchar: sc Scan.try-char(endchar), False))
+			from-off = sc&.byte-offset Mem.size-i32()
+			if sc Scan.try-char('`')
+				while not sc Scan.try-char('`') and not sc null()
+					sc drop'(1)
+				
+				to-off = sc&.byte-offset Mem.size-i32()
+				hls List.add({ from: from-off, to: to-off, type: Ident2 })
+			
+			elif sc Scan.matches-str('**')
+				while not (sc null() or sc Scan.matches-str('**'))
+					sc drop'(1)
+				
+				to-off = sc sc-off()
+				hls List.add({ from: from-off, to: to-off, type: Keyword1 })
+			
+			elif sc Scan.try-char('*')
+				sc Scan.skip-until-after-char('*')
+				to-off = sc sc-off()
+				hls List.add({ from: from-off, to: to-off, type: Keyword2 })
+			
+			elif sc Scan.try-char('\\')
+				sc drop'(1)
+			
+			# parse link
+			elif sc Scan.matches-str('![') or sc Scan.try-char('[')
+				insert-at = hls List.count()
+				open-sqbr = from-off
+				to-open-sqbr = sc sc-off()
+				label-from = sc sc-off()
+				markdown-text(Just(']'))
+				label-to = sc sc-off() - 1
+				close-sqbr = sc sc-off() - 1
+				
+				open-paren = sc sc-off()
+				if sc Scan.try-char('(')
+					link-from = sc sc-off()
+					if sc Scan.skip-until-after-char(')')
+						link-to = sc sc-off() - 1
+						close-paren = sc sc-off() - 1
+						
+						# link parsed. add highlights.
+						# TODO: link labels seem to be recursive.
+						hls List.insert-all(insert-at, 
+							[ { from: open-sqbr, to: to-open-sqbr, type: Special1 }
+							, { from: label-from, to: label-to, type: Comment }
+							])
+							
+						hls List.add-all(
+							[ { from: close-sqbr, to: close-sqbr + 1, type: Special1 }
+							, { from: open-paren, to: open-paren + 1, type: Special2 }
+							, { from: link-from, to: link-to, type: String }
+							, { from: close-paren, to: close-paren + 1, type: Special2 }
+							])
+			else
+				sc drop'(1)
+		# todo more
+		pass
+	
+	from-off = sc&.byte-offset Mem.size-i32()
 	if sc Scan.matches-str('---')
 		to-off = sc&.byte-offset Mem.size-i32()
-		hls List.add({ from: 0, to: to-off, type: Special1 })
-		
-	elif sc Scan.try-char('#')
-		hls List.add({ from: 0, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Keyword1 })
+		hls List.add({ from: from-off, to: to-off, type: Special1 })
 		
 	else
-		sc Scan.skip-while(is-whitespace)
-		from-off = sc&.byte-offset Mem.size-i32()
-		if sc Scan.try-char('-')
+		if sc Scan.try-char('#')
+			hls List.add({ from: from-off, to: line-sv StrView.num-bytes() Mem.size-i32(), type: Keyword1 })
+			
+		elif sc Scan.try-char('-')
 			to-off = sc&.byte-offset Mem.size-i32()
 			hls List.add({ from: from-off, to: to-off, type: Special1 })
 			
@@ -220,19 +286,7 @@ fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 				to-off = sc&.byte-offset Mem.size-i32()
 				hls List.add({ from: from-off, to: to-off, type: Keyword2 })
 			
-		while not sc null()
-			from-off = sc&.byte-offset Mem.size-i32()
-			if sc Scan.try-char('`')
-				while not sc Scan.try-char('`') and not sc null()
-					sc drop'(1)
-				
-				to-off = sc&.byte-offset Mem.size-i32()
-				hls List.add({ from: from-off, to: to-off, type: Ident2 })
-			
-			else
-				sc drop'(1)
-		# todo more
-		pass
+		markdown-text(None)
 
 
 # TEMP: there's a compiler bug, which forbids me from defining it inside.
