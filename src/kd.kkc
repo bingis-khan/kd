@@ -493,35 +493,48 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 			pass
 
 
-fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
+fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 	case &ed&.mode
 		Ptr(Normal)
-			case ed&.pane.mode
-				Pane.Normal
-					ed handle-normal-key(key)
-				Pane.Select
-					ed handle-normal-key(key)
-
-				Pane.Insert
-					case key
-						Tui.Escape
-							ed pane() set-mode( Pane.Normal)
-
-						Tui.Enter
-							indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.line)
-							ed pane() Pane.add-str-at-char('\n')
-							ed pane() Pane.move-right()
-							ed pane() Pane.indent-at-current(indent)
-
-						Tui.Backspace
-							ed pane() Pane.backspace()
-
-						Tui.Char(c)
-							s = Array.as-slice(&[c]) StrView.from-ascii-slice()
-							ed pane() Pane.add-str-at-char(s)
-							ed pane() Pane.move-right()
+			case ev
+				Tui.Key(key)
+					case ed&.pane.mode
+						Pane.Normal
+							ed handle-normal-key(key)
+						Pane.Select
+							ed handle-normal-key(key)
+		
+						Pane.Insert
+							case key
+								Tui.Escape
+									ed pane() set-mode( Pane.Normal)
+		
+								Tui.Enter
+									indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.line)
+									ed pane() Pane.add-str-at-char('\n')
+									ed pane() Pane.move-right()
+									ed pane() Pane.indent-at-current(indent)
+		
+								Tui.Backspace
+									ed pane() Pane.backspace()
+		
+								Tui.Char(c)
+									s = Array.as-slice(&[c]) StrView.from-ascii-slice()
+									ed pane() Pane.add-str-at-char(s)
+									ed pane() Pane.move-right()
+				
+				# other events
+				_
+					pass
+					
 
 		Ptr(Cmd(prev-cur, textbox))
+			key = @undefined
+			case ev
+				Tui.Key(k)
+					key <= k
+				_
+					return
 			case key
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
@@ -545,6 +558,12 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 
 
 		Ptr(Search(prev-cur, textbox))
+			key = @undefined
+			case ev
+				Tui.Key(k)
+					key <= k
+				_
+					return
 			case key
 				Tui.Escape
 					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
@@ -574,6 +593,12 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 						
 
 		Ptr(Menu(menu))
+			key = @undefined
+			case ev
+				Tui.Key(k)
+					key <= k
+				_
+					return
 			case key
 				Tui.Char(c)
 					for menu-item in menu.items
@@ -589,7 +614,7 @@ fn handle-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 					pass
 
 		Ptr(Picker(picker))
-			case FilePicker.handle-key(&picker, key)
+			case FilePicker.handle-event(&picker, ev)
 				Just(PickerExit)
 					picker FilePicker.free(ed&.al)
 					ed exit-mode()
@@ -761,12 +786,11 @@ last-redraw-changes = 0
 while ed&.running
 	for ev in Iter.from-function(fn: Tui.read-event(tui))
 		case ev
-			Tui.Key(k)
+			Tui.Key(_)
 				ed reset-msg()
-				ed handle-key(k)
-
 			_
 				pass
+		ed handle-event(ev)
 
 	screen Tui.resize-screen-if-needed()
 	if tui Tui.should-redraw()

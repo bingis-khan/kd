@@ -152,7 +152,6 @@ fn render(screen Ptr (Tui.Screen al), p Ptr (FilePicker al), config Ptr Config) 
 	# ==========
 	width = screen&.tui&.width Mem.u32-i32() - 1
 	height = screen&.tui&.height Mem.u32-i32() - 1
-	p <&.last-height= height  # update height yo (should create a screen resize event doe)
 	
 	left-off = 1
 	max-possible-width = width - left-off - 1 - 1
@@ -173,7 +172,7 @@ fn render(screen Ptr (Tui.Screen al), p Ptr (FilePicker al), config Ptr Config) 
 	box-height = Mem.size-i32(3 + displayed-files.count)
 	default-box-height = 3 + expected-page-size
 	box-x = (width - box-width) / 2
-	box-y = Math.min((height - default-box-height) / 2, (height - box-height) / 2)
+	box-y = Math.max((height - default-box-height) / 2, (height - box-height) / 2)
 	box-to-x = box-x + box-width
 	box-to-y = box-y + box-height
 	
@@ -224,7 +223,16 @@ fn render(screen Ptr (Tui.Screen al), p Ptr (FilePicker al), config Ptr Config) 
 Choice
 	PickerExit
 	PickerFile StrView
-fn handle-key (p Ptr (FilePicker al), key Tui.Key) -> Maybe Choice <= Allocator al
+fn handle-event (p Ptr (FilePicker al), ev Tui.InputEvent) -> Maybe Choice <= Allocator al
+	key = @undefined
+	case ev
+		Tui.Key(k)
+			key <= k
+		
+		Tui.Resize(_, nu-height)
+			p <&.last-height= nu-height Mem.u32-i32()
+			return None
+
 	case key
 		Tui.Escape
 			return Just(PickerExit)
