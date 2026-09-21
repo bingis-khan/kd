@@ -239,7 +239,12 @@ fn markdown (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 	fn markdown-text (endchar Maybe Char)
 		while not (sc null() or endchar Misc.maybe(fn endchar: sc Scan.try-char(endchar), False))
 			from-off = sc&.byte-offset Mem.size-i32()
-			if sc Scan.try-char('`')
+			
+			if sc Scan.matches-str('```')
+				to-off = sc sc-off()
+				hls List.add({ from: from-off, to: to-off, type: Special2 })
+				
+			elif sc Scan.try-char('`')
 				while not sc Scan.try-char('`') and not sc null()
 					sc drop'(1)
 				

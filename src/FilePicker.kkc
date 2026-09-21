@@ -1,8 +1,8 @@
 use Term (Color)
 use StrBuilder (StrBuilder)
 use Iter (map-maybe)
-
 use File (Dir, DirType(File, Directory))
+
 use Pane (ScreenDims)  # bad import, we only depend on the screen dims data structure.
 use Config (Config)
 use TextBox (TextBox)
