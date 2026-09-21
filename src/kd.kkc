@@ -304,7 +304,14 @@ EditorAllocator = Alloc.CAllocator
 goto-menu = Menu
 	{ name: 'goto'
 	, items:
-		[ MenuItem { key: 'l', description: 'move to end of line', action: fn ed: ed pane() Pane.move-to-end() }
+		[ MenuItem
+			{ key: 'l'
+			, description: 'move to end of line'
+			, action: (fn(ed))
+				if not ed pane() Pane.cursor-is-at-line-end()  # handles empty line too. helix actually doesn't care when we're at the end of the line - it moves the cursor back.
+					ed pane() Pane.move-to-end()
+					ed pane() Pane.move-left()
+			}
 		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn ed: ed pane() Pane.move-to-beginning-indented() }
 		, MenuItem { key: 'g', description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
 		, MenuItem { key: 'e', description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
