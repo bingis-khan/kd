@@ -1,6 +1,6 @@
 # kd - kind of an editor
 
-my attempt at an editor written in [kc](https://git.bimbur.art/kkc)([github](https://github.com/bingis-khan/kkc)). attempts to emulate helix control scheme.
+my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](https://github.com/bingis-khan/kkc)). attempts to emulate helix control scheme.
 
 ![showcase](./screenshot.png)
 ![showcase2](./screenshot2.png)

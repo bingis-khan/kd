@@ -60,20 +60,52 @@ fn kc (hls Ptr (List al Highlight), line-sv StrView) <= Allocator al
 
 		# string
 		elif sc Scan.try-char('\'')
+			string-begin-idx = hls List.count()
 			while True
 				sc Scan.skip-while(fn c: c /= '\'' and c /= '\\')
-				if sc Scan.peek() == Just('\\')
-					sc drop'(1)
-					if sc Scan.peek() == Just('\'')
-						sc drop'(1)
+				
+				# escape sequences
+				esc-from-off = sc sc-off()
+				if sc Scan.try-char('\\')
+					if sc Scan.try-char('(')
+						interp-open-to-off = sc sc-off()
+						interp-index-start = hls List.count()
+						hls List.add({ from: esc-from-off, to: interp-open-to-off, type: Special3 })
+						
+						# parse access (maybe merge it with assignment?
+						sc Scan.skip-while(is-whitespace)
+						while True
+							if sc null() or sc Scan.try-char(')')
+								break
+							interp-from-off = sc sc-off()
+							if sc Scan.try-char('&')
+								interp-to-off = sc sc-off()
+								hls List.add({ from: interp-from-off, to: interp-to-off, type: Special1 })
+							else
+								# everything else gets the identifier1 treatment
+								sc Scan.skip-while(fn c: c is-not-whitespace() and c /= ')' and c /= '&')
+								interp-to-off = sc sc-off()
+								hls List.add({ from: interp-from-off, to: interp-to-off, type: Ident1})
+							
+							sc Scan.skip-while(is-whitespace)
+					
+					
+						last-paren = sc sc-off()
+						hls List.add({ from: last-paren - 1, to: last-paren, type: Special3 })
+					elif sc Scan.char-satisfies(fn c: c one-of(['t', 'n', 'r', '\\', '\'', '0', 'x']))  # x is temp here.
+						to-off = sc sc-off()
+						hls List.add({ from: esc-from-off, to: to-off, type: Special3 })
 					else
-						# todo for highlighting special sequences and interpolation
-						pass
+						to-off = sc sc-off()
+						hls List.add({ from: esc-from-off, to: to-off, type: Invalid })
+				
+				# here it's an ending quote
 				else
 					sc drop'(1)  # drop the ending quote also
 					break
-			cur-off = sc&.byte-offset Mem.size-i32()
-			hls List.add({ from: from-off, to: cur-off, type: String })
+			cur-off = sc sc-off()
+			# TODO: right now it's okay, but if I add a theme with a bg for strings, all spaces in interpolation will have this color.
+			hls List.insert(string-begin-idx, { from: from-off, to: cur-off, type: String })
 
 		# intrinsics
 		elif sc Scan.try-char('@')
