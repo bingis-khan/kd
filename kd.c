@@ -2820,7 +2820,6 @@ struct env327 {
     ;
     ;
     ;
-    ;
     struct env320 envinst320;
     ;
     ;
@@ -21293,7 +21292,6 @@ static  enum Unit_11   render3114 (   struct env327* env ,    struct Screen_885 
     ( (  set_dash_screen_dash_colors3140 ) ( (  screen5098 ) ,  (  colors5125 ) ) );
     ( (  draw_dash_box3141 ) ( (  screen5098 ) ,  (  box_dash_x5121 ) ,  (  box_dash_y5122 ) ,  (  box_dash_to_dash_x5123 ) ,  (  box_dash_to_dash_y5124 ) ) );
     ( (  draw_dash_str_dash_right_dash_aligned3151 ) ( (  screen5098 ) ,  ( ( StrConcat_3152_StrConcat ) ( ( ( StrConcat_3153_StrConcat ) ( ( ( ( * (  p5100 ) ) .f_rendered_dash_files ) .f_count ) ,  ( (  from_dash_charlike430 ) ( ( (uint8_t*)"/" ) ,  ( 1 ) ) ) ) ) ,  ( ( ( * (  p5100 ) ) .f_total_dash_files ) .f_count ) ) ) ,  (  op_dash_sub234 ( (  box_dash_to_dash_x5123 ) , (  from_dash_integral105 ( 1 ) ) ) ) ,  (  op_dash_add229 ( (  box_dash_y5122 ) , (  from_dash_integral105 ( 1 ) ) ) ) ) );
-    ( (  draw_dash_str2570 ) ( (  screen5098 ) ,  (  page_dash_size5109 ) ,  (  from_dash_integral105 ( 0 ) ) ,  (  from_dash_integral105 ( 0 ) ) ) );
     ( (  draw_dash_str3176 ) ( (  screen5098 ) ,  ( (  trim_dash_to_dash_wcwidth3183 ) ( ( (  as_dash_str2314 ) ( ( ( * (  p5100 ) ) .f_query ) ) ) ,  (  max_dash_width5117 ) ) ) ,  (  op_dash_add229 ( (  box_dash_x5121 ) , (  from_dash_integral105 ( 2 ) ) ) ) ,  (  op_dash_add229 ( (  box_dash_y5122 ) , (  from_dash_integral105 ( 1 ) ) ) ) ) );
     if ( (  cmp394 ( ( ( ( * (  p5100 ) ) .f_query ) .f_cursor ) , ( (  i32_dash_size380 ) ( (  max_dash_shown_dash_filename_dash_width5113 ) ) ) ) != 2 ) ) {
         struct env3185 envinst3185 = {

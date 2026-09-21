@@ -190,7 +190,6 @@ fn render(screen Ptr (Tui.Screen al), p Ptr (FilePicker al), config Ptr Config) 
 	screen Tui.draw-str-right-aligned('\(p&.rendered-files.count)/\(p&.total-files.count)', box-to-x - 1, box-y + 1)
 	
 	# draw query and cursor
-	screen Tui.draw-str('\(page-size)', 0, 0)
 	screen Tui.draw-str(p&.query TextBox.as-str() Term.trim-to-wcwidth(max-width), box-x + 2, box-y + 1)
 	if p&.query.cursor <= max-shown-filename-width Mem.i32-size()
 		screen Tui.get-cell-ptr(box-x + 2 + p&.query.cursor Mem.size-i32(), box-y + 1) if-just(fn(cell))
