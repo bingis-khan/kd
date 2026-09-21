@@ -6,8 +6,7 @@ use Pos
 use TextBuf
 	TextBuf
 use CharType
-	char-type
-	is-word-boundary
+	char-type, is-word-boundary
 use Theme
 	Theme
 use Config
