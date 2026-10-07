@@ -2,6 +2,8 @@
 
 my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](https://github.com/bingis-khan/kkc)). attempts to emulate helix control scheme.
 
+(on hold due to a compiler bug (`split-current-pane()` in window-menu prevents compilation))
+
 ![showcase](./screenshot.png)
 ![showcase2](./screenshot2.png)
 
@@ -48,19 +50,24 @@ my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](ht
 - ...
 - [x] syntax (keyword) highlighting
 	- [ ] multiline higlighting (eg. markdown code snippets)
+		- the way we should do this is first highlight all of it from top to bottom, then when an update happens,
+		  redo the highlights affected by the "update" with extra first and last token. (just in case)
 - ...
 - [ ] proper datastructure for handling text (continuous array, the new le vscode data structure, ideally non-recursive :])
 - [ ] hex edit mode (this requires file type detection)
 - ...
 - [ ] nice UI and animations
 - [x] UTF8 handling
-- [ ] multipane
+- [x] multipane
+	- [ ] move cursor properly when same buffer is modificatied in other pane.
+	- [ ] instead of hiding some parts of the interface, render inactive pane in muted colors
 - [ ] multicursor
 - ...
 - [ ] nice themes
 - [ ] cmd autocomplete
 - [ ] wq (i didn't add it on purpose. due to my muscle memory, i use it automatically,  but I don't want to overwrite important files accidentally)
 - ...
+- [ ] tabs?
 - [ ] graphical backend
 - [ ] earlier/later commands (undo 5 mins)
 

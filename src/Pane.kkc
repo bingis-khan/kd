@@ -139,27 +139,30 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	sw = sd screen-width() - 1
 	sh = sd screen-height() - 1
 
-	margin = 5  # default margin.
-	# idea. if screen is really small, reduce margin to 1
-	# if still smaller (3 cells only :]), just center the cursor.
-	# but it's so smol it's pointless. helix does not care.
+	xmargin = 5  # default margin.
+	ymargin = xmargin
+	
+	if sw <= xmargin * 2
+		xmargin <= if sw > 3: 1 else 0
+	if sh <= ymargin * 2
+		ymargin <= if sh > 3: 1 else 0
 
 	csi = pane&.buf pos-vi(cur)  # this takes into account screen tab len n shii
 	csx = csi - sc-off.screen-left
 	csy = cur.line - sc-off.screen-top
 
 	nu-screen-left = sc-off.screen-left
-	if csx < margin
-		nu-screen-left <= csi - margin
-	elif csx > sw - margin
-		nu-screen-left <= csi - (sw - margin)
+	if csx < xmargin
+		nu-screen-left <= csi - xmargin
+	elif csx > sw - xmargin
+		nu-screen-left <= csi - (sw - xmargin)
 	nu-screen-left = Math.max(nu-screen-left, 0)
 
 	nu-screen-top = sc-off.screen-top
-	if csy < margin
-		nu-screen-top <= cur.line - margin
-	elif csy > sh - margin
-		nu-screen-top <= cur.line - (sh - margin)
+	if csy < ymargin
+		nu-screen-top <= cur.line - ymargin
+	elif csy > sh - ymargin
+		nu-screen-top <= cur.line - (sh - ymargin)
 	nu-screen-top = Math.max(nu-screen-top, 0)
 
 	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
@@ -169,7 +172,7 @@ fn set-colors (screen Ptr (Screen Allocator), colors Theme.Colors)
 	screen Tui.set-screen-colors(colors.fg, colors.bg)
 
 
-fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Config) <= Allocator al
+fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Config, is-active Bool) <= Allocator al
 	theme = cfg&.theme
 	display-line-numbers = cfg&.display-line-numbers
 	relative-line-numbers = cfg&.relative-line-numbers
@@ -193,7 +196,7 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 
 		# first draw line number
 		if display-line-numbers
-			if pane&.cursor.line == ybi  # if cursor is on this line, do special highlight
+			if pane&.cursor.line == ybi and is-active  # if cursor is on this line, do special highlight
 				screen set-colors(theme&.line-num-hl)
 			else
 				screen set-colors(theme&.line-num)
@@ -208,13 +211,13 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
 		left-offset = sd.from-sx + total-margin
 		for c in line-content StrView.byte-substr-from(xbi Mem.i32-size()) chars() append(' ')
-			if vx > sd.to-sx
+			if left-offset + vx > sd.to-sx
 				break
 
 			curpos = Pos.mk(ybi, xbi)
 			is-cursor = curpos == pane&.cursor
 			in-selection = pane is-in-selection(Pos.mk(ybi, xbi))
-			if is-cursor
+			if is-cursor and is-active
 				screen set-colors(theme&.cursor)
 			elif in-selection
 				screen set-colors(theme&.selection)
@@ -237,9 +240,10 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 			xbi <= xbi + c.num-bytes Mem.size-i32()
 
 	# overlay
-	screen set-colors(theme&.overlay)
-	modename = pane&.mode short-mode-name()
-	screen Tui.draw-str(' \(modename) ', sd.from-sx, sd.to-sy)  # idea: make mode appear briefly in the middle/lower-middle of the screen. more dynamic!
+	if is-active
+		screen set-colors(theme&.overlay)
+		modename = pane&.mode short-mode-name()
+		screen Tui.draw-str(' \(modename) ', sd.from-sx, sd.to-sy)  # idea: make mode appear briefly in the middle/lower-middle of the screen. more dynamic!
 
 
 fn set-sel (self Ptr (Pane al), sel Maybe Pos)

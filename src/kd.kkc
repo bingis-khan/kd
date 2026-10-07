@@ -14,7 +14,7 @@ use TextBuf
 use Pos
 	Pos
 use Pane
-	Pane, set-mode
+	Pane, set-mode, ScreenDims
 use Theme
 	Theme
 use Config
@@ -32,8 +32,18 @@ use TextBox
 #   |     opening a new file should go through the map first.
 # [Filename -> TextBuf]
 
+PaneSplitType
+	SplitHorizontal
+	SplitVertical
+
+# NOTE: don't store any ScreenDims, because the editor may be resized.
+PaneSplit al
+	Split PaneSplitType
+	ActualPane (Pane al)
+
+
 MenuItem al
-	key AsciiChar
+	keys Slice Tui.Key
 	description StrView
 
 	action (Ptr (Editor al)) -> ()
@@ -53,7 +63,8 @@ EditorMode al
 Editor al
 	al al
 	running Bool
-	pane Pane al
+	panes List al (PaneSplit al)
+	current-pane-idx Size
 	clipboard Maybe StrView
 	search-term Maybe StrView
 	
@@ -69,6 +80,14 @@ Editor al
 	cfg Ptr Config
 	og-theme Ptr Theme  # hackish. stores the theme we currently have set (but might not be "trying out" with the :theme command)
 
+
+# override instance for Tui.Key to display them in a way we want
+inst Str Tui.Key
+	chars (self _): (case self) chars()
+		Tui.Char(c): c StrCase1()
+		Tui.Ctrl(c): 'C-\(c)' StrCase2()
+		_: todo()
+	print-str (self _): panic('unimplemented')
 
 inst Str EditorMode
 	chars (self _)
@@ -90,11 +109,86 @@ inst Str EditorMode
 
 
 # use this to get the current pane.
-fn pane (ed Ptr (Editor al)) -> Ptr (Pane al): &ed&.pane
+fn pane-at (ed Ptr (Editor al), idx) -> Ptr (Pane al)
+	case (&ed&.panes) List.get-ptr(idx)
+		Ptr(ActualPane(pane))
+			return &pane
+		_
+			panic('the pane index (\(idx)) is not supposed to point to the split yo. if it happens, check why and maybe write code here to automatically move the index.')
+
+fn pane (ed Ptr (Editor al)) -> Ptr (Pane al): ed pane-at(ed&.current-pane-idx)
+
+
+fn next-pane-index (ed Ptr (Editor al), pane-i)
+	i = pane-i
+	while True
+		i <= (i + 1) Math.mod(List.size(&ed&.panes))
+		case ed&.panes[i]
+			Split(_)
+				pass
+			ActualPane(_)
+				return i
+
+fn next-pane (ed Ptr (Editor al)) <= Allocator al
+	ed <&.current-pane-idx= ed next-pane-index(ed&.current-pane-idx)
+
+fn split-current-pane (ed Ptr (Editor al), split PaneSplitType) <= Allocator al
+	le-pane = ed pane()&
+	panes = &ed&.panes
+	panes List.remove(ed&.current-pane-idx)
+	panes List.insert-all(ed&.current-pane-idx, [Split(split), ActualPane(le-pane), ActualPane(le-pane)])
+	ed <&.current-pane-idx= ed&.current-pane-idx + 2  # set current pane as the second one.
+
+
+# . 1
+# s . . 2
+# s (s . .) . 3
+# s (s . .) (s . .) 4
+
+fn close-current-pane (ed Ptr (Editor al)) <= Allocator al
+	panes = &ed&.panes
+	if (&ed&.panes) List.size() <= 1
+		ed <&.running= False
+		return
+	
+	
+	# find next leaf
+	panes-to-splits = 0
+	pane-i = ed&.current-pane-idx
+	split-i = 0
+	List.remove(panes, pane-i)
+	for i in (Mem.size-i32(pane-i - 1)) down-to (0)
+		i = i Mem.i32-size()
+		case ed&.panes[i]
+			Split(_)
+				if panes-to-splits <= 1
+					panes List.remove(i)
+					split-i = i
+					break
+				else
+					panes-to-splits <= panes-to-splits - 1
+			ActualPane(_)
+				panes-to-splits <= panes-to-splits + 1
+	
+	
+	# next pane index should be the other pane in the split
+	if split-i == pane-i - 1  # we started from the first leaf in tree, therefore find first non-split pane.
+		while True
+			case ed&.panes[split-i]
+				Split(_)
+					split-i <= split-i + 1
+				ActualPane(_)
+					ed <&.current-pane-idx= split-i
+					break
+					
+	else  # it was a second leaf in tree, just go to the leftmost pane thing. the one on the left is guaranteed that it is a pane.
+		ed <&.current-pane-idx= pane-i - 2
+	
+	
 
 fn copy-selection-to-clipboard (ed Ptr (Editor al)) <= Allocator al
 	let (from, to) = Pane.selection(ed pane())
-	cpd = ed&.pane.buf TextBuf.str-between(from, to)
+	cpd = ed pane()&.buf TextBuf.str-between(from, to)
 	ed&.clipboard if-just(fn(cp))
 		cp StrView.free(ed&.al)
 
@@ -160,7 +254,8 @@ fn open-buffer (ed Ptr (Editor al), fname Maybe StrView) <= Allocator al
 			tb <= fname open-buffer-standalone(ed&.al)
 			ed add-new-buffer(tb)
 			ed associate-name-with-buffer(tb)
-	ed <&.pane = Pane.mk(ed&.al, tb)  # also store Panes too. maybe in the next function?
+	current-pane = ed pane()
+	current-pane <&= Pane.mk(ed&.al, tb)  # also store Panes too. maybe in the next function?
 
 fn save-current-buffer (ed Ptr (Editor al), new-filename Maybe StrView) <= Allocator al
 	case new-filename
@@ -305,47 +400,81 @@ goto-menu = Menu
 	{ name: 'goto'
 	, items:
 		[ MenuItem
-			{ key: 'l'
+			{ keys: [Tui.Char('l')]
 			, description: 'move to end of line'
 			, action: (fn(ed))
 				if not ed pane() Pane.cursor-is-at-line-end()  # handles empty line too. helix actually doesn't care when we're at the end of the line - it moves the cursor back.
 					ed pane() Pane.move-to-end()
 					ed pane() Pane.move-left()
 			}
-		, MenuItem { key: 'h', description: 'move to beginning of line', action: fn ed: ed pane() Pane.move-to-beginning-indented() }
-		, MenuItem { key: 'g', description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
-		, MenuItem { key: 'e', description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
+		, MenuItem { keys: [Tui.Char('h')], description: 'move to beginning of line', action: fn ed: ed pane() Pane.move-to-beginning-indented() }
+		, MenuItem { keys: [Tui.Char('g')], description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
+		, MenuItem { keys: [Tui.Char('e')], description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
 		]
 	} as Menu EditorAllocator
 
 
-# fn open-filepicker (ed Ptr (Editor EditorAllocator))
-# 	ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
+fn open-filepicker-in (ed Ptr (Editor EditorAllocator), dir)
+	ed <&.next-mode= Just(Picker(FilePicker.at-dir(dir, ed&.al)))
+
 
 space-menu = Menu
 	{ name: 'space'
 	, items:
 		[ MenuItem
-			{ key: 'f'
+			{ keys: [Tui.Char('f')]
 			, description: 'open dir bruh'
 			, action: (fn(ed))
-				# ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
-				# ed open-filepicker()
-				pass
+				# TODO: this should find a sort of project base directory.
+				# look for .git? how does helix do it?
+				# at helix-loader/src/lib.rs -> find_workspace_in()
+				# for each path and acestors check for existence of .git, .svn, .jj, .helix directories.
+				# NOTE: path ancestors(), and path exists()
+				# btw, exists just loads "Metadata" (literally C's Stat struct) and checks if it's not null.
+				#  (Rust wraps the C Stat in "Metadata" - how are fields accessed?)
+				ed open-filepicker-in('.')
 			}
 		, MenuItem
-			{ key: 'F'
+			{ keys: [Tui.Char('F')]
 			, description: 'open dir at cwd'
 			, action: (fn(ed))
-				# TODO(kc-bug): for some reason, the same line at both options crashes the compiler. even with the helper function.
-				ed <&.next-mode= Just(Picker(FilePicker.at-dir('.', ed&.al)))
-				# ed open-filepicker()
-				pass
+				ed open-filepicker-in('.')
 			}
-		, MenuItem { key: 'y', description: 'copy to system clipboard', action: fn ed: () }
-		# , MenuItem { key: 'g', description: 'move up yah', action: fn pane: pane Pane.set-cursors({ line: 0, bi: 0}, None, Pane.NoChanges) }
+		, MenuItem { keys: [Tui.Char('y')], description: 'copy to system clipboard', action: fn ed: () }
 		]
 	} as Menu EditorAllocator
+
+
+window-menu = Menu
+	{ name: 'window'
+	, items:
+		[ MenuItem
+			{ keys: [Tui.Ctrl('w')]
+			, description: 'switch window'
+			, action: (fn(ed))
+				ed next-pane()
+			}
+		, MenuItem
+			{ keys: [Tui.Char('v'), Tui.Ctrl('v')]
+			, description: 'split window vertical'
+			, action: (fn(ed))
+				ed split-current-pane(SplitVertical)
+			}
+		, MenuItem
+			{ keys: [Tui.Char('s'), Tui.Ctrl('s')]
+			, description: 'split window horizontal'
+			, action: (fn(ed))
+				ed split-current-pane(SplitHorizontal)
+			}
+		, MenuItem
+			{ keys: [Tui.Char('q'), Tui.Ctrl('q')]
+			, description: 'close pane'
+			, action: (fn(ed))
+				ed close-current-pane()
+			}
+		]
+	} as Menu EditorAllocator
+
 
 fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 	case key
@@ -432,7 +561,7 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 
 						ed pane() Pane.replace-selection((start, start), cp)
 					else
-						start = TextBuf.right-pos(ed&.pane.buf, start)
+						start = TextBuf.right-pos(ed pane()&.buf, start)
 						ed pane() Pane.replace-selection((start, start), cp)
 			elif c == 'P'
 				ed&.clipboard if-just(fn(cp))
@@ -453,8 +582,9 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 
 			elif c == 'v'
 				ed pane() set-mode(Pane.Select)
-				if ed&.pane.sel is-none()
-					ed <&.pane.sel= Just(ed&.pane.cursor)
+				if ed pane()&.sel is-none()
+					cur-pane = ed pane()
+					cur-pane <&.sel= Just(ed pane()&.cursor)
 
 			elif c == ':'
 				ed <&.mode= Cmd(ed pane()&.cursor, TextBox.mk(ed&.al))
@@ -493,6 +623,9 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 				ed pane() Pane.move-up(15)
 			elif c == 'd'
 				ed pane() Pane.move-down(15)
+			
+			elif c == 'w'
+				ed enmenue(window-menu)
 
 			else
 				pass
@@ -505,7 +638,7 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 		Ptr(Normal)
 			case ev
 				Tui.Key(key)
-					case ed&.pane.mode
+					case ed pane()&.mode
 						Pane.Normal
 							ed handle-normal-key(key)
 						Pane.Select
@@ -607,18 +740,15 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 				_
 					return
 			case key
-				Tui.Char(c)
-					for menu-item in menu.items
-						if menu-item.key == c
-							menu-item.action(ed)
-					
-					ed exit-mode()
-					
 				Tui.Escape
 					ed exit-mode()
 					
 				_
-					pass
+					for menu-item in menu.items
+						if key one-of (menu-item.keys)
+							menu-item.action(ed)
+					
+					ed exit-mode()
 
 		Ptr(Picker(picker))
 			case FilePicker.handle-event(&picker, ev)
@@ -636,19 +766,68 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 			todo()
 
 
+fn render-panes (screen Ptr (Screen al), ed Ptr (Editor al), dims ScreenDims, idx Ptr List.Idx) <= Allocator al
+	cur-idx = idx&
+	case List.try-get-ptr(&ed&.panes, cur-idx)
+		None
+			return
+		Just(pane-segment)
+			idx <&= idx& + 1
+			
+			case pane-segment
+				Ptr(Split(split))
+					let (first-dims, second-dims) = (case split)
+						SplitVertical:
+							# 0-3 (4) -> 0-1 & 2-3
+							# 0-4 (5) -> 0-2 & 3-4
+							(ScreenDims
+								{ from-sx: dims.from-sx
+								, to-sx: dims.from-sx + (dims.to-sx - dims.from-sx) / 2
+								, from-sy: dims.from-sy
+								, to-sy: dims.to-sy
+								}
+							, ScreenDims
+								{ from-sx: dims.from-sx + (dims.to-sx - dims.from-sx) / 2 + 1
+								, to-sx: dims.to-sx
+								, from-sy: dims.from-sy
+								, to-sy: dims.to-sy
+								})
+						_: # exhaustive case exprs todo
+							(ScreenDims
+								{ from-sx: dims.from-sx
+								, to-sx: dims.to-sx
+								, from-sy: dims.from-sy
+								, to-sy: dims.from-sy + (dims.to-sy - dims.from-sy) / 2
+								}
+							, ScreenDims
+								{ from-sx: dims.from-sx
+								, to-sx: dims.to-sx
+								, from-sy: dims.from-sy + (dims.to-sy - dims.from-sy) / 2 + 1
+								, to-sy: dims.to-sy
+								})
+					
+					pass  # fix let parsing bug (pass allows the expression yah)
+					
+					screen render-panes(ed, first-dims, idx)
+					screen render-panes(ed, second-dims, idx)
+				Ptr(ActualPane(pane))
+					screen Pane.render(&pane, dims, ed&.cfg, ed&.current-pane-idx == cur-idx)
+
 fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	screen-dims = 
 		{ from-sx: 0
-		, to-sx: screen&.tui&.width Mem.u32-i32() -1
+		, to-sx: (screen&.tui&.width Mem.u32-i32() - 1)
 		, from-sy: 0
-		, to-sy: screen&.tui&.height Mem.u32-i32() -1
+		, to-sy: (screen&.tui&.height Mem.u32-i32() - 1)
 		}
-	screen Pane.render(ed pane(), screen-dims, ed&.cfg)
+	screen render-panes(ed, screen-dims, &0)
 
 	# overlay
 	ed&.msg if-just(fn(msg))
 		num-chars = msg chars() count() Mem.size-i32()
 		screen Tui.draw-str(' \(msg) ', (screen&.tui&.width Mem.u32-i32() - num-chars) / 2, screen&.tui&.height Mem.u32-i32() - 1)
+	
+	screen Tui.draw-str('C', screen&.tui&.width Mem.u32-i32() / 2, screen&.tui&.height Mem.u32-i32() / 2)
 
 	case &ed&.mode
 		Ptr(Normal)
@@ -701,7 +880,8 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		Ptr(Menu(menu))
 			screen Tui.draw-str(menu.name, 0, 0)
 			for (menu-item, i) in menu.items zip(from(1))
-				screen Tui.draw-str('\(menu-item.key) \(menu-item.description)', 0, i)
+				keys = menu-item.keys join(', ')
+				screen Tui.draw-str('\(keys) \(menu-item.description)', 0, i)
 		
 		Ptr(Picker(picker))
 			screen FilePicker.render(&picker, ed&.cfg)
@@ -762,7 +942,8 @@ cfg =& Config
 ed =& Editor
 	{ running: True
 	, al: al
-	, pane: Pane.mk(al, tb)
+	, panes: List.from-one(al, ActualPane(Pane.mk(al, tb)))
+	, current-pane-idx: 0
 	, clipboard: None
 	, search-term: None
 	
