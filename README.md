@@ -53,7 +53,6 @@ my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](ht
 		  redo the highlights affected by the "update" with extra first and last token. (just in case)
 - ...
 - [ ] proper datastructure for handling text (continuous array, the new le vscode data structure, ideally non-recursive :])
-- [ ] hex edit mode (this requires file type detection)
 - ...
 - [ ] nice UI and animations
 - [x] UTF8 handling
@@ -69,6 +68,7 @@ my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](ht
 - ...
 - [ ] tabs?
 - [ ] graphical backend
+- [ ] hex edit mode (this requires file type detection)
 - [ ] earlier/later commands (undo 5 mins)
 
 

@@ -508,7 +508,10 @@ fn toggle-comment (self Ptr (Pane Allocator))
 			self set-cursors(Pos.mk(line, min-indent), None, NoChanges)
 			self add-str-at-char('# ')
 		else
-			comment-pos = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
+			let (comment-start, line-start) = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
+			comment-end = line-start
+			comment-end <.bi= Math.min(line-start.bi, comment-start.bi + comment-str StrView.num-bytes() Mem.size-i32() + 1)
+			comment-pos = (comment-start, comment-end)
 			self replace-selection(comment-pos, '')
 	self&.buf TextBuf.end-changeset()
 
