@@ -163,7 +163,7 @@ fn close-current-pane (ed Ptr (Editor al)) <= Allocator al
 			Split(_)
 				if panes-to-splits <= 1
 					panes List.remove(i)
-					split-i = i
+					split-i <= i
 					break
 				else
 					panes-to-splits <= panes-to-splits - 1
@@ -893,6 +893,8 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	fn ann(s)
 		screen Tui.draw-str-right(s, 0, curline&)
 		curline <&= curline& + 1
+	
+	ann('\(ed&.current-pane-idx)')
 
 	# ann('mode: \(ed&.pane.mode)')
 	# cur-ty = ed pane() Pane.char-at(ed&.pane.cursor) CharType.char-type()
