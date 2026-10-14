@@ -826,8 +826,6 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 	ed&.msg if-just(fn(msg))
 		num-chars = msg chars() count() Mem.size-i32()
 		screen Tui.draw-str(' \(msg) ', (screen&.tui&.width Mem.u32-i32() - num-chars) / 2, screen&.tui&.height Mem.u32-i32() - 1)
-	
-	screen Tui.draw-str('C', screen&.tui&.width Mem.u32-i32() / 2, screen&.tui&.height Mem.u32-i32() / 2)
 
 	case &ed&.mode
 		Ptr(Normal)
