@@ -168,11 +168,12 @@ fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
 	pane <&.sc-off= { screen-top: nu-screen-top, screen-left: nu-screen-left }
 
 
-fn set-colors (screen Ptr (Screen Allocator), colors Theme.Colors)
-	screen Tui.set-screen-colors(colors.fg, colors.bg)
+fn set-colors (screen Ptr (Screen Allocator), colors Theme.Colors, intensity F32)
+	screen Tui.set-screen-colors(colors.fg Term.set-color-intensity-to(intensity), colors.bg Term.set-color-intensity-to(intensity))
 
 
 fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Config, is-active Bool) <= Allocator al
+	intensity = if is-active: 1 else (3/4)
 	theme = cfg&.theme
 	display-line-numbers = cfg&.display-line-numbers
 	relative-line-numbers = cfg&.relative-line-numbers
@@ -185,6 +186,10 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 	# moves the window "in position" of the cursor.
 	# must operate on total text screen area (excluding margin)
 	pane update-screen-offset(sd { from-sx: sd.from-sx + total-margin })
+	
+	# fill background miau
+	screen set-colors(theme&.default, intensity)
+	screen Tui.fill-rect(sd.from-sx, sd.to-sx, sd.from-sy, sd.to-sy)
 
 	sc-off = pane&.sc-off
 	for line-num in (sc-off.screen-top + 1) to (pane&.buf TextBuf.num-lines() Math.min(sc-off.screen-top + sd screen-height()))
@@ -196,16 +201,16 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 
 		# first draw line number
 		if display-line-numbers
-			if pane&.cursor.line == ybi and is-active  # if cursor is on this line, do special highlight
-				screen set-colors(theme&.line-num-hl)
+			if pane&.cursor.line == ybi  # if cursor is on this line, do special highlight
+				screen set-colors(theme&.line-num-hl, intensity)
 			else
-				screen set-colors(theme&.line-num)
+				screen set-colors(theme&.line-num, intensity)
 
 			line-display = if not relative-line-numbers or pane&.cursor.line == ybi: line-num else Math.abs(pane&.cursor.line - ybi)
 			screen Tui.draw-str-right(line-display, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
 			# reset em!
-			screen set-colors(theme&.default)
+			screen set-colors(theme&.default, intensity)
 
 		vx = pane&.buf pos-vi(Pos.mk(ybi, xbi)) - sc-off.screen-left
 		assert(vx <= 0, 'vx must be <= 0, but got \(vx)')
@@ -217,14 +222,14 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 			curpos = Pos.mk(ybi, xbi)
 			is-cursor = curpos == pane&.cursor
 			in-selection = pane is-in-selection(Pos.mk(ybi, xbi))
-			if is-cursor and is-active
-				screen set-colors(theme&.cursor)
+			if is-cursor
+				screen set-colors(theme&.cursor, intensity)
 			elif in-selection
-				screen set-colors(theme&.selection)
+				screen set-colors(theme&.selection, intensity)
 			else
 				# check highlight
 				pane&.buf TextBuf.highlight-at(curpos) if-just(fn(type))
-					screen set-colors(theme Theme.find-colors-for-highlight(type))
+					screen set-colors(theme Theme.find-colors-for-highlight(type), intensity)
 			case c char-replacement()
 				None
 					if not (vx < 0 or vx + c char-screen-width() - 1 > sd.to-sx)
@@ -236,12 +241,12 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 							screen Tui.put-char(c, left-offset + vx, ys)
 						vx <= vx + c char-screen-width()
 
-			screen set-colors(theme&.default)
+			screen set-colors(theme&.default, intensity)
 			xbi <= xbi + c.num-bytes Mem.size-i32()
 
 	# overlay
 	if is-active
-		screen set-colors(theme&.overlay)
+		screen set-colors(theme&.overlay, intensity)
 		modename = pane&.mode short-mode-name()
 		screen Tui.draw-str(' \(modename) ', sd.from-sx, sd.to-sy)  # idea: make mode appear briefly in the middle/lower-middle of the screen. more dynamic!
 

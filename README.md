@@ -60,7 +60,8 @@ my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](ht
 - [x] UTF8 handling
 - [x] multipane
 	- [ ] move cursor properly when same buffer is modificatied in other pane.
-	- [ ] instead of hiding some parts of the interface, render inactive pane in muted colors
+	- [x] instead of hiding some parts of the interface, render inactive pane in muted colors
+		- looks kewl, im gonna leave it in.
 - [ ] multicursor
 - ...
 - [ ] nice themes

@@ -989,10 +989,12 @@ while ed&.running
 		screen <&.requires-full-redraw= True
 
 		screen Tui.clear-screen()
-		theme = ed&.cfg&.theme
-		screen Tui.set-screen-fg(theme&.default.fg)
-		screen Tui.set-screen-bg(theme&.default.bg)
-		screen Tui.fill-default()
+		
+		# NOTE: no need to fill the screen here, each pane should fill it. separate filling for "greying out" options.
+		# theme = ed&.cfg&.theme
+		# screen Tui.set-screen-fg(theme&.default.fg)
+		# screen Tui.set-screen-bg(theme&.default.bg)
+		# screen Tui.fill-default()
 
 		screen render-editor(ed)
 		# screen Tui.draw-str('REDRAWS[\(last-redraw-changes)]', 0, screen&.tui&.height Mem.u32-i32() - 1)
