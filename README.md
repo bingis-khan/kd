@@ -6,6 +6,7 @@ my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](ht
 
 ![showcase](./screenshot.png)
 ![showcase2](./screenshot2.png)
+![showcase3-panes](./screenshot3.png)
 
 ## immediate reminders
 - add :o and loading files later. this requires pane and textbuf management. (opening a new file must create a new textbuf and pane)

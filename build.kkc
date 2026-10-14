@@ -15,9 +15,10 @@ if 'kd' deps(['src']) or full-reinstall or rebuild
 	'kkc --backend c --dont-compile src/kd.kkc' Sh.run(al)
 	# 'cc -O2 kd.c -o kd' Sh.run(al)
 	# --dont-compile does not work for now.
-	
+
 if first-arg == Just('install') or full-reinstall
 	home = Env.get('HOME') or-fail('no $HOME defined!?')
 	target = '\(home)/.local/bin'
+	'cc -O2 kd.c -o kd' Sh.run(al)
 	'cp kd \(target)' Sh.run(al)
 	println('copied executable to \(target)')
