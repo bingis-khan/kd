@@ -2,8 +2,6 @@
 
 my attempt at an editor written in [kc](https://git.bimbur.art/kkc) ([github](https://github.com/bingis-khan/kkc)). attempts to emulate helix control scheme.
 
-(on hold due to a compiler bug (`split-current-pane()` in window-menu prevents compilation))
-
 ![showcase](./screenshot.png)
 ![showcase2](./screenshot2.png)
 ![showcase3-panes](./screenshot3.png)
