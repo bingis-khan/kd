@@ -16,8 +16,9 @@ use CharType
 	char-type
 
 
-Cursors
-	cur Pos
+Cursor
+	pos Pos
+	vi I32
 	sel Maybe Pos
 
 Action
@@ -32,8 +33,11 @@ Action
 Changeset al
 	parts List al Action
 
-	# instead of before-cursors, use an enum to specify where a cursor should end up.
-	before-cursors Cursors
+	# NOTE(???): instead of before-cursors, use an enum to specify where a cursor should end up.
+	# NOTE(15.10.26): what
+	before-cursors Slice Cursor
+	after-cursors Slice Cursor
+	# how to do redo() and after cursors?
 
 fn free-action (action Action, al Allocator)
 	action.fwd StrView.free(al)
@@ -332,7 +336,7 @@ fn flush-insert-action (self Ptr (TextBuf Allocator))
 	# this will force a new action to be added.
 	self <&.actions.input-changeset= NoChangeset
 
-fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+fn undo (self Ptr (TextBuf Allocator)) -> Maybe (Slice Cursor)  # None when there's nothing to undo.
 	self flush-insert-action()
 
 	actions = &self&.actions
@@ -345,7 +349,7 @@ fn undo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
 		self action-bwd(action)
 	return changeset.before-cursors Just()
 
-fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
+fn redo (self Ptr (TextBuf Allocator)) -> Maybe (Slice Cursor)
 	self flush-insert-action()
 
 	actions = &self&.actions
@@ -362,12 +366,14 @@ fn redo (self Ptr (TextBuf Allocator)) -> Maybe Cursors
 	# we don't track the future position of the cursors. so, we have to decide where we're gonna put the cursor.
 	# so, when we're redoing single chars, we want to put the cursor after chars (makes writing nicer). this is what this if statement checks
 	# so, we don't differentiate between a character insertion and paste, unlike Helix. fix it sometime later.
-	last-action = changeset.parts List.to-slice() Slice.last()
-	if last-action.fwd StrView.num-bytes() > 1  
-		to-fwd = left-pos(self, to-fwd)
-		return Cursors { cur: to-fwd, sel: Just(last-action.from) } Just()
-	else
-		return Cursors { cur: to-fwd, sel: None } Just()
+	
+	# last-action = changeset.parts List.to-slice() Slice.last()
+	# if last-action.fwd StrView.num-bytes() > 1  
+	# 	to-fwd = left-pos(self, to-fwd)
+	# 	return Cursors { cur: to-fwd, sel: Just(last-action.from) } Just()
+	# else
+	# 	return Cursors { cur: to-fwd, sel: None } Just()
+	return todo()
 
 
 fn str-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> StrView
@@ -411,7 +417,7 @@ fn num-bytes-between (self Ptr (TextBuf Allocator), from Pos, to Pos) -> Size
 		return fbi + tbi + bbi
 
 
-fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before-cursors Maybe Cursors)
+fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before-cursors Maybe (Slice Cursor))
 	from-pos = Math.min(from, to)
 	to-pos = Math.max(from, to)
 
@@ -432,7 +438,11 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 		last-changeset = actions&.list List.to-slice() Slice.last-ptr()
 		List.add(&last-changeset&.parts, action)
 	else
-		changeset =& { parts: List.mk(al), before-cursors: before-cursors or-else({ cur: from, sel: if from == to: None else Just(to) }) }
+		changeset =&
+			{ parts: List.mk(al)
+			, before-cursors: before-cursors or-fail('TODO when does this case happen.')
+			, after-cursors: todo()
+			}
 		List.add(&changeset&.parts, action)
 		List.add(&actions&.list, changeset&)
 		actions <&.input-changeset = if is-typed-in: InputChangeset else NoChangeset
@@ -440,20 +450,25 @@ fn change (self Ptr (TextBuf Allocator), from Pos, to Pos, bytes StrView, before
 
 	to-fwd = self action-fwd(action)
 
-	if action.fwd StrView.num-bytes() > 1  
-		to-fwd = left-pos(self, to-fwd)
-		return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
-	else
-		return Cursors { cur: to-fwd, sel: None } Just()
+	# if action.fwd StrView.num-bytes() > 1  
+	# 	to-fwd = left-pos(self, to-fwd)
+	# 	return Cursors { cur: to-fwd, sel: Just(action.from) } Just()
+	# else
+	# 	return Cursors { cur: to-fwd, sel: None } Just()
+	return todo()
 
-fn begin-changeset (self Ptr (TextBuf Allocator), before-cursors Cursors)
+fn begin-changeset (self Ptr (TextBuf Allocator), before-cursors Slice Cursor)
 	actions = &self&.actions
 	actions trim-actions()
 	self flush-insert-action()
 	assert(self&.actions.input-changeset == NoChangeset, 'expect no changeset bruh')
 
 	al = self&.al
-	changeset =& { parts: List.mk(al), before-cursors }
+	changeset =&
+		{ parts: List.mk(al)
+		, before-cursors
+		, after-cursors: todo()
+		}
 	List.add(&actions&.list, changeset&)
 	actions <&.input-changeset = CustomChangeset
 	actions <&.cur= actions&.cur + 1

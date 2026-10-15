@@ -5,7 +5,7 @@ args = Args.get()
 
 first-arg = args Slice.try-get(0)
 full-reinstall = first-arg == Just('reinstall')
-rebuild = first-arg == Just('rebuild')
+rebuild = first-arg == Just('rebuild') or first-arg is-none()
 if first-arg == Just('clean') or full-reinstall
 	'rm -f kd kd.c' Sh.run(al)
 	if not full-reinstall

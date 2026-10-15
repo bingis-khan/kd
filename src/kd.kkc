@@ -274,7 +274,7 @@ fn live-cmd (ed Ptr (Editor al), cmd StrView) <= Allocator al
 		Just(line)
 			line = line Mem.i64-i32() Math.clamp(1, ed pane()&.buf TextBuf.num-lines())  # 1..lines range
 			line = line - 1  # lines start from 1 on-screen
-			ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
+			todo() # multicursor # ed pane() Pane.set-cursors({ line, bi: 0 }, None, Pane.NoChanges)
 		None
 			sc =& Scan.mk-from-strview(cmd)
 			cmd = sc Scan.take-str-while(is-alpha)
@@ -357,12 +357,12 @@ fn live-search (ed Ptr (Editor al), begin-pos Pos, query StrView)
 	if not query null()
 		case ed pane() Pane.search-from(begin-pos, query)
 			Just((sel, cur))
-				ed pane() Pane.set-cursors(cur, Just(sel), Pane.NoChanges)
+				todo() # multicursor # ed pane() Pane.set-cursors(cur, Just(sel), Pane.NoChanges)
 
 			None
-				ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
+				todo() # multicursor # ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
 	else
-		ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
+		todo() # multicursor # ed pane() Pane.set-cursors(begin-pos, None, Pane.NoChanges)
 
 fn next-match (ed Ptr (Editor al))
 	case ed&.search-term
@@ -370,12 +370,12 @@ fn next-match (ed Ptr (Editor al))
 			return
 
 		Just(st)
-			case ed pane() Pane.search-from(ed pane() Pane.max-pos(), st)
+			case ed pane() Pane.search-from(ed pane() Pane.max-pos(ed pane() Pane.current-cursor()), st)
 				None
 					pass
 
 				Just((sel, cur))
-					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
+					todo() # multicursor # ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
 
 fn prev-match (ed Ptr (Editor al))
 	case ed&.search-term
@@ -383,11 +383,11 @@ fn prev-match (ed Ptr (Editor al))
 			return
 
 		Just(st)
-			case ed pane() Pane.search-back(ed pane() Pane.min-pos(), st)
+			case ed pane() Pane.search-back(ed pane() Pane.min-pos(ed pane() Pane.current-cursor()), st)
 				None
 					pass
 				Just((sel, cur))
-					ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
+					todo() # multicursor # ed pane() Pane.set-cursors(cur, Just(sel), Pane.UpdateVI)
 
 
 fn enmenue (ed Ptr (Editor al), menu)
@@ -403,13 +403,15 @@ goto-menu = Menu
 			{ keys: [Tui.Char('l')]
 			, description: 'move to end of line'
 			, action: (fn(ed))
-				if not ed pane() Pane.cursor-is-at-line-end()  # handles empty line too. helix actually doesn't care when we're at the end of the line - it moves the cursor back.
-					ed pane() Pane.move-to-end()
-					ed pane() Pane.move-left()
+				# if not ed pane() Pane.cursor-is-at-line-end()  # handles empty line too. helix actually doesn't care when we're at the end of the line - it moves the cursor back.
+				# 	ed pane() Pane.move-to-end()
+				# 	ed pane() Pane.move-left()
+				todo() # multicursor
 			}
-		, MenuItem { keys: [Tui.Char('h')], description: 'move to beginning of line', action: fn ed: ed pane() Pane.move-to-beginning-indented() }
-		, MenuItem { keys: [Tui.Char('g')], description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
-		, MenuItem { keys: [Tui.Char('e')], description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
+		, MenuItem { keys: [Tui.Char('h')], description: 'move to beginning of line', action: fn (ed): ed pane() Pane.move-to-beginning-indented() }
+		# TODO: multicursor
+		# , MenuItem { keys: [Tui.Char('g')], description: 'move up yah', action: fn ed: ed pane() Pane.set-cursors({ line: 0, bi: 0 }, None, Pane.UpdateVI) }
+		# , MenuItem { keys: [Tui.Char('e')], description: 'move dauwn', action: fn ed: ed pane() Pane.set-cursors({ line: Math.max(0, ed pane()&.buf TextBuf.num-lines() - 1), bi: 0 }, None, Pane.UpdateVI) }
 		]
 	} as Menu EditorAllocator
 
@@ -449,7 +451,7 @@ window-menu = Menu
 	{ name: 'window'
 	, items:
 		[ MenuItem
-			{ keys: [Tui.Ctrl('w')]
+			{ keys: [Tui.Char('w'), Tui.Ctrl('w')]
 			, description: 'switch window'
 			, action: (fn(ed))
 				ed next-pane()
@@ -502,21 +504,23 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 
 			elif c == 'o'
 				# NOTE(24.06.26): slower compile times with this block on. bruh. what.
-				pane = ed pane()
-				indent = pane Pane.indent-at-line(pane&.cursor.line)
-				pane Pane.move-to-end()
-				pane Pane.add-str-at-char('\n')
-				pane Pane.move-right()
-				pane Pane.indent-at-current(indent)
-				pane set-mode(Pane.Insert)
+				# pane = ed pane()
+				# indent = pane Pane.indent-at-line(pane&.cursor.pos.line)
+				# pane Pane.move-to-end()
+				# pane Pane.add-str-at-char('\n')
+				# pane Pane.move-right()
+				# pane Pane.indent-at-current(indent)
+				# pane set-mode(Pane.Insert)
+				todo() # multicursor
 			elif c == 'O'
 				# NOTE(24.06.26): also slower due to this. we're reached 300ms. wtffff is going on.
-				pane = ed pane()
-				indent = pane Pane.indent-at-line(pane&.cursor.line)
-				pane Pane.move-to-beginning()
-				pane Pane.add-str-at-char('\n')
-				pane Pane.indent-at-current(indent)
-				pane set-mode(Pane.Insert)
+				# pane = ed pane()
+				# indent = pane Pane.indent-at-line(pane&.cursor.pos.line)
+				# pane Pane.move-to-beginning()
+				# pane Pane.add-str-at-char('\n')
+				# pane Pane.indent-at-current(indent)
+				# pane set-mode(Pane.Insert)
+				todo() # multicursor
 
 			elif c == 'w'
 				(ed pane()) Pane.advance-word(Pane.MoveFwd, Pane.NextWordStart)
@@ -545,53 +549,57 @@ fn handle-normal-key (ed Ptr (Editor EditorAllocator), key Tui.Key)
 				bytes-yanked = ed&.clipboard or-else('') StrView.num-bytes()
 				ed set-msg('yanked \(bytes-yanked) bytes :)')
 			elif c == 'p'
-				ed&.clipboard if-just(fn(cp))
-					start = ed pane() Pane.max-pos()
-
-					# ends in newline? paste after line.
-					cp = cp own()
-					if cp.contents Slice.last() == '\n' Char.ascii-u8()
-						max-lines = ed pane()&.buf TextBuf.num-lines()
-						start = { line: (start.line + 1) Math.clamp(0, max-lines), bi: 0 }
-
-						# should this logic be here or part of TextBuf? it's a bit crappy obv.
-						# also the selection is incorrect, since the selection should also contain the new line.
-						if start.line == max-lines
-							cp <= cp StrView.byte-substr(0, cp.contents.count - 1)
-
-						ed pane() Pane.replace-selection((start, start), cp)
-					else
-						start = TextBuf.right-pos(ed pane()&.buf, start)
-						ed pane() Pane.replace-selection((start, start), cp)
+# 				ed&.clipboard if-just(fn(cp))
+# 					start = ed pane() Pane.max-pos()
+# 
+# 					# ends in newline? paste after line.
+# 					cp = cp own()
+# 					if cp.contents Slice.last() == '\n' Char.ascii-u8()
+# 						max-lines = ed pane()&.buf TextBuf.num-lines()
+# 						start = { line: (start.line + 1) Math.clamp(0, max-lines), bi: 0 }
+# 
+# 						# should this logic be here or part of TextBuf? it's a bit crappy obv.
+# 						# also the selection is incorrect, since the selection should also contain the new line.
+# 						if start.line == max-lines
+# 							cp <= cp StrView.byte-substr(0, cp.contents.count - 1)
+# 
+# 						ed pane() Pane.replace-selection((start, start), cp)
+# 					else
+# 						start = TextBuf.right-pos(ed pane()&.buf, start)
+# 						ed pane() Pane.replace-selection((start, start), cp)
+				todo() # multicursor
 			elif c == 'P'
-				ed&.clipboard if-just(fn(cp))
-					start = ed pane() Pane.min-pos()
-
-					# ends in newline? paste before the line.
-					if cp.contents Slice.last() == '\n' Char.ascii-u8()
-						start <= start { bi: 0 }
-					ed pane() Pane.replace-selection((start, start), cp)
+# 				ed&.clipboard if-just(fn(cp))
+# 					start = ed pane() Pane.min-pos()
+# 
+# 					# ends in newline? paste before the line.
+# 					if cp.contents Slice.last() == '\n' Char.ascii-u8()
+# 						start <= start { bi: 0 }
+# 					ed pane() Pane.replace-selection((start, start), cp)
+				todo() # multicursor
 			elif c == 'R'
-				ed&.clipboard if-just(fn(cp))
-					start = ed pane() Pane.min-pos()
-					end = ed pane() Pane.max-pos()
-					ed pane() Pane.replace-selection((start, end { bi: end.bi + 1 }), cp)
+				# ed&.clipboard if-just(fn(cp))
+				# 	start = ed pane() Pane.min-pos()
+				# 	end = ed pane() Pane.max-pos()
+				# 	ed pane() Pane.replace-selection((start, end { bi: end.bi + 1 }), cp)
+				todo() # multicursor
 
 			elif c == 'x'
 				ed pane() Pane.expand()
 
 			elif c == 'v'
-				ed pane() set-mode(Pane.Select)
-				if ed pane()&.sel is-none()
-					cur-pane = ed pane()
-					cur-pane <&.sel= Just(ed pane()&.cursor)
+				# ed pane() set-mode(Pane.Select)
+				# if ed pane()&.cursor.sel is-none()
+				# 	cur-pane = ed pane()
+				# 	cur-pane <&.cursor.sel= Just(ed pane()&.cursor.pos)
+				todo() # multicursor
 
 			elif c == ':'
-				ed <&.mode= Cmd(ed pane()&.cursor, TextBox.mk(ed&.al))
+				ed <&.mode= Cmd(ed pane() Pane.current-cursor().pos, TextBox.mk(ed&.al))
 
 
 			elif c == '/'
-				ed <&.mode= Search(ed pane()&.cursor, TextBox.mk(ed&.al))
+				ed <&.mode= Search(ed pane() Pane.current-cursor().pos, TextBox.mk(ed&.al))
 
 			elif c == 'n'
 				ed next-match()
@@ -650,10 +658,11 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 									ed pane() set-mode( Pane.Normal)
 		
 								Tui.Enter
-									indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.line)
-									ed pane() Pane.add-str-at-char('\n')
-									ed pane() Pane.move-right()
-									ed pane() Pane.indent-at-current(indent)
+									# indent = ed pane() Pane.indent-at-line(ed pane()&.cursor.pos.line)
+									# ed pane() Pane.add-str-at-char('\n')
+									# ed pane() Pane.move-right()
+									# ed pane() Pane.indent-at-current(indent)
+									todo() # mutliline
 		
 								Tui.Backspace
 									ed pane() Pane.backspace()
@@ -677,7 +686,7 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 					return
 			case key
 				Tui.Escape
-					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
+					todo() # multiline # ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
 					ed exit-mode()
 					ed <&.cfg&.theme= ed&.og-theme  # reset theme in case it was changed.
 
@@ -687,7 +696,7 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 
 					# assume we are already in the correct place.
 					# we're really just setting the vi
-					ed pane() Pane.set-cursors(ed pane()&.cursor, None, Pane.UpdateVI)
+					todo() # multiline # ed pane() Pane.set-cursors(ed pane()&.cursor.pos, None, Pane.UpdateVI)
 
 					ed exit-mode()
 					ed <&.og-theme= ed&.cfg&.theme  # set the theme if it was modified.
@@ -706,21 +715,22 @@ fn handle-event (ed Ptr (Editor EditorAllocator), ev Tui.InputEvent)
 					return
 			case key
 				Tui.Escape
-					ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
+					todo() # multiline # ed pane() Pane.set-cursors(prev-cur, None, Pane.UpdateVI)
 					ed exit-mode()
 
 				Tui.Enter
 					# assume we are already in the correct place.
 					# we're really just setting the vi
-					ed pane() Pane.set-cursors(ed pane()&.cursor, ed pane()&.sel, Pane.UpdateVI)
+					todo() # multiline # ed pane() Pane.set-cursors(ed pane()&.cursor.pos, ed pane()&.cursor.sel, Pane.UpdateVI)
 
 					ed&.search-term if-just(fn(st))
 						StrView.free(st, ed&.al)
 
 					nu-search = textbox TextBox.as-str()
 					if not nu-search null()
-						to = ed pane()&.cursor
-						from = ed pane()&.sel or-else(to)
+						# to = ed pane()&.cursor.pos
+						# from = ed pane()&.cursor.sel or-else(to)
+						todo() # multiline
 						ed <&.search-term= Just(nu-search)
 					else
 						ed <&.search-term= None
@@ -821,6 +831,7 @@ fn render-editor (screen Ptr (Screen al), ed Ptr (Editor al)) <= Allocator al
 		, to-sy: (screen&.tui&.height Mem.u32-i32() - 1)
 		}
 	screen render-panes(ed, screen-dims, &0)
+	screen Tui.set-screen-colors(ed&.cfg&.theme&.default.fg, ed&.cfg&.theme&.default.bg)  # reset colors for UI
 
 	# overlay
 	ed&.msg if-just(fn(msg))

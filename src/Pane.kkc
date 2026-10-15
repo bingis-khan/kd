@@ -4,7 +4,7 @@ use Tui
 use Pos
 	Pos
 use TextBuf
-	TextBuf
+	TextBuf, Cursor
 use CharType
 	char-type, is-word-boundary
 use Theme
@@ -45,19 +45,18 @@ ScreenCursorOffset
 	screen-top I32
 	screen-left I32
 
+
 Pane al
 	buf Ptr (TextBuf al)
-	cursor Pos
-	vi I32
-	sel Maybe Pos
+	cursors List al Cursor
+	current-cursor List.Idx
 	mode Mode
 	sc-off ScreenCursorOffset
 
-fn mk (al al, buf Ptr (TextBuf al)) -> Pane al: Pane
+fn mk (al al, buf Ptr (TextBuf al)) -> Pane al <= Allocator al: Pane
 	{ buf
-	, cursor: Pos.mk(0, 0)
-	, vi: 0
-	, sel: None
+	, cursors: List.from-one(al, { pos: Pos.mk(0, 0), vi: 0, sel: None })
+	, current-cursor: 0
 	, mode: Normal
 	, sc-off: { screen-top: 0, screen-left: 0 }
 	}
@@ -77,6 +76,9 @@ fn char-replacement (c Char) -> Maybe StrView
 
 fn char-screen-width (c Char) -> I32: char-replacement(c) Misc.maybe(fn s: s chars() count() Mem.size-i32(), Term.rendered-wcwidth(c))
 
+
+fn current-cursor (self Ptr (Pane al)) -> Cursor: self&.cursors[self&.current-cursor]
+fn cursors (self Ptr (Pane al)): List.addresses(self&.cursors)
 
 fn vi-bi (self Ptr (TextBuf al), ln I32, vx I32) -> I32
 	bi = 0 as I32
@@ -112,10 +114,9 @@ fn char-at(pane Ptr (Pane al), pos Pos)
 		or-else('\n')
 
 
-fn is-in-selection (pane Ptr (Pane al), pos Pos):
-	(case pane&.sel)
-		Just(sel): pos Math.between(pane&.cursor, sel)
-		_: False
+fn is-in-selection (self Ptr (Pane al), pos Pos): self&.cursors
+	map-maybe(fn cur: cur.sel Misc.fmap-maybe(fn s: (s, cur.pos)))
+	any(fn ((sel, pos)): pos Math.between(pos, sel))
 
 
 # maybe this should not be here?
@@ -131,7 +132,8 @@ fn screen-width (sd ScreenDims): sd.to-sx - sd.from-sx + 1
 fn screen-height (sd ScreenDims): sd.to-sy - sd.from-sy + 1
 
 fn update-screen-offset (pane Ptr (Pane al), sd ScreenDims)
-	cur = pane&.cursor
+	cur = pane current-cursor()
+	cur = cur.pos
 	cur-sx = pane&.buf pos-vi(cur)
 	sc-off = pane&.sc-off
 
@@ -186,6 +188,7 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 	# moves the window "in position" of the cursor.
 	# must operate on total text screen area (excluding margin)
 	pane update-screen-offset(sd { from-sx: sd.from-sx + total-margin })
+	cur = pane current-cursor()
 	
 	# fill background miau
 	screen set-colors(theme&.default, intensity)
@@ -201,12 +204,12 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 
 		# first draw line number
 		if display-line-numbers
-			if pane&.cursor.line == ybi  # if cursor is on this line, do special highlight
+			if cur.pos.line == ybi  # if cursor is on this line, do special highlight
 				screen set-colors(theme&.line-num-hl, intensity)
 			else
 				screen set-colors(theme&.line-num, intensity)
 
-			line-display = if not relative-line-numbers or pane&.cursor.line == ybi: line-num else Math.abs(pane&.cursor.line - ybi)
+			line-display = if not relative-line-numbers or cur.pos.line == ybi: line-num else Math.abs(cur.pos.line - ybi)
 			screen Tui.draw-str-right(line-display, screen&.tui&.width Mem.u32-i32() - sd.from-sx - total-margin + num-back-margin, ys)  # trust the science
 
 			# reset em!
@@ -220,7 +223,7 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 				break
 
 			curpos = Pos.mk(ybi, xbi)
-			is-cursor = curpos == pane&.cursor
+			is-cursor = curpos == cur.pos
 			in-selection = pane is-in-selection(Pos.mk(ybi, xbi))
 			if is-cursor
 				screen set-colors(theme&.cursor, intensity)
@@ -251,9 +254,9 @@ fn render (screen Ptr (Screen al), pane Ptr (Pane al), sd ScreenDims, cfg Ptr Co
 		screen Tui.draw-str(' \(modename) ', sd.from-sx, sd.to-sy)  # idea: make mode appear briefly in the middle/lower-middle of the screen. more dynamic!
 
 
-fn set-sel (self Ptr (Pane al), sel Maybe Pos)
+fn set-sel (self Ptr (Pane al), cur Ptr Cursor, sel Maybe Pos)
 	if self&.mode /= Select
-		self <&.sel= sel
+		cur <&.sel= sel
 
 fn set-mode (self Ptr (Pane al), mode Mode) <= Allocator al
 	if mode == Normal
@@ -275,43 +278,53 @@ inst Eq CursorMovement
 			_: False
 
 
-fn set-cursors (self Ptr (Pane al), cur Pos, sel Maybe Pos, cursor-movement-type CursorMovement)  # todo: change flags to a readable enum.
+fn set-cursors (self Ptr (Pane al), cur Ptr Cursor, pos Pos, sel Maybe Pos, cursor-movement-type CursorMovement)  # todo: change flags to a readable enum.
 	if cursor-movement-type /= NoChanges
-		self <&.vi= self&.buf pos-vi(cur)
-	self <&.cursor= cur
+		cur <&.vi= self&.buf pos-vi(pos)
+	cur <&.pos= pos
 	if cursor-movement-type /= OverrideSelect
-		self set-sel(sel)
+		self set-sel(cur, sel)
 	else
-		self <&.sel= sel
+		cur <&.sel= sel
 
+fn override-cursors (self Ptr (Pane al), cursors Slice Cursor) <= Allocator al
+	(&self&.cursors) List.replace-with(cursors)
+	
 
 fn move-right (self Ptr (Pane al))
-	self set-cursors(TextBuf.right-pos(self&.buf, self&.cursor), None, UpdateVI)
+	for cursor in self cursors()
+		self set-cursors(cursor, TextBuf.right-pos(self&.buf, cursor&.pos), None, UpdateVI)
+
+fn move-cursor-left (self Ptr (Pane al), cursor Ptr Cursor)
+	self set-cursors(cursor, TextBuf.left-pos(self&.buf, cursor&.pos), None, UpdateVI)
 
 fn move-left (self Ptr (Pane al))
-	self set-cursors(TextBuf.left-pos(self&.buf, self&.cursor), None, UpdateVI)
+	for cursor in self cursors()
+		self move-cursor-left(cursor)
 
 fn move-down (self Ptr (Pane al), amnt I32)
-	cur = self&.cursor
-	nu-line = Math.min(cur.line + amnt, self&.buf TextBuf.num-lines() - 1)
-
-	vci = self&.vi
-	bi = self&.buf vi-bi(nu-line, vci)
-	self set-cursors({ line: nu-line, bi }, None, NoChanges)
+	for cursor in self cursors()
+		pos = cursor&.pos
+		nu-line = Math.min(pos.line + amnt, self&.buf TextBuf.num-lines() - 1)
+	
+		vci = cursor&.vi
+		bi = self&.buf vi-bi(nu-line, vci)
+		self set-cursors(cursor, { line: nu-line, bi }, None, NoChanges)
 
 fn move-up (self Ptr (Pane al), amnt I32)
-	cur = self&.cursor
-	nu-line = Math.max(cur.line - amnt, 0)
-
-	vci = self&.vi
-	bi = self&.buf vi-bi(nu-line, vci)
-	self set-cursors({ line: nu-line, bi }, None, NoChanges)
+	for cursor in self cursors()
+		pos = cursor&.pos
+		nu-line = Math.max(pos.line - amnt, 0)
+	
+		vci = cursor&.vi
+		bi = self&.buf vi-bi(nu-line, vci)
+		self set-cursors(cursor, { line: nu-line, bi }, None, NoChanges)
 
 fn is-at-line-end (pane Ptr (Pane al), pos Pos):
 	pos.bi Mem.i32-size() == pane&.buf TextBuf.line(pos.line) StrView.num-bytes()
 
-fn cursor-is-at-line-end (pane Ptr (Pane al)):
-	pane is-at-line-end(pane&.cursor)
+fn cursor-is-at-line-end (pane Ptr (Pane al), cursor Cursor):
+	pane is-at-line-end(cursor.pos)
 
 MoveDirection
 	MoveFwd
@@ -321,69 +334,71 @@ MoveTarget
 	NextWordStart
 	NextWordEnd
 
-fn reached-target (pane Ptr (Pane al), target MoveTarget, prev Pos):
+fn reached-target (pane Ptr (Pane al), target MoveTarget, prev Pos, cur Pos):
 	(case target)
 		NextWordStart:
-			is-word-boundary(pane char-at(prev), pane char-at(pane&.cursor))
-			  and not pane char-at(pane&.cursor) char-type() == CharType.CharSpace
+			is-word-boundary(pane char-at(prev), pane char-at(cur))
+			  and not pane char-at(cur) char-type() == CharType.CharSpace
 		NextWordEnd:
-			is-word-boundary(pane char-at(prev), pane char-at(pane&.cursor))
+			is-word-boundary(pane char-at(prev), pane char-at(cur))
 			  and not pane char-at(prev) char-type() == CharType.CharSpace
 		_: todo()
 
 # todo: maybe make it stateless. this will allow me to not accidentally end up setting stuff.
+# todo: also this will play nicely with set-cursors merging multiple cursors.
 fn advance-word (pane Ptr (Pane al), dir MoveDirection, target MoveTarget) <= Allocator al
-	prev =& pane&.cursor Misc.own()
-	fn advance()
-		prev <&= pane&.cursor
-		case dir
-			MoveFwd
-				pane move-right()
-			MoveBwd
-				pane move-left()
-
-	# skip newlines
-	sel = pane&.cursor
-	was-at-line-end = pane cursor-is-at-line-end()
-	advance()
-	if was-at-line-end or pane reached-target(target, prev&)
-		sel <= pane&.cursor
-
-	while pane cursor-is-at-line-end()
-		if pane&.cursor == prev&
-			return  # at the end of the file!
-		advance()
-		sel <= pane&.cursor
-
-	# check first word boundary
-	# if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor)) and pane char-at(pane&.cursor) CharType.char-type() /= CharType.CharSpace
-	# 	sel <= pane&.cursor
-	while True
-		advance()
-		if pane cursor-is-at-line-end() or pane reached-target(target, prev&)
+	for cursor in pane cursors()
+		prev =& cursor&.pos Misc.own()
+		fn advance()
+			prev <&= cursor&.pos
 			case dir
 				MoveFwd
-					pane move-left()
-				MoveBwd
 					pane move-right()
-			break
+				MoveBwd
+					pane move-left()
+	
+		# skip newlines
+		sel = cursor&.pos
+		was-at-line-end = pane cursor-is-at-line-end(cursor&)
+		advance()
+		if was-at-line-end or pane reached-target(target, prev&, cursor&.pos)
+			sel <= cursor&.pos
+	
+		while pane cursor-is-at-line-end(cursor&)
+			if cursor&.pos == prev&
+				return  # at the end of the file!
+			advance()
+			sel <= cursor&.pos
+	
+		# check first word boundary
+		# if is-word-boundary(pane char-at(prev&), pane char-at(pane&.cursor)) and pane char-at(pane&.cursor) CharType.char-type() /= CharType.CharSpace
+		# 	sel <= pane&.cursor
+		while True
+			advance()
+			if pane cursor-is-at-line-end(cursor&) or pane reached-target(target, prev&, cursor&.pos)
+				case dir
+					MoveFwd
+						pane move-left()
+					MoveBwd
+						pane move-right()
+				break
+	
+			# when moving backwards, we might get to the start of the file. this line breaks us out.
+			if prev& == cursor&.pos
+				break
+	
+		pane set-sel(cursor, Just(sel))
 
-		# when moving backwards, we might get to the start of the file. this line breaks us out.
-		if prev& == pane&.cursor
-			break
 
-	pane set-sel(Just(sel))
+fn min-pos (pane Ptr (Pane al), cursor Cursor):
+	(case cursor.sel)
+		Just(sel): Math.min(cursor.pos, sel)
+		_: cursor.pos
 
-
-fn min-pos (pane Ptr (Pane al)):
-	(case pane&.sel)
-		Just(sel): Math.min(pane&.cursor, sel)
-		_: pane&.cursor
-
-fn max-pos (pane Ptr (Pane al)):
-	(case pane&.sel)
-		Just(sel): Math.max(pane&.cursor, sel)
-		_: pane&.cursor
+fn max-pos (pane Ptr (Pane al), cursor Cursor):
+	(case cursor.sel)
+		Just(sel): Math.max(cursor.pos, sel)
+		_: cursor.pos
 
 fn indent-at-line (pane Ptr (Pane al), line I32) -> I32:
 	pane&.buf TextBuf.line(line) take-while(fn c: c is-whitespace()) map(fn c: c.num-bytes) sum() Mem.size-i32()
@@ -392,31 +407,34 @@ fn indent-at-line (pane Ptr (Pane al), line I32) -> I32:
 # 1. if the ends are not already expanded, then expand current selection to ends of screen.
 # 2. if it's already expanded, select next line.
 fn expand(pane Ptr (Pane al))
-	min-pos = pane min-pos()
-	max-pos = pane max-pos()
-	max-pos-max = pane&.buf TextBuf.line(max-pos.line) StrView.num-bytes() Mem.size-i32()
-	if not (min-pos.bi == 0 and max-pos.bi == max-pos-max)
-		pane <&.sel= min-pos { bi: 0 } Just()
-		pane <&.cursor= max-pos { bi: max-pos-max }
-	else
-		if max-pos.line + 1 >= pane&.buf TextBuf.num-lines()
-			return
-
-		pane <&.sel= min-pos { bi: 0 } Just()
-		next-line = max-pos.line + 1
-		pane <&.cursor= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
+	for cursor in pane cursors()
+		min-pos = pane min-pos(cursor&)
+		max-pos = pane max-pos(cursor&)
+		max-pos-max = pane&.buf TextBuf.line(max-pos.line) StrView.num-bytes() Mem.size-i32()
+		if not (min-pos.bi == 0 and max-pos.bi == max-pos-max)
+			cursor <&.sel= min-pos { bi: 0 } Just()
+			cursor <&.pos= max-pos { bi: max-pos-max }
+		else
+			if max-pos.line + 1 >= pane&.buf TextBuf.num-lines()
+				return
+	
+			cursor <&.sel= min-pos { bi: 0 } Just()
+			next-line = max-pos.line + 1
+			cursor <&.pos= { line: next-line, bi: pane&.buf TextBuf.line(next-line) StrView.num-bytes() Mem.size-i32() }
 
 fn move-to-beginning (self Ptr (Pane al))
-	self set-cursors(self&.cursor { bi: 0 }, None, UpdateVI)
+	for cursor in self cursors()
+		self set-cursors(cursor, cursor&.pos { bi: 0 }, None, UpdateVI)
 
 fn move-to-beginning-indented (self Ptr (Pane al))
-	cur = self&.cursor
-	indent = self indent-at-line(cur.line)
-	self set-cursors(cur { bi: indent }, None, UpdateVI)
+	for cursor in self cursors()
+		indent = self indent-at-line(cursor&.pos.line)
+		self set-cursors(cursor, cursor&.pos { bi: indent }, None, UpdateVI)
 
 fn move-to-end (self Ptr (Pane al))
-	cur = self&.cursor
-	self set-cursors(cur { bi: self&.buf TextBuf.line(cur.line) StrView.num-bytes() Mem.size-i32() }, None, UpdateVI)
+	for cursor in self cursors()
+		pos = cursor&.pos
+		self set-cursors(cursor, pos { bi: self&.buf TextBuf.line(pos.line) StrView.num-bytes() Mem.size-i32() }, None, UpdateVI)
 
 fn line-begins-with-comment (self Ptr (Pane al), line I32) -> Maybe (Pos, Pos)
 	indent = self indent-at-line(line)
@@ -432,36 +450,45 @@ fn line-begins-with-comment (self Ptr (Pane al), line I32) -> Maybe (Pos, Pos)
 # modification
 
 fn add-str-at-char (self Ptr (Pane al), s StrView) <= Allocator al
-	cur = self&.cursor
-	self&.buf TextBuf.change(cur, cur, s, None)
+	for cursor in self cursors()
+		cur = cursor&.pos
+		self&.buf TextBuf.change(cur, cur, s, None)
 
 fn backspace (self Ptr (Pane Allocator))
-	prev-cur = self&.cursor
-	self move-left()
-	self&.buf TextBuf.change(self&.cursor, prev-cur, '', None)
+	for cursor in self cursors()
+		prev-cur = cursor&.pos
+		self move-cursor-left(cursor)
+		self&.buf TextBuf.change(cursor&.pos, prev-cur, '', None)
 
 fn undo (self Ptr (Pane al)) <= Allocator al
 	mcursors = self&.buf TextBuf.undo()
 	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+		# self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+		self override-cursors(cursors)
 
 fn redo (self Ptr (Pane al)) <= Allocator al
 	mcursors = self&.buf TextBuf.redo()
 	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+		# self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+		self override-cursors(cursors)
 
 
 # selection in a textbuf format (with the later position being moved by one.)
+# TODO: impl for multicursors. or for only the current cursor (depends how it's used)
 fn selection (self Ptr (Pane al)) -> (Pos, Pos)
-	from-to = Math.minmax(self&.sel or-else(self&.cursor), self&.cursor)
-	from = from-to fst()
-	to = self&.buf TextBuf.right-pos(from-to snd())
-	return (from, to)
+	# from-to = Math.minmax(self&.cursor.sel or-else(self&.cursor.pos), self&.cursor.pos)
+	# from = from-to fst()
+	# to = self&.buf TextBuf.right-pos(from-to snd())
+	# return (from, to)
+	return todo()
 
+# TODO: multicursors (we must somehow replace all immediately, cus Pos' will move)
 fn replace-selection (self Ptr (Pane al), (prev-pos, next-pos) (Pos, Pos), cp StrView) <= Allocator al
-	mcursors = self&.buf TextBuf.change(prev-pos, next-pos, cp, Just({ cur: self&.cursor, sel: self&.sel }))
-	mcursors if-just(fn(cursors))
-		self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+	# mcursors = self&.buf TextBuf.change(prev-pos, next-pos, cp, Just({ cur: self&.cursor.pos, sel: self&.cursor.sel }))
+	# mcursors if-just(fn(cursors))
+	# 	self set-cursors(cursors.cur, cursors.sel, OverrideSelect)
+	todo()
+		
 	# to = self&.buf TextBuf.pos-after-str(cp, pos's fst())
 	# if cp StrView.num-bytes() > 0
 	# 	to <= TextBuf.left-pos(self&.buf, to)
@@ -471,49 +498,53 @@ fn indent-at (self Ptr (Pane Allocator), line I32)
 	self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 0 }, '\t', None)
 
 fn indent-selection (self Ptr (Pane al)) <= Allocator al
-	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
-	for line in self min-pos().line to (self max-pos().line)
-		self indent-at(line)
-	self&.buf TextBuf.end-changeset()
-
-	self set-cursors(self&.cursor { bi: self&.cursor.bi + 1 }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: sel.bi + 1 }), UpdateVI)
+	# self&.buf TextBuf.begin-changeset({ cur: self&.cursor.pos, sel: self&.cursor.sel })
+	# for line in self min-pos().line to (self max-pos().line)
+	# 	self indent-at(line)
+	# self&.buf TextBuf.end-changeset()
+	# 
+	# self set-cursors(self&.cursor.pos { bi: self&.cursor.pos.bi + 1 }, self&.cursor.sel Misc.fmap-maybe(fn sel: sel { bi: sel.bi + 1 }), UpdateVI)
+	todo()
 
 fn dedent-selection (self Ptr (Pane al)) <= Allocator al
-	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
-	first-char-was-tab = self char-at(self min-pos() { bi: 0 }) == '\t'
-	last-char-was-tab = self char-at(self max-pos() { bi: 0 }) == '\t'
-	for line in self min-pos().line to (self max-pos().line)
-		if self char-at({ line, bi: 0 }) == '\t'
-			self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 1 }, '', None)
-	self&.buf TextBuf.end-changeset()
-
-	self set-cursors(self&.cursor { bi: if first-char-was-tab: self&.cursor.bi - 1 else self&.cursor.bi }, self&.sel Misc.fmap-maybe(fn sel: sel { bi: if last-char-was-tab: sel.bi - 1 else sel.bi }), UpdateVI)
+# 	self&.buf TextBuf.begin-changeset({ cur: self&.cursor.pos, sel: self&.cursor.sel })
+# 	first-char-was-tab = self char-at(self min-pos() { bi: 0 }) == '\t'
+# 	last-char-was-tab = self char-at(self max-pos() { bi: 0 }) == '\t'
+# 	for line in self min-pos().line to (self max-pos().line)
+# 		if self char-at({ line, bi: 0 }) == '\t'
+# 			self&.buf TextBuf.change({ line, bi: 0 }, { line, bi: 1 }, '', None)
+# 	self&.buf TextBuf.end-changeset()
+# 
+# 	self set-cursors(self&.cursor.pos { bi: if first-char-was-tab: self&.cursor.pos.bi - 1 else self&.cursor.pos.bi }, self&.cursor.sel Misc.fmap-maybe(fn sel: sel { bi: if last-char-was-tab: sel.bi - 1 else sel.bi }), UpdateVI)
+	todo()
 
 fn indent-at-current (self Ptr (Pane Allocator), indent I32)
-	for _ in 1 to (indent)
-		self indent-at(self&.cursor.line)
-		self move-right()
+	# for _ in 1 to (indent)
+	# 	self indent-at(self&.cursor.pos.line)
+	# 	self move-right()
+	todo()
 
 
 fn toggle-comment (self Ptr (Pane Allocator))
-	from-line = self min-pos().line
-	to-line = self max-pos().line
-	min-indent = from-line to (to-line) map(fn ln: self indent-at-line(ln)) minimum() or-fail('no lines what??')
-	all-have-comment = from-line to (to-line) all(fn ln: self line-begins-with-comment(ln) is-just())
-
-	self&.buf TextBuf.begin-changeset({ cur: self&.cursor, sel: self&.sel })
-	for line in from-line to (to-line)
-		comment-str = '#'
-		if not all-have-comment
-			self set-cursors(Pos.mk(line, min-indent), None, NoChanges)
-			self add-str-at-char('# ')
-		else
-			let (comment-start, line-start) = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
-			comment-end = line-start
-			comment-end <.bi= Math.min(line-start.bi, comment-start.bi + comment-str StrView.num-bytes() Mem.size-i32() + 1)
-			comment-pos = (comment-start, comment-end)
-			self replace-selection(comment-pos, '')
-	self&.buf TextBuf.end-changeset()
+# 	from-line = self min-pos().line
+# 	to-line = self max-pos().line
+# 	min-indent = from-line to (to-line) map(fn ln: self indent-at-line(ln)) minimum() or-fail('no lines what??')
+# 	all-have-comment = from-line to (to-line) all(fn ln: self line-begins-with-comment(ln) is-just())
+# 
+# 	self&.buf TextBuf.begin-changeset({ cur: self&.cursor.pos, sel: self&.cursor.sel })
+# 	for line in from-line to (to-line)
+# 		comment-str = '#'
+# 		if not all-have-comment
+# 			self set-cursors(Pos.mk(line, min-indent), None, NoChanges)
+# 			self add-str-at-char('# ')
+# 		else
+# 			let (comment-start, line-start) = self line-begins-with-comment(line) or-fail('(Pane.toggle-comment) impossiburu')
+# 			comment-end = line-start
+# 			comment-end <.bi= Math.min(line-start.bi, comment-start.bi + comment-str StrView.num-bytes() Mem.size-i32() + 1)
+# 			comment-pos = (comment-start, comment-end)
+# 			self replace-selection(comment-pos, '')
+# 	self&.buf TextBuf.end-changeset()
+	todo()
 
 
 
